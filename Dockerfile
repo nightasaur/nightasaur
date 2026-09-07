@@ -14,9 +14,9 @@ RUN npm install
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
 
-# Generate Prisma client and build
-RUN cd apps/backend && npx prisma generate && npm run build
+# Generate Prisma client
+RUN cd apps/backend && npx prisma generate
 
 EXPOSE 3002
 
-CMD ["node", "apps/backend/dist/index.js"]
+CMD ["npx", "tsx", "apps/backend/src/index.ts"]
