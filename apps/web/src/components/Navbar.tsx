@@ -37,20 +37,23 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           
           {user ? (
             <>
-              <Link to="/dashboard" className="text-white/70 hover:text-white transition">
+              <Link to="/dashboard" className="text-white/70 hover:text-white transition text-sm">
                 儀表板
               </Link>
-              <Link to="/spirits" className="text-white/70 hover:text-white transition">
-<Link to="/settings/language" className="text-white/70 hover:text-white transition">
-                語言設定
-              </Link>
+              <Link to="/spirits" className="text-white/70 hover:text-white transition text-sm">
                 我的精靈
+              </Link>
+              <Link to="/assistant" className="text-white/70 hover:text-white transition text-sm">
+                🤖 AI 助手
+              </Link>
+              <Link to="/social" className="text-white/70 hover:text-white transition text-sm">
+                社群
+              </Link>
+              <Link to="/settings/language" className="text-white/70 hover:text-white transition text-sm">
+                語言設定
               </Link>
               <Link to="/spirits/new" className="btn-primary text-sm py-2 px-4">
                 + 孵化精靈
-              </Link>
-              <Link to="/social" className="text-white/70 hover:text-white transition">
-                社群
               </Link>
               <button
                 onClick={handleLogout}

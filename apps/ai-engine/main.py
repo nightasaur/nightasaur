@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import HOST, PORT
-from routers import generation, dialogue
+from routers import generation, dialogue, assistant
 from services.llm import llm_service
 from services.comfyui import comfyui_service
 
@@ -21,6 +21,7 @@ app.add_middleware(
 
 app.include_router(generation.router, prefix="/api/generate", tags=["Generation"])
 app.include_router(dialogue.router, prefix="/api/dialogue", tags=["Dialogue"])
+app.include_router(assistant.router, prefix="/api/assistant", tags=["Assistant"])
 
 
 @app.get("/api/health")

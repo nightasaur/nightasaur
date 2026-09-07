@@ -13,6 +13,7 @@ import Social from "./pages/Social";
 import APISettings from "./pages/APISettings";
 import Privacy from "./pages/Privacy";
 import LanguageSettings from "./pages/LanguageSettings";
+import Assistant from "./pages/Assistant";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -82,6 +83,10 @@ function AppContent() {
           <Route
             path="/settings/language"
             element={<ProtectedRoute><LanguageSettings /></ProtectedRoute>}
+          />
+          <Route
+            path="/assistant"
+            element={<ProtectedRoute><Assistant /></ProtectedRoute>}
           />
         </Routes>
       </main>
