@@ -1,158 +1,209 @@
-# 🌙 Nightasaur — AI 數位精靈平台
+# 🌙 Nightasaur - Open Source AI Digital Spirit & Personal Assistant Platform
 
-> 每位使用者註冊即可生成一隻專屬 AI 精靈，像數碼寶貝般進化養成、賈維斯般對話陪伴，一鍵分享到 FB/IG/APP。
+> Create and evolve your AI spirit companion, or switch to a powerful personal AI assistant. 100% open source.
 
----
+[![License](https://img.shields.io/github/license/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/blob/main/LICENSE)
+[![Version](https://img.shields.io/github/v/release/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/releases)
+[![Stars](https://img.shields.io/github/stars/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/YOUR-USERNAME/nightasaur/blob/main/CONTRIBUTING.md)
 
-## Phase 3 完成 ✅
+## ✨ Features
 
-| Phase | 項目 | 狀態 |
-|-------|------|:--:|
-| 1 | 後端 + 資料庫 + Web 後台 | ✅ |
-| 2 | AI Engine (Ollama) + FB/IG API | ✅ |
-| 3 | ComfyUI + 排程 + LoRA + RN APP | ✅ |
+### 🐉 Digital Spirit System
+- Create and evolve AI spirit companions
+- 10 elemental types with unique personalities
+- Interactive dialogue with memory context
+- Visual evolution through AI image generation
 
----
+### 🤖 Personal AI Assistant
+- General knowledge Q&A like ChatGPT
+- Code assistance and debugging
+- Document analysis and summarization
+- Multi-language translation
+- File processing (PDF, Word, Images)
 
-## 🏗️ 架構
+### 🌐 Full-Stack Platform
+- Modern web interface (React + TypeScript)
+- Robust backend API (Node.js + Express)
+- AI engine with local LLM support (Ollama)
+- Mobile app ready (React Native)
+- Social media integration (FB/IG)
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js >= 20.0.0
+- Python >= 3.11
+- PostgreSQL >= 14
+- Ollama (for local LLM)
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/YOUR-USERNAME/nightasaur.git
+cd nightasaur
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Start all services
+npm run dev
+```
+
+### Access URLs
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3002
+- **AI Engine**: http://localhost:8000
+- **API Documentation**: http://localhost:3002/api-docs
+
+## 🏗️ Architecture
 
 ```
 nightasaur/
 ├── apps/
-│   ├── ai-engine/          # Python + FastAPI
-│   │   ├── routers/        # generation, dialogue
-│   │   ├── services/       # comfyui, llm (Ollama)
-│   │   ├── workflows/      # ComfyUI 生圖工作流
-│   │   └── training/       # LoRA 訓練腳本
-│   ├── backend/            # Node.js + Express + Prisma
+│   ├── backend/          # Node.js + Express + Prisma
 │   │   └── src/
-│   │       ├── jobs/       # 排程系統 (圖片生成佇列)
-│   │       ├── services/   # auth, spirit, ai, social, imagegen
 │   │       ├── controllers/
-│   │       ├── routes/     # auth, spirits, social, generate
-│   │       └── middleware/
-│   ├── web/                # React + Vite + Tailwind (8 頁面)
-│   └── mobile/             # React Native + Expo (6 螢幕)
-├── docs/
-│   └── FB-IG-SETUP.md      # FB/IG API 設定指南
-├── scripts/
-│   └── setup-comfyui.bat   # ComfyUI 一鍵安裝
-└── packages/shared/
+│   │       ├── routes/   # API endpoints
+│   │       ├── services/ # Business logic
+│   │       └── jobs/     # Scheduled tasks
+│   ├── web/             # React + Vite + Tailwind
+│   │   └── src/
+│   │       ├── pages/    # Application pages
+│   │       ├── components/
+│   │       └── api/      # API client
+│   ├── ai-engine/       # Python + FastAPI
+│   │   ├── routers/     # AI endpoints
+│   │   ├── services/    # LLM, ComfyUI
+│   │   └── training/    # LoRA training
+│   └── mobile/          # React Native + Expo
+├── packages/shared/     # Shared utilities
+└── docs/               # Documentation
 ```
 
----
+## 📡 API Overview
 
-## 🚀 快速啟動
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get user profile
+- `POST /api/auth/logout` - User logout
 
-### 環境需求
+### Spirit Management
+- `POST /api/spirits` - Create a new spirit
+- `GET /api/spirits` - List user's spirits
+- `GET /api/spirits/:id` - Get spirit details
+- `POST /api/spirits/:id/evolve` - Evolve spirit
 
-| 工具 | 版本 | 用途 |
-|------|------|------|
-| Node.js | ≥ 20 | 後端 + 前端 |
-| Python | ≥ 3.11 | AI Engine |
-| Ollama | 最新 | 本地 LLM |
-| GTX 3070+ | 8GB+ VRAM | ComfyUI 生圖 (選用) |
+### Personal Assistant
+- `POST /api/assistant/chat` - General AI chat
+- `POST /api/assistant/code` - Code assistance
+- `POST /api/assistant/document` - Document analysis
+- `POST /api/assistant/translate` - Translation
+- `POST /api/assistant/upload` - File upload
 
-### 啟動
+### AI Generation
+- `POST /api/generate/image` - Generate spirit images
+- `POST /api/dialogue/chat` - Spirit dialogue
+- `GET /api/health` - System health check
 
+## 🎮 Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@nightasaur.com | admin123! |
+| Trainer | demo@nightasaur.com | demo1234 |
+
+## 🔧 Development
+
+### Setting Up Development Environment
 ```bash
-# 終端 1：AI Engine
-cd apps\ai-engine && python main.py
-# → http://localhost:8000
+# 1. Install dependencies
+npm install
 
-# 終端 2：後端
-cd apps\backend && npx tsx src\index.ts
-# → http://localhost:3000
+# 2. Set up database
+npm run db:migrate
+npm run db:seed
 
-# 終端 3：前端
-cd apps\web && npx vite
-# → http://localhost:5173
+# 3. Start development servers
+npm run dev
+
+# 4. Run tests
+npm test
 ```
 
----
+### Code Style
+- TypeScript with strict mode
+- ESLint + Prettier for code formatting
+- Conventional commits
+- Comprehensive testing
 
-## 📡 API 總覽 (25+ 端點)
+## 🤝 Contributing
 
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| Auth | `/api/auth/register`, `/login`, `/logout`, `GET /me` | 認證 |
-| Spirits | `POST /api/spirits`, `GET /`, `GET /:id`, `POST /:id/evolve` | 精靈 CRUD + 進化 |
-| Dialogue | `POST /api/dialogue` | AI 對話 (Ollama) |
-| Social | `POST /api/social/posts`, `GET /test/fb`, `GET /test/ig` | FB/IG 發文 + 測試 |
-| Generate | `POST /api/generate/spirit/:id`, `POST /process`, `GET /status` | AI 生圖 + 佇列 |
-| AI Engine | `POST /api/generate/image`, `POST /api/dialogue/chat`, `GET /api/health` | Python AI 服務 |
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
----
+### How to Contribute
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-##  Web 頁面 (10 頁)
+### Code of Conduct
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
-| 頁面 | 路徑 | 功能 |
-|------|------|------|
-| 首頁 | `/` | Landing page + 屬性展示 |
-| 註冊 | `/register` | 註冊即生精靈 |
-| 登入 | `/login` | JWT 認證 |
-| 儀表板 | `/dashboard` | 精靈概覽 |
-| 精靈列表 | `/spirits` | 精靈卡牌 |
-| 孵化 | `/spirits/new` | 選屬性 + 命名 |
-| 精靈詳情 | `/spirits/:id` | 狀態 + 進化 + AI 對話 |
-| 社群 | `/social` | FB/IG 發文 |
-| API 設定 | `/settings/api` | FB/IG 連線測試 |
+## 📚 Documentation
 
----
+- [API Documentation](docs/API.md) - Complete API reference
+- [Development Guide](docs/DEVELOPMENT.md) - Development setup
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment
+- [Architecture Overview](docs/ARCHITECTURE.md) - System architecture
 
-##  精靈系統
+## 🚢 Deployment
 
-```
-Lv.1 蛋 → Lv.5 幼體 → Lv.15 少年體 → Lv.30 成年體 → Lv.60 究極體 → 傳說體
-
-10 種屬性：🔥火 💧水 ✨光 🌑暗 ⭐星 🦊幻 🌙月 🌿自然 ⚡雷 ❄️冰
-```
-
----
-
-## 🎨 AI 生成管線
-
-```
-使用者孵化精靈 → 自動建立 GenerationTask
-                      ↓
-排程器 (每 5 分鐘) → imagegen.ts → AI Engine → ComfyUI
-                      ↓
-精靈收到圖片 → spirit.imageUrl 更新
-```
-
----
-
-## 🧪 LoRA 訓練
-
+### Docker Deployment
 ```bash
-cd apps\ai-engine\training
-pip install Pillow
-python train_lora.py
-# → 預處理你的 10 張怪獸圖 + 產生標註
-# → 依指示安裝 Kohya SS 訓練
-# → LoRA 輸出到 ComfyUI/models/loras/
+# Build and run with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
 ```
 
+### Manual Deployment
+```bash
+# Build all applications
+npm run build
+
+# Start production servers
+npm start
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Ollama](https://ollama.com/) for local LLM support
+- [ComfyUI](https://github.com/comfyanonymous/ComfyUI) for image generation
+- [Prisma](https://www.prisma.io/) for database ORM
+- [FastAPI](https://fastapi.tiangolo.com/) for Python API framework
+
+## 📞 Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/YOUR-USERNAME/nightasaur/issues)
+- **Discord**: [Join our community](https://discord.gg/YOUR-INVITE-LINK)
+- **Email**: support@nightasaur.com
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=YOUR-USERNAME/nightasaur&type=Date)](https://star-history.com/#YOUR-USERNAME/nightasaur&Date)
+
 ---
 
-## 🎮 示範帳號
-
-| 角色 | Email | 密碼 |
-|------|-------|------|
-| 管理員 | admin@nightasaur.com | admin123! |
-| 訓練家 | demo@nightasaur.com | demo1234 |
-
----
-
-## ️ 下一步 (Phase 4 — 營運上線)
-
-1. ComfyUI 安裝 + dreamshaper_8 模型下載
-2. LoRA 訓練 (你的 10 張怪獸圖)
-3. FB/IG API 審核 + Token 設定
-4. React Native APP 編譯上架
-5. Cloudflare 部署 (Pages + Worker)
-6. 網域 nightasaur.com 設定
-
----
-
-**Made with 🌙 by Nightasaur Team | 86 source files | 3 languages (TS + Python + React)**
+**Made with ❤️ by the Nightasaur Team | Open Source AI Platform**
