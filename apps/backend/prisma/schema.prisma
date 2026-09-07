@@ -162,6 +162,7 @@ model Spirit {
   evolutions Evolution[]
   conversations Conversation[]
   generationTasks GenerationTask[]
+  squadMember SquadMember?
 
   @@map("spirits")
 }
