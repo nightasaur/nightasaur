@@ -1,0 +1,16 @@
+[build]
+  builder = "nixpacks"
+  buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+  numReplicas = 1
+  startCommand = "python main.py"
+  healthcheckPath = "/api/health"
+  healthcheckTimeout = 30
+
+[service]
+  name = "nightasaur-ai"
+
+[[ports]]
+  port = 8000
+  protocol = "TCP"

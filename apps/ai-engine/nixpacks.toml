@@ -1,0 +1,15 @@
+[phases.setup]
+  nixPackages = ["python311", "python311Packages.pip", "python311Packages.setuptools"]
+  
+[phases.install]
+  cmds = ["pip install -r requirements.txt"]
+
+[phases.start]
+  cmds = ["python main.py"]
+
+[environment]
+  PYTHONUNBUFFERED = "1"
+  OLLAMA_URL = "http://localhost:11434"
+  OLLAMA_MODEL = "qwen2.5:3b"
+  HOST = "0.0.0.0"
+  PORT = "8000"

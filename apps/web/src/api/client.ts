@@ -51,13 +51,13 @@ export const socialAPI = {
 // Assistant API
 export const assistantAPI = {
   chat: (message: string, history: { role: string; content: string }[] = []) =>
-    api.post("/api/assistant/chat", { message, history }),
+    api.post("/assistant/chat", { message, history }),
   code: (code: string, language: string, task: string = "explain") =>
-    api.post("/api/assistant/code", { code, language, task }),
+    api.post("/assistant/code", { code, language, task }),
   translate: (text: string, targetLang: string = "zh-TW", sourceLang: string = "auto") =>
-    api.post("/api/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }),
+    api.post("/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }),
   document: (content: string, task: string = "summarize", docType: string = "text") =>
-    api.post("/api/assistant/document", { content, task, doc_type: docType }),
+    api.post("/assistant/document", { content, task, doc_type: docType }),
 };
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
