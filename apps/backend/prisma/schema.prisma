@@ -20,6 +20,7 @@ model User {
   gems         Int      @default(0)
   coins        Int      @default(0)
   isActive     Boolean  @default(true)
+  activeSpiritId String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -31,6 +32,7 @@ model User {
   Quests              QuestProgress[]
   Sessions            Session[]
   GenerationTasks     GenerationTask[]
+  Squad               Squad?
 
   @@map("users")
 }
@@ -92,6 +94,49 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model Squad {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String   @default("我的小隊")
+  maxSize   Int      @default(4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members SquadMember[]
+
+  @@map("squads")
+}
+
+model SquadMember {
+  id       String  @id @default(cuid())
+  squadId  String
+  spiritId String  @unique
+  position Int
+  isActive Boolean @default(false)
+  joinedAt DateTime @default(now())
+
+  squad     Squad           @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  spirit    Spirit          @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  trainings SquadTraining[]
+
+  @@map("squad_members")
+}
+
+model SquadTraining {
+  id           String   @id @default(cuid())
+  memberId     String
+  trainingType String
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  lastTrained  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  member SquadMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("squad_trainings")
 }
 
 model Spirit {
