@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 核心模型 ====================
+
+// 用戶模型
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  role         String   @default("PLAYER")
+  trainerXp    Int      @default(0)
+  trainerLevel Int      @default(1)
+  gems         Int      @default(0)
+  coins        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 關係
+  LanguagePreference  LanguagePreference?
+  UserSettings        UserSettings?
+  PasswordResetToken  PasswordResetToken[]
+  Spirits             Spirit[]
+  UserItems           UserItem[]
+  Quests              QuestProgress[]
+  Achievements        AchievementProgress[]
+  PlayerLocation      PlayerLocation?
+  LocationVisits      LocationVisit[]
+  GenerationTasks     GenerationTask[]
+  Squads              Squad[]
+  SocialPosts         SocialPost[]
+
+  @@map("users")
+}
+
+// 精靈模型
+model Spirit {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  element       String
+  species       String?
+  personality   String?
+  appearance    String?
+  stage         String   @default("EGG")
+  level         Int      @default(1)
+  experience    Int      @default(0)
+  stats         String   @default("{}")
+  skills        String   @default("[]")
+  customization String   @default("{}")
+  backstory     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 關係
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Conversations   Conversation[]
+  Evolutions      Evolution[]
+  HatchingRecords HatchingRecord[]
+  SpiritAppearance SpiritAppearance?
+  SquadMembers    SquadMember[]
+  GenerationTasks GenerationTask[]
+
+  @@map("spirits")
+}

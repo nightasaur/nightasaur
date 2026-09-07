@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head><meta charset="UTF-8"><title>Nightasaur 設定</title></head>
+<body>
+<h1>🦖 Nightasaur 設定管理</h1>
+<p>服務器: http://localhost:3001</p>
+
+<h2>🔐 登入</h2>
+<input id="email" value="admin@nightasaur.com"><br>
+<input id="password" type="password" value="admin123"><br>
+<button onclick="login()">登入</button>
+<button onclick="register()">註冊</button>
+<div id="status"></div>
+
+<h2>🌐 語言設定</h2>
+<select id="language">
+    <option value="zh-TW">繁體中文</option>
+    <option value="zh-CN">簡體中文</option>
+    <option value="en-US">English</option>
+</select>
+<button onclick="updateLanguage()">更新語言</button>
+
+<h2>🎵 音效設定</h2>
+音樂: <input type="range" id="musicVolume" value="70"><br>
+音效: <input type="range" id="soundVolume" value="80"><br>
+<button onclick="updateAudio()">更新音效</button>
+
+<h2>📳 震動設定</h2>
+強度: <input type="range" id="vibrationStrength" value="50"><br>
+<button onclick="updateVibration()">更新震動</button>
+
+<script>
+let token = localStorage.getItem('nightasaur_token');
+
+async function login() {
+    const res = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        })
+    });
+    const data = await res.json();
+    if(data.success) {
+        token = data.token;
+        localStorage.setItem('nightasaur_token', token);
+        showStatus('✅ 登入成功');
+    } else {
+        showStatus('❌ ' + data.message);
+    }
+}
+
+async function updateLanguage() {
+    if(!token) { showStatus('請先登入'); return; }
+    const res = await fetch('http://localhost:3001/api/settings/language', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({primaryLang: document.getElementById('language').value})
+    });
+    const data = await res.json();
+    showStatus(data.success ? '✅ 語言已更新' : '❌ ' + data.message);
+}
+
+async function updateAudio() {
+    if(!token) { showStatus('請先登入'); return; }
+    const res = await fetch('http://localhost:3001/api/settings/audio', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({
+            musicVolume: parseInt(document.getElementById('musicVolume').value),
+            soundVolume: parseInt(document.getElementById('soundVolume').value)
+        })
+    });
+    const data = await res.json();
+    showStatus(data.success ? '✅ 音效已更新' : '❌ ' + data.message);
+}
+
+async function updateVibration() {
+    if(!token) { showStatus('請先登入'); return; }
+    const res = await fetch('http://localhost:3001/api/settings/vibration', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({
+            vibrationStrength: parseInt(document.getElementById('vibrationStrength').value)
+        })
+    });
+    const data = await res.json();
+    showStatus(data.success ? '✅ 震動已更新' : '❌ ' + data.message);
+}
+
+function showStatus(msg) {
+    document.getElementById('status').innerHTML = msg;
+    setTimeout(() => document.getElementById('status').innerHTML = '', 3000);
+}
+
+async function register() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const username = email.split('@')[0];
+    
+    const res = await fetch('http://localhost:3001/api/auth/register', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email, username, password})
+    });
+    const data = await res.json();
+    if(data.success) {
+        token = data.token;
+        localStorage.setItem('nightasaur_token', token);
+        showStatus('✅ 註冊成功');
+    } else {
+        showStatus('❌ ' + data.message);
+    }
+}
+
+if(token) showStatus('✅ 已登入');
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "nightasaur",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nightasaur - AI 數位精靈平台",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
+    "dev:backend": "npm -w apps/backend run dev",
+    "dev:web": "npm -w apps/web run dev",
+    "dev:ai": "cd apps/ai-engine && python main.py",
+    "build": "npm -w apps/backend run build && npm -w apps/web run build",
+    "db:migrate": "npm -w apps/backend run db:migrate",
+    "db:seed": "npm -w apps/backend run db:seed",
+    "db:studio": "npm -w apps/backend run db:studio",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

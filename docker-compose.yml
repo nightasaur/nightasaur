@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  # PostgreSQL 資料庫
+  postgres:
+    image: postgres:16-alpine
+    container_name: nightasaur-db
+    environment:
+      POSTGRES_USER: nightasaur
+      POSTGRES_PASSWORD: nightasaur
+      POSTGRES_DB: nightasaur
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/data/postgres:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nightasaur"]
+      interval: 5s
+      retries: 5
+
+  # Redis (列隊/快取)
+  redis:
+    image: redis:7-alpine
+    container_name: nightasaur-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker/data/redis:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  # Ollama (LLM 本機執行)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nightasaur-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./docker/data/ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:

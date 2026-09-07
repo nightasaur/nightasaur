@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>🦖 Nightasaur 遊戲入口</title>
+  <style>
+    body { 
+      font-family: 'Microsoft JhengHei', sans-serif; 
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    .header h1 {
+      font-size: 3rem;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 50px;
+    }
+    
+    .option {
+      background: #1e293b;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      border: 2px solid #334155;
+      transition: all 0.3s;
+    }
+    
+    .option:hover {
+      border-color: #667eea;
+      transform: translateY(-5px);
+    }
+    
+    .option h3 {
+      color: #38bdf8;
+      margin-bottom: 15px;
+    }
+    
+    .btn {
+      display: block;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    
+    .btn:hover {
+      background: #5a67d8;
+    }
+    
+    .admin-info {
+      background: #1e293b;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 40px;
+      border: 2px solid #fbbf24;
+    }
+    
+    .admin-info h3 {
+      color: #fbbf24;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .credentials {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .credential-item {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .credential-item strong {
+      color: #38bdf8;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .support {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🦖 Nightasaur 遊戲系統</h1>
+      <p>選擇您要訪問的系統</p>
+    </div>
+    
+    <div class="options">
+      <div class="option">
+        <h3>🎮 進入完整遊戲</h3>
+        <p>訪問完整的遊戲界面，開始您的精靈冒險！</p>
+        <a href="http://localhost:5173" class="btn" target="_blank">開始遊戲</a>
+      </div>
+      
+      <div class="option">
+        <h3>🔐 系統登入管理</h3>
+        <p>使用管理員帳號登入系統管理界面</p>
+        <a href="http://localhost:3002" class="btn" target="_blank">系統登入</a>
+      </div>
+      
+      <div class="option">
+        <h3>⚙️ 後台管理界面</h3>
+        <p>查看系統狀態和管理功能</p>
+        <a href="http://localhost:3000" class="btn" target="_blank">後台管理</a>
+      </div>
+    </div>
+    
+    <div class="admin-info">
+      <h3>📋 管理員帳號</h3>
+      
+      <div class="credentials">
+        <div class="credential-item">
+          <strong>電子郵件</strong>
+          <span>admin@nightasaur.com</span>
+        </div>
+        
+        <div class="credential-item">
+          <strong>用戶名</strong>
+          <span>admin</span>
+        </div>
+        
+        <div class="credential-item">
+          <strong>密碼</strong>
+          <span>admin123</span>
+        </div>
+        
+        <div class="credential-item">
+          <strong>角色</strong>
+          <span>系統管理員</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="support">
+      <p>💡 <strong>提示：</strong> 建議使用「進入完整遊戲」獲得最佳體驗</p>
+      <p>📧 <strong>支援信箱：</strong> service@nightasaur.com</p>
+    </div>
+  </div>
+</body>
+</html>

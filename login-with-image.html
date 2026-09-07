@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Nightasaur 登入</title>
+  <style>
+    body { 
+      font-family: 'Microsoft JhengHei', sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: #0f172a;
+      color: white; 
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container { 
+      max-width: 500px; 
+      width: 100%;
+      background: #1e293b; 
+      padding: 30px; 
+      border-radius: 15px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #667eea;
+      margin-bottom: 15px;
+    }
+    
+    h1 { 
+      color: #667eea; 
+      text-align: center; 
+      margin-bottom: 10px;
+    }
+    
+    .admin-info { 
+      background: #fbbf24; 
+      color: #000; 
+      padding: 15px; 
+      border-radius: 10px; 
+      margin: 20px 0;
+    }
+    
+    .form-group { 
+      margin: 20px 0; 
+      position: relative; 
+    }
+    
+    input { 
+      width: 100%; 
+      padding: 14px; 
+      background: #0f172a; 
+      border: 1px solid #334155; 
+      border-radius: 8px; 
+      color: white; 
+      box-sizing: border-box;
+    }
+    
+    .password-container { 
+      position: relative; 
+    }
+    
+    .toggle-password { 
+      position: absolute; 
+      right: 10px; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      background: none; 
+      border: none; 
+      color: #94a3b8; 
+      cursor: pointer; 
+      font-size: 20px; 
+    }
+    
+    .btn { 
+      width: 100%; 
+      padding: 16px; 
+      background: #667eea; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      margin: 20px 0;
+    }
+    
+    .btn:hover { 
+      background: #5a67d8; 
+    }
+    
+    .status { 
+      margin: 15px 0; 
+      padding: 12px; 
+      border-radius: 8px; 
+      text-align: center;
+    }
+    
+    .success { 
+      background: #10b981; 
+      color: white; 
+    }
+    
+    .error { 
+      background: #ef4444; 
+      color: white; 
+    }
+    
+    .support {
+      text-align: center;
+      margin-top: 20px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <img src="file:///C:/Nightasaur/Nightasaur-Luma.jpg" alt="Nightasaur Logo" class="logo">
+      <h1>🦖 Nightasaur 登入系統</h1>
+    </div>
+    
+    <div class="admin-info">
+      <h3>📋 管理員帳號</h3>
+      <p><strong>電子郵件：</strong> admin@nightasaur.com</p>
+      <p><strong>密碼：</strong> admin123</p>
+    </div>
+    
+    <div class="form-group">
+      <label>電子郵件</label>
+      <input type="email" id="loginEmail" value="admin@nightasaur.com">
+    </div>
+    
+    <div class="form-group">
+      <label>密碼</label>
+      <div class="password-container">
+        <input type="password" id="loginPassword" value="admin123" style="padding-right: 45px;">
+        <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">
+          👁️
+        </button>
+      </div>
+    </div>
+    
+    <button class="btn" onclick="login()">登入</button>
+    
+    <div id="status" class="status"></div>
+    
+    <div class="support">
+      <p>📧 支援信箱：service@nightasaur.com</p>
+      <p>🎮 遊戲界面：<a href="http://localhost:5173" style="color:#667eea;">http://localhost:5173</a></p>
+    </div>
+  </div>
+  
+  <script>
+    const BASE_URL = 'http://localhost:3002';
+    
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        button.textContent = '👁️';
+      }
+    }
+    
+    function showStatus(msg, isSuccess = true) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'status ' + (isSuccess ? 'success' : 'error');
+      setTimeout(() => el.className = 'status', 5000);
+    }
+    
+    async function login() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      if(!email || !password) { showStatus('請輸入電子郵件和密碼', false); return; }
+    
+      try {
+        const res = await fetch(BASE_URL + '/api/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({email, password})
+        });
+        const data = await res.json();
+        if(data.success) {
+          localStorage.setItem('nightasaur_token', data.token);
+          showStatus('✅ 登入成功！正在跳轉到遊戲界面...');
+    
+          setTimeout(() => {
+            window.location.href = 'http://localhost:5173/dashboard';
+          }, 1500);
+        } else {
+          showStatus('❌ ' + data.message, false);
+        }
+      } catch(error) {
+        showStatus('❌ 連線錯誤', false);
+      }
+    }
+  </script>
+</body>
+</html>

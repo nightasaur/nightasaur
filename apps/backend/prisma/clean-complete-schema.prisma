@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用戶系統 ====================
+
+// 用戶模型
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  role         String   @default("PLAYER")
+  trainerXp    Int      @default(0)
+  trainerLevel Int      @default(1)
+  gems         Int      @default(0)
+  coins        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 關係
+  LanguagePreference  LanguagePreference?
+  UserSettings        UserSettings?
+  PasswordResetToken  PasswordResetToken[]
+  Spirits             Spirit[]
+  UserItems           UserItem[]
+  Quests              QuestProgress[]
+  Achievements        AchievementProgress[]
+  PlayerLocation      PlayerLocation?
+  LocationVisits      LocationVisit[]
+  GenerationTasks     GenerationTask[]
+  Squads              Squad[]
+  SocialPosts         SocialPost[]
+
+  @@map("users")
+}
+
+// 語言設定
+model LanguagePreference {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  primaryLang   String  @default("zh-TW")
+  secondaryLang String?
+  displayMode   String  @default("SINGLE")
+  fontSize      Int     @default(16)
+  theme         String  @default("LIGHT")
+  autoDetect    Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("language_preferences")
+}
+
+// 用戶設定
+model UserSettings {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 音效設定
+  musicVolume    Int     @default(70)
+  soundVolume    Int     @default(80)
+  musicEnabled   Boolean @default(true)
+  soundEnabled   Boolean @default(true)
+  
+  // 震動設定
+  vibrationEnabled Boolean @default(true)
+  vibrationStrength Int    @default(50)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// ==================== 精靈系統 ====================
+
+// 精靈模型
+model Spirit {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  element       String
+  species       String?
+  personality   String?
+  appearance    String?
+  stage         String   @default("EGG")
+  level         Int      @default(1)
+  experience    Int      @default(0)
+  stats         String   @default("{}")
+  skills        String   @default("[]")
+  customization String   @default("{}")
+  backstory     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 關係
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Conversations   Conversation[]
+  Evolutions      Evolution[]
+  HatchingRecords HatchingRecord[]
+  SpiritAppearance SpiritAppearance?
+  SquadMembers    SquadMember[]
+  GenerationTasks GenerationTask[]
+
+  @@map("spirits")
+}
+
+// 對話記錄
+model Conversation {
+  id           String   @id @default(cuid())
+  spiritId     String
+  userMessage  String
+  aiResponse   String
+  createdAt    DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+// 進化記錄
+model Evolution {
+  id          String   @id @default(cuid())
+  spiritId    String
+  fromStage   String
+  toStage     String
+  triggeredBy String
+  createdAt   DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("evolutions")
+}

@@ -1,0 +1,484 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用戶系統 ====================
+
+// 用戶模型
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  role         String   @default("PLAYER")
+  trainerXp    Int      @default(0)
+  trainerLevel Int      @default(1)
+  gems         Int      @default(0)
+  coins        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 關係
+  LanguagePreference  LanguagePreference?
+  UserSettings        UserSettings?
+  PasswordResetToken  PasswordResetToken[]
+  Spirits             Spirit[]
+  UserItems           UserItem[]
+  Quests              QuestProgress[]
+  Achievements        AchievementProgress[]
+  PlayerLocation      PlayerLocation?
+  LocationVisits      LocationVisit[]
+  GenerationTasks     GenerationTask[]
+  Squads              Squad[]
+  SocialPosts         SocialPost[]
+
+  @@map("users")
+}
+
+// 語言設定
+model LanguagePreference {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  primaryLang   String  @default("zh-TW")
+  secondaryLang String?
+  displayMode   String  @default("SINGLE")
+  fontSize      Int     @default(16)
+  theme         String  @default("LIGHT")
+  autoDetect    Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("language_preferences")
+}
+
+// 用戶設定
+model UserSettings {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 音效設定
+  musicVolume    Int     @default(70)
+  soundVolume    Int     @default(80)
+  musicEnabled   Boolean @default(true)
+  soundEnabled   Boolean @default(true)
+  
+  // 震動設定
+  vibrationEnabled Boolean @default(true)
+  vibrationStrength Int    @default(50)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// 密碼重置令牌
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ==================== 精靈系統 ====================
+
+// 精靈模型
+model Spirit {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  element       String
+  species       String?
+  personality   String?
+  appearance    String?
+  stage         String   @default("EGG")
+  level         Int      @default(1)
+  experience    Int      @default(0)
+  stats         String   @default("{}")
+  skills        String   @default("[]")
+  customization String   @default("{}")
+  backstory     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 關係
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Conversations   Conversation[]
+  Evolutions      Evolution[]
+  HatchingRecords HatchingRecord[]
+  SpiritAppearance SpiritAppearance?
+  SquadMembers    SquadMember[]
+  GenerationTasks GenerationTask[]
+
+  @@map("spirits")
+}
+
+// 對話記錄
+model Conversation {
+  id           String   @id @default(cuid())
+  spiritId     String
+  userMessage  String
+  aiResponse   String
+  createdAt    DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+// 進化記錄
+model Evolution {
+  id          String   @id @default(cuid())
+  spiritId    String
+  fromStage   String
+  toStage     String
+  triggeredBy String
+  createdAt   DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("evolutions")
+}
+
+// 孵化記錄
+model HatchingRecord {
+  id              String   @id @default(cuid())
+  spiritId        String
+  userId          String
+  hatchDuration   Int
+  temperature     Float
+  humidity        Float
+  interactionCount Int      @default(0)
+  successRate     Float
+  hatchedAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("hatching_records")
+}
+
+// ==================== 物品系統 ====================
+
+// 物品
+model Item {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  type        String
+  rarity      String   @default("COMMON")
+  effect      String?
+  iconUrl     String?
+  price       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  UserItems UserItem[]
+
+  @@map("items")
+}
+
+// 用戶物品
+model UserItem {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@map("user_items")
+}
+
+// ==================== 位置系統 ====================
+
+// 玩家位置
+model PlayerLocation {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  latitude  Float
+  longitude Float
+  heading   Float?
+  updatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("player_locations")
+}
+
+// 位置生成
+model LocationSpawn {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  element     String?
+  rarity      String   @default("COMMON")
+  activeSpawn String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  LocationVisits LocationVisit[]
+
+  @@map("location_spawns")
+}
+
+// ==================== 任務系統 ====================
+
+// 任務
+model Quest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String
+  difficulty  String   @default("EASY")
+  reward      String   @default("{}")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  QuestProgress QuestProgress[]
+
+  @@map("quests")
+}
+
+// 任務進度
+model QuestProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  questId   String
+  progress  Int      @default(0)
+  completed Boolean  @default(false)
+  claimed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questId])
+  @@map("quest_progress")
+}
+
+// ==================== 成就系統 ====================
+
+// 成就
+model Achievement {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String
+  condition   String
+  reward      String   @default("{}")
+  iconUrl     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  AchievementProgress AchievementProgress[]
+
+  @@map("achievements")
+}
+
+// 成就進度
+model AchievementProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  progress      Int      @default(0)
+  completed     Boolean  @default(false)
+  claimed       Boolean  @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("achievement_progress")
+}
+
+// ==================== 生成任務系統 ====================
+
+// 生成任務
+model GenerationTask {
+  id          String   @id @default(cuid())
+  spiritId    String
+  userId      String
+  taskType    String
+  inputPrompt String
+  status      String   @default("PENDING")
+  resultUrl   String?
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("generation_tasks")
+}
+
+// ==================== 小隊系統 ====================
+
+// 小隊
+model Squad {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  maxSize   Int      @default(6)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  SquadMembers SquadMember[]
+
+  @@map("squads")
+}
+
+// 小隊成員
+model SquadMember {
+  id        String   @id @default(cuid())
+  squadId   String
+  spiritId  String
+  position  Int?
+  joinedAt  DateTime @default(now())
+
+  squad  Squad  @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@unique([squadId, spiritId])
+  @@map("squad_members")
+}
+
+// ==================== 社交系統 ====================
+
+// 社交貼文
+model SocialPost {
+  id          String   @id @default(cuid())
+  userId      String
+  content     String
+  spiritId    String?
+  imageUrl    String?
+  likes       Int      @default(0)
+  comments    Int      @default(0)
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit Spirit? @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("social_posts")
+}
+
+// ==================== 其他輔助模型 ====================
+
+// 外觀變更歷史
+model AppearanceChange {
+  id         String   @id @default(cuid())
+  spiritId   String
+  userId     String
+  changeType String
+  oldValue   String?
+  newValue   String
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("appearance_changes")
+}
+
+// 命名歷史
+model NamingHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  element   String
+  style     String   @default("CLASSIC")
+  language  String   @default("zh-TW")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("naming_history")
+}
+
+// 孵化互動
+model HatchingInteraction {
+  id              String   @id @default(cuid())
+  spiritId        String
+  interactionType String
+  intensity       Int      @default(1)
+  progressBefore  Float
+  progressAfter   Float
+  temperature     Float
+  humidity        Float
+  createdAt       DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("hatching_interactions")
+}
+
+// 熱點
+model Hotspot {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  radius      Int      @default(500)
+  type        String   @default("GENERAL")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hotspots")
+}
+
+// 益智關卡
+model PuzzleLevel {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  puzzleType  String
+  difficulty  String   @default("EASY")
+  data        String
+  solution    String
+  reward      String   @default("{}")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("puzzle_levels")
+}

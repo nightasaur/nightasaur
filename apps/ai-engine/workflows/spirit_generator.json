@@ -1,0 +1,87 @@
+{
+  "description": "Nightasaur Spirit Generator - Native ComfyUI Workflow",
+  "version": "1.0",
+  "parameters": {
+    "_comment": "Required models: SD 1.5 checkpoint, any standard VAE",
+    "checkpoint": "sd15.safetensors",
+    "vae": "vae-ft-mse-840000-ema-pruned.safetensors",
+    "lora": "nightasaur_style.safetensors"
+  },
+  "nodes": {
+    "1_checkpoint": {
+      "type": "CheckpointLoaderSimple",
+      "inputs": { "ckpt_name": "sd15.safetensors" }
+    },
+    "2_positive": {
+      "type": "CLIPTextEncode",
+      "inputs": {
+        "text": "a cute fantasy monster digital art, Pokemon-inspired style, vibrant colors, detailed, concept art, whimsical creature design",
+        "clip": ["1_checkpoint", "CLIP"]
+      }
+    },
+    "3_negative": {
+      "type": "CLIPTextEncode",
+      "inputs": {
+        "text": "ugly, deformed, blurry, low quality, watermark, text, realistic, photorealistic, bad anatomy, extra limbs",
+        "clip": ["1_checkpoint", "CLIP"]
+      }
+    },
+    "4_latent": {
+      "type": "EmptyLatentImage",
+      "inputs": { "width": 768, "height": 768, "batch_size": 1 }
+    },
+    "5_sampler": {
+      "type": "KSampler",
+      "inputs": {
+        "seed": 42,
+        "steps": 25,
+        "cfg": 7.5,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1.0,
+        "model": ["1_checkpoint", "MODEL"],
+        "positive": ["2_positive", "CONDITIONING"],
+        "negative": ["3_negative", "CONDITIONING"],
+        "latent_image": ["4_latent", "LATENT"]
+      }
+    },
+    "6_vae": {
+      "type": "VAEDecode",
+      "inputs": {
+        "samples": ["5_sampler", "LATENT"],
+        "vae": ["1_checkpoint", "VAE"]
+      }
+    },
+    "7_preview": {
+      "type": "PreviewImage",
+      "inputs": { "images": ["6_vae", "IMAGE"] }
+    },
+    "8_save": {
+      "type": "SaveImage",
+      "inputs": {
+        "filename_prefix": "nightasaur_spirit",
+        "images": ["6_vae", "IMAGE"]
+      }
+    }
+  },
+  "api_format": {
+    "prompt": {
+      "3": {
+        "inputs": {
+          "seed": 42,
+          "steps": 25,
+          "cfg": 7.5,
+          "sampler_name": "euler_ancestral",
+          "scheduler": "normal",
+          "denoise": 1.0,
+          "model": ["1_checkpoint", "MODEL"],
+          "positive": ["2_positive", "CONDITIONING"],
+          "negative": ["3_negative", "CONDITIONING"],
+          "latent_image": ["4_latent", "LATENT"]
+        },
+        "class_type": "KSampler"
+      }
+    },
+    "_note": "For API usage, set prompt text in node 2 and seed in node 5 before queueing"
+  }
+}

@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  role         String   @default("PLAYER")
+  trainerXp    Int      @default(0)
+  trainerLevel Int      @default(1)
+  gems         Int      @default(0)
+  coins        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  LanguagePreference  LanguagePreference?
+  UserSettings        UserSettings?
+  PasswordResetToken  PasswordResetToken[]
+  Spirits             Spirit[]
+  UserItems           UserItem[]
+  Quests              QuestProgress[]
+  Sessions            Session[]
+  GenerationTasks     GenerationTask[]
+
+  @@map("users")
+}
+
+model LanguagePreference {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  primaryLang   String  @default("zh-TW")
+  secondaryLang String?
+  displayMode   String  @default("SINGLE")
+  fontSize      Int     @default(16)
+  theme         String  @default("LIGHT")
+  autoDetect    Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("language_preferences")
+}
+
+model UserSettings {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  musicVolume    Int     @default(70)
+  soundVolume    Int     @default(80)
+  musicEnabled   Boolean @default(true)
+  soundEnabled   Boolean @default(true)
+  
+  vibrationEnabled Boolean @default(true)
+  vibrationStrength Int    @default(50)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Spirit {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  element       String
+  species       String?
+  personality   String?
+  appearance    String?
+  stage         String   @default("EGG")
+  level         Int      @default(1)
+  experience    Int      @default(0)
+  stats         String   @default("{}")
+  skills        String   @default("[]")
+  customization String   @default("{}")
+  backstory     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evolutions Evolution[]
+  conversations Conversation[]
+  generationTasks GenerationTask[]
+
+  @@map("spirits")
+}
+
+// Item model
+model Item {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  type        String
+  rarity      String   @default("COMMON")
+  effect      String?
+  iconUrl     String?
+  price       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  UserItems UserItem[]
+
+  @@map("items")
+}
+
+// UserItem model
+model UserItem {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@map("user_items")
+}
+
+// Quest model
+model Quest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String
+  difficulty  String   @default("EASY")
+  reward      String   @default("{}")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  QuestProgress QuestProgress[]
+
+  @@map("quests")
+}
+
+// QuestProgress model
+model QuestProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  questId   String
+  progress  Int      @default(0)
+  completed Boolean  @default(false)
+  claimed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  }
+
+model Evolution {
+  id         String   @id @default(cuid())
+  spiritId   String
+  fromStage  String
+  toStage    String
+  imageUrl   String?
+  triggeredBy String?
+  createdAt  DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("evolutions")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  spiritId    String
+  userMessage String
+  aiResponse  String
+  sentiment   String?
+  createdAt   DateTime @default(now())
+
+  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+model GenerationTask {
+  id         String   @id @default(cuid())
+  spiritId   String?
+  userId     String
+  taskType   String
+  inputPrompt String
+  resultUrl  String?
+  status     String   @default("PENDING")
+  errorMsg   String?
+  metadata   String?
+  queueJobId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  completedAt DateTime?
+
+  spirit Spirit? @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("generation_tasks")
+}

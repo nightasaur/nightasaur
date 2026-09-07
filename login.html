@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head><meta charset="UTF-8"><title>Nightasaur 登入</title>
+<style>
+body { font-family: 'Microsoft JhengHei'; margin: 20px; background: #f0f2f5; }
+.container { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+h1 { color: #667eea; text-align: center; }
+.form-group { margin: 15px 0; }
+label { display: block; margin-bottom: 5px; font-weight: bold; }
+input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+.btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px 0; }
+.btn:hover { background: #5a67d8; }
+.btn-secondary { background: #48bb78; }
+.btn-secondary:hover { background: #38a169; }
+.status { margin: 15px 0; padding: 10px; border-radius: 5px; }
+.success { background: #c6f6d5; color: #22543d; }
+.error { background: #fed7d7; color: #742a2a; }
+.info { background: #bee3f8; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+.admin { background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+.tabs { display: flex; margin-bottom: 20px; }
+.tab { flex: 1; padding: 10px; text-align: center; background: #e2e8f0; cursor: pointer; }
+.tab.active { background: #667eea; color: white; }
+.form { display: none; }
+.form.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🦖 Nightasaur 登入系統</h1>
+
+<div class="info">
+<p><strong>服務器:</strong> http://localhost:3002</p>
+<p><strong>支援信箱:</strong> service@nightasaur.com</p>
+</div>
+
+<div class="admin">
+<h3>📋 管理員帳號</h3>
+<p><strong>電子郵件:</strong> admin@nightasaur.com</p>
+<p><strong>用戶名:</strong> admin</p>
+<p><strong>密碼:</strong> admin123</p>
+<p><strong>角色:</strong> 系統管理員</p>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="showForm('login')">登入</div>
+<div class="tab" onclick="showForm('register')">註冊</div>
+</div>
+
+<!-- 登入表單 -->
+<div id="loginForm" class="form active">
+<div class="form-group">
+<label>電子郵件</label>
+<input type="email" id="loginEmail" value="admin@nightasaur.com">
+</div>
+<div class="form-group">
+<label>密碼</label>
+<input type="password" id="loginPassword" value="admin123">
+</div>
+<button class="btn" onclick="login()">登入</button>
+</div>
+
+<!-- 註冊表單 -->
+<div id="registerForm" class="form">
+<div class="form-group">
+<label>電子郵件</label>
+<input type="email" id="registerEmail" placeholder="your@email.com">
+</div>
+<div class="form-group">
+<label>用戶名</label>
+<input type="text" id="registerUsername" placeholder="選擇用戶名">
+</div>
+<div class="form-group">
+<label>密碼</label>
+<input type="password" id="registerPassword" placeholder="至少6個字符">
+</div>
+<button class="btn btn-secondary" onclick="register()">註冊</button>
+</div>
+
+<div id="status"></div>
+
+<p style="text-align:center; margin-top:20px;">
+<a href="/forgot-password">忘記密碼？</a>
+</p>
+</div>
+
+<script>
+const BASE_URL = 'http://localhost:3002';
+let token = localStorage.getItem('nightasaur_token');
+
+function showForm(formId) {
+document.getElementById('loginForm').classList.remove('active');
+document.getElementById('registerForm').classList.remove('active');
+document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+document.getElementById(formId + 'Form').classList.add('active');
+document.querySelectorAll('.tab')[formId === 'login' ? 0 : 1].classList.add('active');
+}
+
+// 眼睛符號功能
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    button.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    button.textContent = '👁️';
+  }
+}
+
+async function login() {
+const email = document.getElementById('loginEmail').value;
+const password = document.getElementById('loginPassword').value;
+if(!email || !password) { showStatus('請輸入電子郵件和密碼', false); return; }
+
+try {
+const res = await fetch(BASE_URL + '/api/auth/login', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({email, password})
+});
+const data = await res.json();
+if(data.success) {
+token = data.token;
+localStorage.setItem('nightasaur_token', token);
+showStatus('✅ 登入成功！正在跳轉到遊戲界面...');
+
+// 跳轉到遊戲界面
+setTimeout(() => {
+  window.location.href = 'http://localhost:5173/dashboard';
+}, 1500);
+} else {
+showStatus('❌ ' + data.message, false);
+}
+} catch(error) {
+showStatus('❌ 連線錯誤', false);
+}
+}
+
+async function register() {
+const email = document.getElementById('registerEmail').value;
+const username = document.getElementById('registerUsername').value;
+const password = document.getElementById('registerPassword').value;
+if(!email || !username || !password) { showStatus('請填寫所有欄位', false); return; }
+if(password.length < 6) { showStatus('密碼至少需要6個字符', false); return; }
+
+try {
+const res = await fetch(BASE_URL + '/api/auth/register', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({email, username, password})
+});
+const data = await res.json();
+if(data.success) {
+token = data.token;
+localStorage.setItem('nightasaur_token', token);
+showStatus('✅ 註冊成功！');
+document.getElementById('loginEmail').value = email;
+document.getElementById('loginPassword').value = password;
+showForm('login');
+} else {
+showStatus('❌ ' + data.message, false);
+}
+} catch(error) {
+showStatus('❌ 連線錯誤', false);
+}
+}
+
+if(token) {
+showStatus('✅ 已檢測到登入令牌');
+}
+</script>
+</body>
+</html>
