@@ -2,10 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy root workspace config
+# Copy workspace config files
 COPY package.json package-lock.json tsconfig.base.json ./
-COPY apps/backend/package.json apps/backend/
-COPY packages/shared/package.json packages/shared/
+COPY apps/backend/package.json apps/backend/package.json
+COPY packages/shared/package.json packages/shared/package.json
 
 # Install dependencies
 RUN npm install
@@ -14,13 +14,9 @@ RUN npm install
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
 
-# Generate Prisma client
-RUN cd apps/backend && npx prisma generate
-
-# Build
-RUN cd apps/backend && npm run build
+# Generate Prisma client and build
+RUN cd apps/backend && npx prisma generate && npm run build
 
 EXPOSE 3002
 
-# Start
 CMD ["node", "apps/backend/dist/index.js"]
