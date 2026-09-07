@@ -2,10 +2,10 @@
 
 > Create and evolve your AI spirit companion, or switch to a powerful personal AI assistant. 100% open source.
 
-[![License](https://img.shields.io/github/license/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/blob/main/LICENSE)
-[![Version](https://img.shields.io/github/v/release/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/releases)
-[![Stars](https://img.shields.io/github/stars/YOUR-USERNAME/nightasaur)](https://github.com/YOUR-USERNAME/nightasaur/stargazers)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/YOUR-USERNAME/nightasaur/blob/main/CONTRIBUTING.md)
+[![License](https://img.shields.io/github/license/nightasaur/nightasaur)](https://github.com/nightasaur/nightasaur/blob/main/LICENSE)
+[![Version](https://img.shields.io/github/v/release/nightasaur/nightasaur)](https://github.com/nightasaur/nightasaur/releases)
+[![Stars](https://img.shields.io/github/stars/nightasaur/nightasaur)](https://github.com/nightasaur/nightasaur/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/nightasaur/nightasaur/blob/main/CONTRIBUTING.md)
 
 ## ✨ Features
 
@@ -40,7 +40,7 @@
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR-USERNAME/nightasaur.git
+git clone https://github.com/nightasaur/nightasaur.git
 cd nightasaur
 
 # Install dependencies
@@ -196,13 +196,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/YOUR-USERNAME/nightasaur/issues)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/nightasaur/nightasaur/issues)
 - **Discord**: [Join our community](https://discord.gg/YOUR-INVITE-LINK)
 - **Email**: support@nightasaur.com
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=YOUR-USERNAME/nightasaur&type=Date)](https://star-history.com/#YOUR-USERNAME/nightasaur&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=nightasaur/nightasaur&type=Date)](https://star-history.com/#nightasaur/nightasaur&Date)
 
 ---
 
