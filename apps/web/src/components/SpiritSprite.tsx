@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { SPECIES_EMOJI } from "@nightasaur/shared";
 
 const PC: Record<string, string[]> = {
   FIRE: ["#ff4500", "#ff6b35", "#ffd700"],
@@ -59,7 +58,7 @@ export default function SpiritSprite({
     return () => clearInterval(iv);
   }, [animate]);
 
-  const main = SPECIES_EMOJI[species || ""] || EI[element || ""] || "🦕";
+  const main = EI[element || ""] || "🦕";
   const stageCls = ST[stage || ""] || "";
 
   return (
