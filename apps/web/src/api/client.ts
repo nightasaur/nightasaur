@@ -1,11 +1,11 @@
-import axios from "axios";
+﻿import axios from "axios";
 
 const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
 });
 
-// Token 攔截器
+// Token ???
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("nightasaur_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -58,7 +58,8 @@ export const assistantAPI = {
     api.post("/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }),
   document: (content: string, task: string = "summarize", docType: string = "text") =>
     api.post("/assistant/document", { content, task, doc_type: docType }),
-};\nexport const battleAPI = {
+};
+export const battleAPI = {
   encounter: (spiritId: string) => api.get(`/battle/encounter/${spiritId}`),
   action: (player: any, enemy: any, action: { type: string }) =>
     api.post("/battle/action", { player, enemy, action }),
