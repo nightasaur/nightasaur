@@ -34,6 +34,7 @@ export default function SpiritDetail() {
   const [expression, setExpression] = useState("😄开心");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const { speak, isSpeaking } = useVoiceOutput();
+const [animState, setAnimState] = useState<AnimState>("idle");
 
   useEffect(() => { if (id) load(); }, [id]);
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
@@ -180,11 +181,33 @@ return (
           {/* 大型预览 */}
           <div className="flex justify-center py-4">
             <SpiritSprite species={s.species} element={s.element} stage={s.stage}
-              outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={200} />
+              outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={200}
+              animState={animState} onAnimEnd={() => setAnimState("idle")} />
           </div>
           <p className="text-center text-white/50 text-sm -mt-2">
             {s.name} | {ICO[s.element]||"?"} {s.element} | {ICO[s.species]||"?"} {s.species||"?"} | Lv.{s.level}
           </p>
+
+          {/* 動作互動按鈕 */}
+          <div className="flex justify-center gap-2 mt-4 flex-wrap">
+            {[
+              { key: "happy", icon: "😄", label: "開心" },
+              { key: "attack", icon: "⚔️", label: "攻擊" },
+              { key: "special", icon: "✨", label: "絕招" },
+              { key: "hurt", icon: "😵", label: "受傷" },
+              { key: "sleep", icon: "😴", label: "睡覺" },
+              { key: "evolve", icon: "🌟", label: "進化" },
+            ].map((a) => (
+              <button key={a.key} onClick={() => setAnimState(a.key as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  animState === a.key
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                }`}>
+                {a.icon} {a.label}
+              </button>
+            ))}
+          </div>
 
           <p className="text-white/60 mb-3 font-bold">👗 服装</p>
           <div className="flex flex-wrap gap-2">

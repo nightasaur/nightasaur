@@ -157,3 +157,19 @@ body::before {
   50% { box-shadow: 0 0 20px rgba(94,234,212,0.5); }
 }
 .outfit-selected { animation: outfitGlow 2s ease-in-out infinite; }
+
+/* 精靈粒子浮動 */
+@keyframes floatUp {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  50% { transform: translate(var(--tx, 10px), var(--ty, -20px)) scale(1.2); opacity: 1; }
+  100% { transform: translate(var(--tx, 10px), var(--ty, -40px)) scale(0); opacity: 0; }
+}
+
+/* 浮動文字 */
+.floating {
+  animation: floatText 3s ease-in-out infinite;
+}
+@keyframes floatText {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
