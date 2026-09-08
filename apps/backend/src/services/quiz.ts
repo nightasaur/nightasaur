@@ -280,13 +280,7 @@ export function generateQuestions(count: number, level: number, lang: Lang = "zh
     const isAdd = Math.random() > 0.4;
     const ans = isAdd ? a + b : Math.max(a, b) - Math.min(a, b);
     if (ans <= 0) continue;
-    const symbols = ["＋","+","+","＋"];
-/** Calculate enemy counter-attack damage */
-export function calcEnemyDamage(enemyLevel: number, playerDef: number): number {
-  const base = Math.max(1, Math.floor(((12 + enemyLevel * 2) / (playerDef || 10)) * 10));
-  return base + Math.floor(Math.random() * 5);
-}
-    const q = isAdd ? `${a} ${symbols[langIdx]} ${b} = ?` : `${Math.max(a,b)}  ${symbols[langIdx]}  ${Math.min(a,b)} = ?`;
+    const symbols = ["＋","+","+","＋"];const q = isAdd ? `${a} ${symbols[langIdx]} ${b} = ?` : `${Math.max(a,b)}  ${symbols[langIdx]}  ${Math.min(a,b)} = ?`;
     extra.push({
       id: `extra-${level}-${i}`, category: "MATH" as any,
       question: q, options: shuffle([ans, ans+1, ans-1, ans+2, ans*2, ans-2].filter(x => x > 0)),
@@ -345,4 +339,10 @@ export function calcQuizDamage(elem: string, defElem: string, level: number): {
   const base = 10 + level * 2;
   const damage = Math.floor(base * effective * (critical ? 1.5 : 1));
   return { damage, effective, critical };
+}
+
+/** Calculate enemy counter-attack damage */
+export function calcEnemyDamage(enemyLevel: number, playerDef: number): number {
+  const base = Math.max(1, Math.floor(((12 + enemyLevel * 2) / (playerDef || 10)) * 10));
+  return base + Math.floor(Math.random() * 5);
 }
