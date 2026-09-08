@@ -39,8 +39,7 @@ export const IELTS_ARTICLES: IeltsArticle[] = [
       { question: "What is the main idea of this passage?", options: ["化石燃料最好", "可再生能源有前景但也有挑戰", "儲存技術完美", "太陽能太貴"], answer: 1, explanation: "文章主要討論可再生能源的發展和挑戰", questionType: "main-idea" },
     ],
   },
-  },  // end env-1
-// 更多文章
+  // 更多文章
   {
     id: "ai-health-1", title: "AI in Healthcare",
     titleZH: "人工智慧與醫療",
