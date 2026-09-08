@@ -12,9 +12,11 @@ RUN npm install
 
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
+COPY start.sh start.sh
+RUN chmod +x start.sh
 
 RUN cd apps/backend && npx prisma generate
 
 EXPOSE 3002
 
-CMD ["npx", "tsx", "apps/backend/src/index.ts"]
+CMD ["./start.sh"]
