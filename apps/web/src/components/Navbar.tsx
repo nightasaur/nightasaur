@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Nightasaur Team
+
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../api/client";
 import LanguageSwitcher from "./LanguageSwitcher";

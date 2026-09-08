@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Nightasaur Team
+
 """通用 AI 助手路由 — 精靈模式外的通用對話、程式協助、文件分析、翻譯"""
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel

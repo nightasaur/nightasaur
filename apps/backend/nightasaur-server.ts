@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Nightasaur Team
+
 // Nightasaur 遊戲後台系統 - 繁體中文主要版本
 import express from "express";
 import cors from "cors";

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Nightasaur Team
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import HOST, PORT
