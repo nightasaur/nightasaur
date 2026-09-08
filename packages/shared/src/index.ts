@@ -1,6 +1,5 @@
-// ─────────────────────────────────
-// Nightasaur 共用型別定義
-// ─────────────────────────────────
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Nightasaur Team
 
 export const ELEMENTS = [
   "FIRE", "WATER", "LIGHT", "SHADOW", "STAR",
@@ -31,6 +30,10 @@ export const STAGE_EMOJI: Record<Stage, string> = {
   ADULT: "🦕", ULTIMATE: "👑", LEGENDARY: "🌟",
 };
 
+export const STAGE_LEVEL_REQ: Record<string, number> = {
+  HATCHLING: 1, JUVENILE: 5, ADULT: 15, ULTIMATE: 30, LEGENDARY: 60,
+};
+
 export interface SpiritStats {
   hp: number;
   atk: number;
@@ -38,6 +41,9 @@ export interface SpiritStats {
   spd: number;
   maxHp: number;
 }
-// 地球生物外觀資料庫
+
+export { ELEMENT_ADVANTAGES, ELEMENT_DISADVANTAGES, ELEMENT_ICONS, getEffectiveness, getEffectivenessDescription } from "./elements.js";
+export { SKILL_POOL, getAvailableSkills, getSkillProgression } from "./skills.js";
+export type { Skill } from "./skills.js";
 export { ALL_SPECIES, SPECIES_CATEGORIES, SPECIES_EMOJI, SPECIES_LABELS, getSpeciesByCategory } from "./species.js";
 export type { SpeciesEntry } from "./species.js";

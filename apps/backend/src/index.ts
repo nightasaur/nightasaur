@@ -13,6 +13,7 @@ import gameLogicRoutes from "./routes/gameLogic.js";
 import squadRoutes from "./routes/squad.js";
 import arLocationRoutes from "./routes/arLocation.js";
 import languageRoutes from "./routes/language.js";
+import battleRoutes from "./routes/battle.js";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/game-logic", gameLogicRoutes);
 app.use("/api/squads", squadRoutes);
 app.use("/api/ar", arLocationRoutes);
 app.use("/api/language", languageRoutes);
+app.use("/api/battle", battleRoutes);
 
 // 錯誤處理中間件
 app.use(errorHandler);

@@ -17,6 +17,7 @@ import APISettings from "./pages/APISettings";
 import Privacy from "./pages/Privacy";
 import LanguageSettings from "./pages/LanguageSettings";
 import Assistant from "./pages/Assistant";
+import Battle from "./pages/Battle";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -90,6 +91,10 @@ function AppContent() {
           <Route
             path="/assistant"
             element={<ProtectedRoute><Assistant /></ProtectedRoute>}
+          />
+          <Route
+            path="/spirits/:id/battle"
+            element={<ProtectedRoute><Battle /></ProtectedRoute>}
           />
         </Routes>
       </main>

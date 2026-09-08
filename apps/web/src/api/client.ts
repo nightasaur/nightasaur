@@ -58,6 +58,10 @@ export const assistantAPI = {
     api.post("/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }),
   document: (content: string, task: string = "summarize", docType: string = "text") =>
     api.post("/assistant/document", { content, task, doc_type: docType }),
+};\nexport const battleAPI = {
+  encounter: (spiritId: string) => api.get(`/battle/encounter/${spiritId}`),
+  action: (player: any, enemy: any, action: { type: string }) =>
+    api.post("/battle/action", { player, enemy, action }),
 };
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),

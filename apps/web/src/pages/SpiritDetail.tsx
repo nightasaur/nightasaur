@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { spiritsAPI, dialogueAPI } from "../api/client";
 import SpiritSprite from "../components/SpiritSprite";
 import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
@@ -248,6 +248,14 @@ return (
               {evolving?"进化中...✨":can?`进化到 ${ns} →`:`需要 Lv.${nr} 才能进化`}
             </button>
             {evolveMsg && <p className="mt-3 text-teal-300 animate-pulse">{evolveMsg}</p>}
+          </div>
+        )}
+        {s && s.stage !== "EGG" && (
+          <div className="mt-6 text-center">
+            <Link to={`/spirits/${s.id}/battle`}
+              className="btn-primary text-lg px-10 inline-block">
+              ⚔️ 開始對戰
+            </Link>
           </div>
         )}
       </div>
