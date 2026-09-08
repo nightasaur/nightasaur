@@ -143,13 +143,13 @@ pytest
 ### Communication Channels
 - GitHub Discussions: For questions and discussions
 - GitHub Issues: For bugs and feature requests
-- Discord: For real-time chat (coming soon)
+- Discord: [Join our community](https://discord.gg/2Eb4nkk8E)
 
 ### Getting Help
 1. Check the documentation
 2. Search existing issues
 3. Ask in GitHub Discussions
-4. Join our Discord community
+4. Join our [Discord community](https://discord.gg/2Eb4nkk8E)
 
 ## Recognition
 

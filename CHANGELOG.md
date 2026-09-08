@@ -66,8 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Planned for v1.1.0
-- [ ] Discord community server
+### v1.0.0 - Completed
+- [x] Discord community server - https://discord.gg/2Eb4nkk8E
 - [ ] GitHub Actions CI/CD pipeline
 - [ ] Automated testing
 - [ ] Performance optimizations

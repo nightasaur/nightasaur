@@ -197,7 +197,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **GitHub Issues**: [Report bugs or request features](https://github.com/nightasaur/nightasaur/issues)
-- **Discord**: [Join our community](https://discord.gg/YOUR-INVITE-LINK)
+- **Discord**: [Join our community](https://discord.gg/2Eb4nkk8E)
 - **Email**: support@nightasaur.com
 
 ## 🌟 Star History
