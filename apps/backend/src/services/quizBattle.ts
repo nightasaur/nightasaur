@@ -8,8 +8,7 @@
 import prisma from "../config/prisma.js";
 import { gameService } from "./game.js";
 import { calculateGrowth } from "./growth.js";
-import { getQuizQuestions, calcQuizDamage, calcEnemyDamage } from "./quiz.js";
-import type { QuizQuestion } from "./quiz.js";
+import { generateQuestions, calcQuizDamage, calcEnemyDamage, QuizQuestion } from "./quiz.js";
 
 interface QuizBattleState {
   spiritId: string;
@@ -51,7 +50,7 @@ export class QuizBattleService {
     const enemyGrowth = calculateGrowth(element, enemyLevel, spirit.stage);
     const enemyHp = Math.floor(enemyGrowth.hp * 1.2);
 
-    const questions = getQuizQuestions(5, spirit.element);
+    const questions = generateQuestions(5, spirit.level, "zh-TW");
 
     this.battles.set(spiritId, {
       spiritId, questionIndex: 0, questions,
