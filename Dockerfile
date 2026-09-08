@@ -12,11 +12,9 @@ RUN npm install
 
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
-COPY start.sh start.sh
-RUN chmod +x start.sh
 
 RUN cd apps/backend && npx prisma generate
 
 EXPOSE 3002
 
-CMD ["./start.sh"]
+CMD sh -c "cd apps/backend && npx prisma db push --accept-data-loss && cd /app && npx tsx apps/backend/src/index.ts"
