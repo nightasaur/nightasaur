@@ -1,3 +1,75 @@
+import { IELTS_WORDS } from "./ieltsVocab.js";
+import { IELTS_ARTICLES } from "./ieltsReading.js";
+import type { IeltsArticle } from "./ieltsReading.js";
+
+// IELTS vocabulary question generator
+function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
+  for (const word of IELTS_WORDS) {
+    const def = word.definition;
+    const correct = word.word;
+    // 選出正確定義 (English mode)
+    if (langIdx === 2) {
+      const wrongDefs = IELTS_WORDS.filter(w => w.word !== word.word)
+        .sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.definition);
+      const opts = [def, ...wrongDefs].sort(() => Math.random() - 0.5);
+      yield {
+        id: `ielts-vocab-${word.word}-${langIdx}`, category: "IELTS" as any,
+        question: `What does "${word.word}" mean?`,
+        options: opts, answer: opts.indexOf(def),
+        explanation: `${word.word}: ${def} (${word.pos}) [Band ${word.band}]`,
+        level: Math.max(1, word.band - 3), difficulty: word.band > 7 ? 4 : word.band > 6 ? 3 : 2,
+        language: LANG_NAMES[langIdx],
+      };
+    } else {
+      // 選出對應字彙 (中/日模式)
+      const zhFields = langIdx <= 1 ? "zhCN" : "ja";
+      const meaning = (word as any)[zhFields];
+      const wrongWords = IELTS_WORDS.filter(w => w.word !== word.word)
+        .sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.word);
+      const opts = [correct, ...wrongWords].sort(() => Math.random() - 0.5);
+      yield {
+        id: `ielts-vocab-${word.word}-${langIdx}`, category: "IELTS" as any,
+        question: langIdx <= 1 ? `「${meaning}」的英文單字是？` : `「${meaning}」の英単語は？`,
+        options: opts, answer: opts.indexOf(correct),
+        explanation: `${correct}: ${def} (${word.pos})`,
+        level: Math.max(1, word.band - 3), difficulty: word.band > 7 ? 4 : word.band > 6 ? 3 : 2,
+        language: LANG_NAMES[langIdx],
+      };
+    }
+/** Generate IELTS reading comprehension questions */
+function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
+  for (const article of IELTS_ARTICLES) {
+    for (const q of article.questions) {
+      if (langIdx <= 1) {
+        yield {
+          id: `ielts-read-${article.id}-${q.questionType}-${langIdx}`,
+          category: "IELTS" as any,
+          question: `${q.question} (${article.titleZH})`,
+          options: q.options, answer: q.answer,
+          explanation: q.explanation,
+          level: Math.max(1, article.band - 3),
+          difficulty: article.band > 7 ? 4 : 3,
+          language: LANG_NAMES[langIdx],
+        };
+      }
+      // English mode
+      if (langIdx === 2) {
+        yield {
+          id: `ielts-read-en-${article.id}-${q.questionType}`,
+          category: "IELTS" as any,
+          question: `${q.question} (${article.title})`,
+          options: q.options, answer: q.answer,
+          explanation: q.explanation,
+          level: Math.max(1, article.band - 3),
+          difficulty: article.band > 7 ? 4 : 3,
+          language: "en",
+        };
+      }
+    }
+  }
+}
+  }
+}
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Nightasaur Team
 
@@ -6,7 +78,7 @@
  * Uses combinatorial templates + level-based scaling to generate large question pools
  */
 
-export type QCat = "ELEMENT" | "SPIRIT" | "MATH" | "LOGIC" | "SPECIES";
+export type QCat = "ELEMENT" | "SPIRIT" | "MATH" | "LOGIC" | "SPECIES" | "IELTS";
 export type Lang = "zh-TW" | "zh-CN" | "en" | "ja";
 
 export interface QuizQuestion {
@@ -266,7 +338,8 @@ export function generateQuestions(count: number, level: number, lang: Lang = "zh
     // Add English questions for some categories
     for (const q of genSpiritQs(2)) all.push(q);
     for (const q of genSpeciesQs(2)) all.push(q);
-
+    for (const l of [0,1,2]) { for (const q of genIELTSVocabQs(l)) all.push(q); }
+    for (const l of [0,1,2]) { for (const q of genIELTSReadingQs(l)) all.push(q); }
     questionCache = all;
     QUESTION_COUNT = all.length;
   }
