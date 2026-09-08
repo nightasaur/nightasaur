@@ -1,0 +1,33 @@
+name: Welcome Contributors
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            👋 Thanks for opening your first issue in Nightasaur!
+            
+            We appreciate you taking the time to help improve the project.
+            Please check our [Contributing Guide](CONTRIBUTING.md) for guidelines.
+            
+            A maintainer will review your issue soon. 🚀
+          pr-message: |
+            🎉 Thanks for your first Pull Request in Nightasaur!
+            
+            We're excited to review your contribution. Please make sure:
+            
+            - ✅ Your code follows our coding style
+            - ✅ You've tested your changes
+            - ✅ You've updated documentation if needed
+            - ✅ Your PR description is clear
+            
+            A maintainer will review your PR as soon as possible. Thank you! ⭐
