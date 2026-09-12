@@ -4,7 +4,7 @@
 """通用 AI 助手路由 — 精靈模式外的通用對話、程式協助、文件分析、翻譯"""
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from typing import Optional, list as List
+from typing import Optional
 from services.assistant_llm import assistant_llm_service
 
 router = APIRouter()

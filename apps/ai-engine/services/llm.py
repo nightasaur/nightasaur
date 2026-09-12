@@ -1,59 +1,47 @@
-"""Ollama LLM 對話服務"""
-import httpx
-import json
+"""Ollama LLM 對話服務
+
+內部改為透過 AgentCore 執行（見 apps/ai-engine/agent/），Ollama 呼叫邏輯已搬到
+agent/providers/ollama_provider.py 的 OllamaModelProvider。此檔案對外的
+public method 簽名與回傳格式維持不變，確保 routers/dialogue.py 與既有前端
+呼叫鏈不受影響。
+"""
+from agent import AgentInput, build_default_agent_core
 from config import OLLAMA_URL, OLLAMA_MODEL
+
+# 與重構前 LLMService.chat() 完全相同的生成參數與錯誤/離線訊息文案，
+# 透過 AgentInput.model_options 傳給 OllamaModelProvider，確保行為不變。
+DIALOGUE_MODEL_OPTIONS = {
+    "temperature": 0.8,
+    "top_p": 0.9,
+    "num_predict": 256,
+    "fallback_message": "嗚...我暫時無法回應。請稍後再試。",
+    "offline_message": "嘎嗚～（AI 引擎尚未啟動，請先執行 Ollama）",
+    "error_message": "嘎嗚～（通訊暫時中斷...）",
+}
 
 
 class LLMService:
     def __init__(self):
         self.base_url = OLLAMA_URL
         self.model = OLLAMA_MODEL
-
-    async def chat(self, messages: list[dict]) -> str:
-        """與 Ollama LLM 對話"""
-        try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    f"{self.base_url}/api/chat",
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "stream": False,
-                        "options": {
-                            "temperature": 0.8,
-                            "top_p": 0.9,
-                            "num_predict": 256,
-                        },
-                    },
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    return data["message"]["content"].strip()
-                else:
-                    print(f"[LLM Error] HTTP {response.status_code}: {response.text[:200]}")
-                    return "嗚...我暫時無法回應。請稍後再試。"
-        except httpx.ConnectError:
-            print(f"[LLM Error] Cannot connect to Ollama at {self.base_url}")
-            return "嘎嗚～（AI 引擎尚未啟動，請先執行 Ollama）"
-        except Exception as e:
-            print(f"[LLM Error] {e}")
-            return "嘎嗚～（通訊暫時中斷...）"
+        self.agent_core = build_default_agent_core(OLLAMA_URL, OLLAMA_MODEL)
 
     async def generate_story(self, prompt: str) -> str:
         """生成精靈背景故事"""
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "你是 Nightasaur 世界的故事講述者。"
-                    "用繁體中文為奇幻精靈創作短篇背景故事。"
-                    "3-5 句話，語氣溫暖、魔法、富有想像力。"
-                    "故事要生動、有畫面感。"
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ]
-        return await self.chat(messages)
+        system_prompt = (
+            "你是 Nightasaur 世界的故事講述者。"
+            "用繁體中文為奇幻精靈創作短篇背景故事。"
+            "3-5 句話，語氣溫暖、魔法、富有想像力。"
+            "故事要生動、有畫面感。"
+        )
+        output = await self.agent_core.run(
+            AgentInput(
+                message=prompt,
+                system_prompt=system_prompt,
+                model_options=DIALOGUE_MODEL_OPTIONS,
+            )
+        )
+        return output.content
 
     async def generate_dialogue(
         self,
@@ -90,34 +78,22 @@ class LLMService:
 5. 用符合性格的口吻說話
 6. 適時加入 emoji"""
 
-        messages = [{"role": "system", "content": system_prompt}]
+        # 加入歷史對話（最近16則），與重構前行為一致
+        trimmed_history = history[-16:] if history else []
 
-        # 加入歷史對話（最近16則）
-        if history:
-            messages.extend(history[-16:])
-
-        # 加入當前訊息
-        messages.append({"role": "user", "content": message})
-
-        return await self.chat(messages)
+        output = await self.agent_core.run(
+            AgentInput(
+                message=message,
+                system_prompt=system_prompt,
+                history=trimmed_history,
+                model_options=DIALOGUE_MODEL_OPTIONS,
+            )
+        )
+        return output.content
 
     async def health_check(self) -> dict:
         """檢查 Ollama 連線狀態"""
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.get(f"{self.base_url}/api/tags")
-                if resp.status_code == 200:
-                    data = resp.json()
-                    models = [m["name"] for m in data.get("models", [])]
-                    return {
-                        "status": "ok",
-                        "model": self.model,
-                        "model_available": self.model in models,
-                        "available_models": models,
-                    }
-                return {"status": "error", "message": f"HTTP {resp.status_code}"}
-        except Exception as e:
-            return {"status": "offline", "message": str(e)}
+        return await self.agent_core.model_provider.health_check()
 
 
 llm_service = LLMService()
