@@ -24,13 +24,24 @@ Loop 的安全邊界：
 - 送回模型前，任何工具結果都必須先經過
   `agent.tool_result_serializer.serialize_tool_result()`，確保只有
   deterministic、JSON-safe 的內容進入 messages。
+- `AgentOutput.metadata["tool_trace"]` 是另一個獨立的安全邊界：它是給
+  開發者/呼叫端診斷用的資料，可能被記錄或回傳，因此同樣不得保留序列化前
+  的原始 Python 物件，字串欄位也不得無限制暴露完整內容（可能包含
+  token/password/email 等敏感文字）。tool_trace 一律先經過
+  `agent.tool_result_serializer.build_safe_trace_value()` /
+  `redact_and_truncate_text()`，取得有長度上限、敏感欄位遮蔽過的
+  representation，而不是原始值。
 """
 from agent.execution_policy import AllowAllExecutionPolicy, ExecutionDecision, ExecutionPolicy
 from agent.memory.base import MemoryProvider
 from agent.providers.base import ModelProvider
 from agent.schemas import AgentInput, AgentOutput
 from agent.tool_calls import ToolCallResult
-from agent.tool_result_serializer import serialize_tool_result
+from agent.tool_result_serializer import (
+    build_safe_trace_value,
+    redact_and_truncate_text,
+    serialize_tool_result,
+)
 from agent.tools.base import ToolError
 from agent.tools.registry import ToolRegistry
 
@@ -119,7 +130,11 @@ class AgentCore:
                         "event": "max_iterations_reached",
                         "iterations": iterations,
                         "pending_tool_calls": [
-                            {"id": c.id, "name": c.name, "arguments": c.arguments}
+                            {
+                                "id": c.id,
+                                "name": c.name,
+                                "arguments": build_safe_trace_value(c.arguments),
+                            }
                             for c in response.tool_calls
                         ],
                     }
@@ -180,10 +195,14 @@ class AgentCore:
                     {
                         "id": call.id,
                         "name": call.name,
-                        "arguments": call.arguments,
+                        "arguments": build_safe_trace_value(call.arguments),
                         "ok": result.ok,
-                        "result": result.result if result.ok else None,
-                        "error": result.error,
+                        "result": (
+                            build_safe_trace_value(result.result)
+                            if result.ok
+                            else None
+                        ),
+                        "error": redact_and_truncate_text(result.error),
                     }
                 )
 

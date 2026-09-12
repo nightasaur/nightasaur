@@ -6,8 +6,12 @@
 涵蓋 test matrix：no-tool path、single tool call、tool result -> final
 answer、message ordering、unknown tool、tool exception、max-iteration stop
 （含 per-run override）、ExecutionPolicy boundary（deny/confirmation_required
-一律不執行工具）、以及 ModelProvider 收到的 tool_specs 契約。
+一律不執行工具）、以及 ModelProvider 收到的 tool_specs 契約。另涵蓋
+tool_trace 安全邊界：raw object 不外洩、敏感字串遮蔽、長度截斷、
+永遠 JSON-safe。
 """
+import json
+
 import pytest
 
 from agent.core import AgentCore
@@ -93,7 +97,10 @@ async def test_single_tool_call_then_final_answer():
     assert provider.call_count == 2
     assert output.metadata["iterations"] == 1
     assert output.metadata["tool_trace"][0]["ok"] is True
-    assert output.metadata["tool_trace"][0]["result"] == "Hello, Ada!"
+    # tool_trace 的 result 已經過 build_safe_trace_value() 正規化（頂層純
+    # 量值會被包成 {"value": ...}，與 serialize_tool_result() 的既有契約
+    # 一致），而不是保留序列化前的原始字串。
+    assert output.metadata["tool_trace"][0]["result"] == {"value": "Hello, Ada!"}
 
 
 @pytest.mark.asyncio
@@ -308,3 +315,132 @@ async def test_memory_receives_full_turn_sequence_for_session():
     stored = await core.memory.get_context("session-1", [])
     roles = [m["role"] for m in stored]
     assert roles == ["user", "assistant", "tool", "assistant"]
+
+
+# ---------------------------------------------------------------------------
+# Security hardening: AgentOutput.metadata["tool_trace"] 安全邊界。
+# tool_trace 是可能被記錄/回傳給呼叫端的診斷資料，不得原封不動保留 raw
+# tool result / arbitrary Python object，也不得無限制暴露看起來像機敏資訊
+# 的字串（token/password/email）。
+# ---------------------------------------------------------------------------
+
+
+class SensitiveObjectTool(Tool):
+    """回傳一個自訂物件（而非 primitive/dict/list），模擬工具回傳
+    「不應該被原封不動保留在 trace 裡」的 raw internal 物件。
+    """
+
+    name = "sensitive_lookup"
+    description = "Returns a custom object carrying sensitive-looking data."
+
+    class _Payload:
+        def __init__(self):
+            self.password = "super-secret-value-should-not-leak"
+
+        def __repr__(self):
+            return f"<Payload password={self.password}>"
+
+    async def run(self, **kwargs):
+        return self._Payload()
+
+
+class SensitiveDictTool(Tool):
+    """回傳一個看起來帶有機敏欄位的 dict（token/password/email）。"""
+
+    name = "credential_lookup"
+    description = "Returns a dict containing sensitive-looking fields."
+
+    async def run(self, **kwargs):
+        return {
+            "user": "ada",
+            "password": "hunter2-should-not-leak-in-full",
+            "api_token": "sk-live-abcdef0123456789",
+            "contact_email": "ada@example.com",
+        }
+
+
+@pytest.mark.asyncio
+async def test_tool_trace_never_exposes_raw_custom_object_result():
+    call = ToolCallRequest(id="call-1", name="sensitive_lookup", arguments={})
+    provider = FakeModelProvider(
+        responses=[ModelResponse(tool_calls=[call]), ModelResponse(content="done")]
+    )
+    core = _core(provider, tools=[SensitiveObjectTool()])
+
+    output = await core.run(AgentInput(message="look it up"))
+
+    trace_result = output.metadata["tool_trace"][0]["result"]
+
+    # 絕不能是原始的 _Payload 實例；必須是安全、JSON-safe 的 placeholder。
+    assert not isinstance(trace_result, SensitiveObjectTool._Payload)
+    assert isinstance(trace_result, dict)
+    assert trace_result.get("__unserializable__") is True
+
+    # 整個 trace/metadata 必須可以被 json.dumps()，不會 raise。
+    json.dumps(output.metadata["tool_trace"])
+
+    # 敏感原文不應該以任何形式完整出現在 trace 序列化結果裡。
+    assert "super-secret-value-should-not-leak" not in json.dumps(
+        output.metadata["tool_trace"]
+    )
+
+
+@pytest.mark.asyncio
+async def test_tool_trace_redacts_sensitive_fields_in_dict_result():
+    call = ToolCallRequest(id="call-1", name="credential_lookup", arguments={})
+    provider = FakeModelProvider(
+        responses=[ModelResponse(tool_calls=[call]), ModelResponse(content="done")]
+    )
+    core = _core(provider, tools=[SensitiveDictTool()])
+
+    output = await core.run(AgentInput(message="look up credentials"))
+
+    trace = output.metadata["tool_trace"][0]
+    dumped = json.dumps(trace)
+
+    assert "hunter2-should-not-leak-in-full" not in dumped
+    assert "sk-live-abcdef0123456789" not in dumped
+    assert "ada@example.com" not in dumped
+    assert trace["result"]["password"] == "<redacted>"
+    assert trace["result"]["api_token"] == "<redacted>"
+
+
+@pytest.mark.asyncio
+async def test_tool_trace_truncates_long_arguments_and_is_always_json_dumpable():
+    long_value = "y" * 5000
+    call = ToolCallRequest(
+        id="call-1", name="greet", arguments={"name": long_value}
+    )
+    provider = FakeModelProvider(
+        responses=[ModelResponse(tool_calls=[call]), ModelResponse(content="done")]
+    )
+    core = _core(provider, tools=[GreetTool()])
+
+    output = await core.run(AgentInput(message="greet with a huge name"))
+
+    trace = output.metadata["tool_trace"][0]
+    argument_text = trace["arguments"]["name"]
+
+    assert len(argument_text) < len(long_value)
+    assert "truncated" in argument_text
+    # 整份 metadata（含 messages/tool_trace）都必須是 JSON-safe。
+    json.dumps(output.metadata)
+
+
+@pytest.mark.asyncio
+async def test_max_iterations_pending_tool_calls_trace_also_redacted_and_bounded():
+    long_value = "z" * 5000
+    call = ToolCallRequest(
+        id="call-x", name="greet", arguments={"name": long_value}
+    )
+    provider = FakeModelProvider(responses=[ModelResponse(tool_calls=[call])])
+    core = _core(provider, tools=[GreetTool()], max_tool_iterations=1)
+
+    output = await core.run(AgentInput(message="loop forever"))
+
+    max_iter_trace = output.metadata["tool_trace"][-1]
+    assert max_iter_trace["event"] == "max_iterations_reached"
+    pending_args = max_iter_trace["pending_tool_calls"][0]["arguments"]["name"]
+    assert len(pending_args) < len(long_value)
+    assert "truncated" in pending_args
+    json.dumps(output.metadata["tool_trace"])

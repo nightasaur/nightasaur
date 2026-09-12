@@ -41,7 +41,12 @@ class AgentOutput:
     # 而不必更動 AgentOutput 的既有欄位。
     # v0.2 新增的 metadata 鍵：
     #   - "tool_trace"：本次 run 執行過的每一次 tool call 的診斷紀錄
-    #     （id/name/arguments/ok/result/error），即使結果被 serializer
-    #     正規化為安全 placeholder，這裡仍保留序列化前的原始值供除錯。
+    #     （id/name/arguments/ok/result/error）。這是安全邊界之一：每個
+    #     欄位都先經過
+    #     agent.tool_result_serializer.build_safe_trace_value() /
+    #     redact_and_truncate_text() 正規化 —— 絕不保留序列化前的原始
+    #     Python 物件，字串欄位也有長度上限與敏感內容遮蔽，而不是完整
+    #     原文，避免 arbitrary object 或機敏文字（token/password/email）
+    #     被無限制暴露在可能對外回傳/記錄的 trace 裡。
     #   - "iterations"：本次 run 實際執行的 tool-calling 迭代次數。
     metadata: dict[str, Any] = field(default_factory=dict)
