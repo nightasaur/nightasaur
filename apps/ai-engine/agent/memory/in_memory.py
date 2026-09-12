@@ -8,6 +8,10 @@
 - session_id 有值：用 process 內記憶體的 dict 累積歷史，僅供未來擴充/測試
   使用，行程重啟即消失。正式的長期記憶（PostgreSQL / 向量庫）留待後續版本
   以新的 MemoryProvider 實作替換，AgentCore 不需要跟著改動。
+
+v0.2：append() 改為接受完整 message dict，可保存 tool-calling 相關欄位
+（tool_call_id、name 等），讓 user -> assistant tool_call -> tool result ->
+final assistant 的完整序列都能被正確累積。
 """
 from agent.memory.base import MemoryProvider
 
@@ -29,8 +33,8 @@ class EphemeralMemoryProvider(MemoryProvider):
             )
         return stored if stored else provided_history
 
-    async def append(self, session_id: str | None, role: str, content: str) -> None:
+    async def append(self, session_id: str | None, message: dict) -> None:
         if session_id is None:
             return
         stored = self._sessions.setdefault(session_id, [])
-        stored.append({"role": role, "content": content})
+        stored.append(dict(message))

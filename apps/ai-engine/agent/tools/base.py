@@ -13,6 +13,10 @@ class Tool(ABC):
     name: str
     #: 給模型或開發者看的簡短說明。
     description: str = ""
+    #: JSON-schema 風格的參數描述，供 ToolRegistry.list_specs() 組成
+    #: provider-neutral 的 ToolSpec，讓模型（或 prompt fallback）知道
+    #: 如何呼叫這個工具。預設為空字典，代表工具不需要（或未描述）參數。
+    parameters: dict = {}
 
     @abstractmethod
     async def run(self, **kwargs) -> Any:
