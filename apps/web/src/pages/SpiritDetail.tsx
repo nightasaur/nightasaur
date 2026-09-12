@@ -70,6 +70,18 @@ const [animState, setAnimState] = useState<AnimState>("idle");
     try { await spiritsAPI.updateCustomization(id!, nc); } catch {}
   };
 
+  const deleteSpirit = async () => {
+    if (!window.confirm(`確定要刪除精靈「${s.name}」嗎？此操作無法還原。`)) return;
+    
+    try {
+      await spiritsAPI.delete(id!);
+      alert("精靈已成功刪除");
+      nav("/spirits");
+    } catch (error: any) {
+      alert(error.response?.data?.message || "刪除失敗");
+    }
+  };
+
   const send = async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || sending) return;
@@ -281,6 +293,13 @@ return (
             </Link>
           </div>
         )}
+        <div className="mt-4 text-center">
+          <button onClick={deleteSpirit}
+            className="btn-danger text-lg px-10 inline-block bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300">
+            🗑️ 刪除精靈
+          </button>
+          <p className="text-white/40 text-sm mt-2">此操作無法還原</p>
+        </div>
       </div>
     </div>
   );

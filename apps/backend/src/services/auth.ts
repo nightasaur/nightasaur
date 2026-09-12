@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { signToken } from "../utils/jwt.js";
 import { PrismaClient } from "@prisma/client";
+import { spiritService } from "./spirit.js";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
@@ -69,6 +70,34 @@ async function ensureDefaultUsers() {
 // 初始化時確保預設帳號存在
 ensureDefaultUsers().catch(console.error);
 
+// 元素列表
+const ELEMENTS = ["FIRE", "WATER", "LIGHT", "SHADOW", "STAR", "ILLUSION", "MOON", "NATURE", "THUNDER", "ICE"];
+
+// 隨機選擇一個元素
+function getRandomElement() {
+  return ELEMENTS[Math.floor(Math.random() * ELEMENTS.length)];
+}
+
+// 根據元素生成精靈名稱
+function generateSpiritName(element: string, username: string) {
+  const elementNames: Record<string, string[]> = {
+    FIRE: ["焰火", "炎龍", "火鳳", "灼光", "熾焰"],
+    WATER: ["清流", "海龍", "水靈", "波光", "潮汐"],
+    LIGHT: ["光輝", "聖光", "晨曦", "輝耀", "明焰"],
+    SHADOW: ["暗影", "夜魅", "幽魂", "暗夜", "黑影"],
+    STAR: ["星塵", "星雲", "星河", "星輝", "星耀"],
+    ILLUSION: ["幻影", "迷霧", "幻象", "夢境", "虛幻"],
+    MOON: ["月影", "月華", "月光", "月神", "月輝"],
+    NATURE: ["綠葉", "森林", "大地", "生命", "自然"],
+    THUNDER: ["雷電", "雷霆", "閃電", "雷鳴", "電光"],
+    ICE: ["冰霜", "冰雪", "冰晶", "寒冰", "霜雪"]
+  };
+  
+  const names = elementNames[element] || ["小精靈"];
+  const randomName = names[Math.floor(Math.random() * names.length)];
+  return `${username}的${randomName}`;
+}
+
 export class AuthService {
   async register(email: string, username: string, password: string) {
     // 檢查是否已存在
@@ -97,6 +126,27 @@ export class AuthService {
       }
     });
 
+    // 為新用戶創建初始精靈
+    let initialSpirit = null;
+    try {
+      const element = getRandomElement();
+      const spiritName = generateSpiritName(element, username);
+      
+      initialSpirit = await spiritService.createSpirit({
+        userId: user.id,
+        name: spiritName,
+        element: element,
+        personality: "活潑好奇，喜歡探索新事物",
+        appearance: "小巧可愛，散發著溫和的光芒",
+        species: "初始精靈"
+      });
+      
+      console.log(`✅ 為新用戶 ${email} 創建初始精靈: ${spiritName} (${element})`);
+    } catch (spiritError) {
+      console.error("❌ 創建初始精靈時發生錯誤:", spiritError);
+      // 不讓精靈創建失敗影響註冊流程
+    }
+
     const token = signToken({
       userId: user.id,
       email: user.email,
@@ -111,6 +161,13 @@ export class AuthService {
         role: user.role,
       },
       token,
+      spirit: initialSpirit ? {
+        id: initialSpirit.id,
+        name: initialSpirit.name,
+        element: initialSpirit.element,
+        stage: initialSpirit.stage,
+        level: initialSpirit.level
+      } : null
     };
   }
 

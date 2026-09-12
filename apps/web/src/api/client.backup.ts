@@ -1,53 +1,16 @@
-import axios from "axios";
-
-// 根據環境設定 API 基礎 URL
-const getApiBaseUrl = () => {
-  // 開發環境使用 localhost:3002
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3002/api';
-  }
-  
-  // 生產環境使用相對路徑或環境變數
-  return process.env.NEXT_PUBLIC_API_URL || '/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+﻿import axios from "axios";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "/api",
   headers: { "Content-Type": "application/json" },
-  timeout: 10000,
 });
 
-// Token 攔截器
+// Token ???
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("nightasaur_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
-// 響應攔截器 - 添加 fallback 支持
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    // 如果請求超時或網絡錯誤
-    if (!error.response || error.code === 'ECONNABORTED') {
-      console.warn('API 連接失敗，前端將使用本地 fallback');
-      return Promise.reject({
-        isNetworkError: true,
-        message: "無法連接到伺服器",
-      });
-    }
-    
-    // 處理未授權
-    if (error.response?.status === 401) {
-      localStorage.removeItem("nightasaur_token");
-      window.location.href = "/login";
-    }
-    
-    return Promise.reject(error);
-  }
-);
 
 // Auth API
 export const authAPI = {
@@ -97,13 +60,11 @@ export const assistantAPI = {
   document: (content: string, task: string = "summarize", docType: string = "text") =>
     api.post("/assistant/document", { content, task, doc_type: docType }),
 };
-
 export const battleAPI = {
   encounter: (spiritId: string) => api.get(`/battle/encounter/${spiritId}`),
   action: (player: any, enemy: any, action: { type: string }) =>
     api.post("/battle/action", { player, enemy, action }),
 };
-
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
   updatePreference: (data: any) => api.patch("/language/preference", data),

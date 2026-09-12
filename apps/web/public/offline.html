@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>離線模式 | Nightasaur</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #0a0d14 0%, #1a1f2e 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 600px;
+      width: 100%;
+    }
+    
+    .logo {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #a0aec0;
+      margin-bottom: 30px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+.actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .offline-features {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    
+    .feature {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .feature h4 {
+      margin-bottom: 10px;
+      color: #68d391;
+    }
+    
+    footer {
+      margin-top: 40px;
+      color: #718096;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🌙🦕</div>
+    <h1>離線模式</h1>
+    <p class="subtitle">Nightasaur 暫時無法連接到網絡</p>
+    
+    <div class="card">
+      <div class="status">
+        <div class="status-icon"></div>
+        <span>目前狀態：離線</span>
+      </div>
+      
+      <p>你的設備目前沒有網絡連接，但別擔心！你仍然可以使用部分功能：</p>
+      
+      <div class="tips">
+        <h3>📱 可用的離線功能：</h3>
+        <ul>
+          <li>查看已快取的精靈資料</li>
+          <li>瀏覽已下載的教學內容</li>
+          <li>使用本地儲存的設定</li>
+          <li>查看離線通知</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="offline-features">
+      <div class="feature">
+        <div class="feature-icon">📱</div>
+        <h4>PWA 支援</h4>
+        <p>Nightasaur 已安裝為 Progressive Web App，提供原生應用體驗</p>
+      </div>
+      
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h4>快速載入</h4>
+        <p>重要資源已快取，即使離線也能快速載入</p>
+      </div>
+      
+      <div class="feature">
+        <div class="feature-icon">🔄</div>
+        <h4>自動同步</h4>
+        <p>恢復連線後自動同步離線期間的數據</p>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button class="btn btn-primary" onclick="window.location.reload()">
+        🔄 重新整理
+      </button>
+      <button class="btn btn-secondary" onclick="checkConnection()">
+        🌐 檢查連線
+      </button>
+      <a href="/" class="btn btn-secondary">
+        🏠 返回首頁
+      </a>
+    </div>
+    
+    <footer>
+      <p>© 2026 Nightasaur. 夜間沉浸式 AI 平台</p>
+      <p>遇到問題？請檢查你的網絡連接，或稍後再試。</p>
+    </footer>
+  </div>
+  
+  <script>
+    function checkConnection() {
+      if (navigator.onLine) {
+        alert('✅ 網絡連接已恢復！正在重新載入頁面...');
+        window.location.reload();
+      } else {
+        alert('❌ 仍然無法連接到網絡，請檢查你的網絡設定。');
+      }
+    }
+    
+    // 監聽網絡狀態變化
+    window.addEventListener('online', () => {
+      alert('🌐 網絡連接已恢復！');
+      window.location.reload();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('📴 網絡連接中斷');
+    });
+    
+    // 嘗試註冊 Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('✅ Service Worker 註冊成功:', registration.scope);
+          })
+          .catch(error => {
+            console.log('❌ Service Worker 註冊失敗:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+    
+    .status-icon {
+      width: 12px;
+      height: 12px;
+      background: #f56565;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .tips {
+      text-align: left;
+      margin-top: 20px;
+    }
+    
+    .tips h3 {
+      margin-bottom: 10px;
+      color: #68d391;
+    }
+    
+    .tips ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .tips li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .tips li:before {
+      content: "•";
+      color: #667eea;
+      font-size: 1.5rem;
+    }

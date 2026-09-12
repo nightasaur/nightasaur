@@ -43,8 +43,8 @@ export default function Navbar({ user, setUser }: NavbarProps) {
               <Link to="/dashboard" className="text-white/70 hover:text-white transition text-sm">
                 儀表板
               </Link>
-              <Link to="/spirits" className="text-white/70 hover:text-white transition text-sm">
-                我的精靈
+              <Link to="/academy" className="text-white/70 hover:text-white transition text-sm">
+                🦉 學院
               </Link>
               <Link to="/assistant" className="text-white/70 hover:text-white transition text-sm">
                 🤖 AI 助手

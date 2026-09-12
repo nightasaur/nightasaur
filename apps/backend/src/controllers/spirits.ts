@@ -57,7 +57,15 @@ export class SpiritController {
     }
   }
 
-  async customize(req: Request, res: Response, next: NextFunction) {
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await spiritService.deleteSpirit(req.params.id, req.user!.userId);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+async customize(req: Request, res: Response, next: NextFunction) {
     try {
       const data = customizeSpiritSchema.parse(req.body);
       const spirit = await spiritService.customizeSpirit(req.params.id, req.user!.userId, data);

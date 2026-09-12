@@ -53,3 +53,5 @@ coverage/
 apps/ai-engine/outputs/
 apps/ai-engine/models/
 apps/ai-engine/checkpoints/
+.vercel
+.env*

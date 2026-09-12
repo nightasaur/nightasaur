@@ -82,6 +82,44 @@ export class SpiritService {
     return prisma.spirit.update({where:{id:spiritId},data:{name:newName}});
   }
 
+  async deleteSpirit(spiritId: string, userId: string) {
+    // 檢查精靈是否存在且屬於該用戶
+    const spirit = await prisma.spirit.findFirst({
+      where: {
+        id: spiritId,
+        userId: userId,
+        isActive: true // 只刪除活躍的精靈
+      }
+    });
+
+    if (!spirit) {
+      throw Object.assign(new Error("精靈不存在或您沒有權限刪除"), { statusCode: 404 });
+    }
+
+    // 軟刪除：將 isActive 設為 false
+    const deletedSpirit = await prisma.spirit.update({
+      where: { id: spiritId },
+      data: {
+        isActive: false,
+        deletedAt: new Date()
+      }
+    });
+
+    // 記錄刪除操作
+    await gameService.trackAction(userId, "DELETE_SPIRIT", 1).catch(() => {});
+
+    return {
+      success: true,
+      message: "精靈已成功刪除",
+      spirit: {
+        id: deletedSpirit.id,
+        name: deletedSpirit.name,
+        element: deletedSpirit.element,
+        deletedAt: deletedSpirit.deletedAt
+      }
+    };
+}
+
   async customizeSpirit(spiritId:string,userId:string,data:{customization?:any;name?:string}) {
     const s = await prisma.spirit.findFirst({where:{id:spiritId,userId}});
     if (!s) throw Object.assign(new Error("Spirit not found"),{statusCode:404});
