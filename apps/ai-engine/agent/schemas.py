@@ -9,6 +9,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
+from agent.contexts import RuntimeContext
 from agent.execution_policy import ExecutionPolicy
 
 
@@ -30,6 +31,9 @@ class AgentInput:
     # v0.2：本次 run 覆寫用的 ExecutionPolicy；None 代表使用 AgentCore
     # 建構時設定的預設 policy（v0.2 預設為 AllowAllExecutionPolicy）。
     execution_policy: Optional[ExecutionPolicy] = None
+    # v0.3：可選的 runtime context，提供執行環境的描述性資訊。
+    # 這是 UNTRUSTED 描述性輸入，不是身份驗證或授權證明。
+    runtime_context: Optional[RuntimeContext] = None
 
 
 @dataclass

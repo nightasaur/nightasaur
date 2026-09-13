@@ -7,7 +7,19 @@
 - AgentCore：一次 agent run 的 orchestration 入口
 - AgentInput / AgentOutput：run() 的輸入輸出資料結構
 - build_default_agent_core()：組裝目前預設的 Ollama-backed AgentCore
+
+v0.3 新增：
+- capability：能力描述系統
+- contexts：運行時上下文資料結構
 """
+from agent.capability import Capability, CapabilitySet
+from agent.contexts import (
+    AgentIdentity,
+    DeviceContext,
+    ProviderContext,
+    ProviderDescriptor,
+    RuntimeContext,
+)
 from agent.core import DEFAULT_MAX_TOOL_ITERATIONS, AgentCore
 from agent.execution_policy import AllowAllExecutionPolicy
 from agent.memory.in_memory import EphemeralMemoryProvider
@@ -20,6 +32,14 @@ __all__ = [
     "AgentInput",
     "AgentOutput",
     "build_default_agent_core",
+    # v0.3 exports
+    "Capability",
+    "CapabilitySet",
+    "AgentIdentity",
+    "DeviceContext",
+    "ProviderContext",
+    "ProviderDescriptor",
+    "RuntimeContext",
 ]
 
 
