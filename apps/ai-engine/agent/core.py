@@ -226,8 +226,11 @@ class AgentCore:
         DENY，而不是讓整個 run() 崩潰 —— policy 邊界本身也必須是可控的。
         """
         try:
-            return policy.evaluate(
-                tool_call, spec, {"session_id": agent_input.session_id}
-            )
+            context = {"session_id": agent_input.session_id}
+            # v0.3: Add runtime_context to policy context
+            if agent_input.runtime_context is not None:
+                context["runtime_context"] = agent_input.runtime_context
+            
+            return policy.evaluate(tool_call, spec, context)
         except Exception:  # noqa: BLE001 - policy 邊界必須 fail-safe
             return ExecutionDecision.DENY
