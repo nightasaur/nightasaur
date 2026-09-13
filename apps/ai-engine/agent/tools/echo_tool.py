@@ -19,6 +19,13 @@ class EchoTool(Tool):
 
     name = "echo"
     description = "Echo back the given text. Demo tool used for contract testing."
+    parameters = {
+        "type": "object",
+        "properties": {
+            "text": {"type": "string", "description": "The text to echo back."},
+        },
+        "required": ["text"],
+    }
 
     async def run(self, **kwargs) -> Any:
         if "text" not in kwargs:
