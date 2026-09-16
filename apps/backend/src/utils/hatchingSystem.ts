@@ -25,6 +25,7 @@ export const HATCHING_SYSTEM_CONFIG = {
     "HUMIDITY_CHANGE",      // 濕度變化
     "INTERACTION",          // 玩家互動
     "TIME_PASSED",          // 時間流逝
+    "HATCHING_COMPLETE",    // hatching complete
     "SPECIAL_EVENT"         // 特殊事件
   ] as const,
   
