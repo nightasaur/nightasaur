@@ -39,6 +39,7 @@ model User {
   PlayerLocation        PlayerLocation?
   SocialPosts           SocialPost[]
   LocationVisits        LocationVisit[]
+  HatchingRecords       HatchingRecord[]
   ARCaptures            ARCapture[]
 
   @@map("users")
@@ -466,15 +467,21 @@ model SpiritPuzzleProgress {
 
 // HatchingRecord model for egg hatching records
 model HatchingRecord {
-  id            String    @id @default(cuid())
-  spiritId      String
-  startTime     DateTime
-  endTime       DateTime?
-  status        String
-  finalProgress Float?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  spirit        Spirit    @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  id                 String    @id @default(cuid())
+  spiritId           String
+  userId             String
+  startTime          DateTime
+  endTime            DateTime?
+  status             String
+  initialTemperature Float
+  initialHumidity    Float
+  finalTemperature   Float?
+  finalHumidity      Float?
+  finalProgress      Float?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  spirit             Spirit    @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("hatching_records")
 }
@@ -484,6 +491,10 @@ model HatchingInteraction {
   id              String   @id @default(cuid())
   spiritId        String
   interactionType String
+  progressBefore  Float
+  progressAfter   Float
+  temperature     Float
+  humidity        Float
   intensity       Float?   @default(1.0)
   createdAt       DateTime @default(now())
   spirit          Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
