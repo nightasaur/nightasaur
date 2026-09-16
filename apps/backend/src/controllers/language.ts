@@ -38,8 +38,7 @@ export class LanguageController {
       
       const result = await languageService.autoDetectLanguage(userId, acceptLanguage);
       res.json({ 
-        success: true, 
-        message: "語言已自動偵測",
+        success: true,
         ...result 
       });
     } catch (error: any) {
@@ -359,7 +358,7 @@ export class LanguageController {
       res.json({ 
         menu,
         currentPreference: preference,
-        lastUpdated: preference.updatedAt
+        lastUpdated: undefined
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
