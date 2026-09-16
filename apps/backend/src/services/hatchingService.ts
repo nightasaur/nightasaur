@@ -1,6 +1,6 @@
-import { 
-  HATCHING_SYSTEM_CONFIG, 
-  HatchingEvent, 
+import {
+  HATCHING_SYSTEM_CONFIG,
+  HatchingEvent,
   HatchingState,
   hatchingRequestSchema,
   hatchingInteractionSchema,
@@ -8,9 +8,17 @@ import {
 } from "../utils/hatchingSystem.js";
 import prisma from "../config/prisma.js";
 import { gameService } from "./game.js";
+import { randomUUID } from "node:crypto";
 
-// 互動效果配置
-const INTERACTION_EFFECTS = {
+// 互�??��?類�?
+type InteractionEffect = {
+  progress: number;
+  temperature?: number;
+  humidity?: number;
+};
+
+// 互�??��??�置
+const INTERACTION_EFFECTS: Record<string, InteractionEffect> = {
   TAP: { progress: 2, temperature: 0.5 },
   SHAKE: { progress: 3, temperature: 1.0 },
   WHISPER: { progress: 1, humidity: 1.0 },
@@ -18,7 +26,7 @@ const INTERACTION_EFFECTS = {
   STORY: { progress: 5, temperature: 0.2, humidity: 0.3 }
 };
 
-// 溫度效果配置
+// 溫度?��??�置
 const TEMPERATURE_EFFECTS = {
   optimal: { min: 25, max: 35, multiplier: 1.5 },
   good: { min: 20, max: 40, multiplier: 1.0 },
@@ -28,8 +36,8 @@ const TEMPERATURE_EFFECTS = {
 
 export class HatchingService {
   private hatchingStates = new Map<string, HatchingState>();
-  
-  // 開始孵化
+
+  // ?��?孵�?
   async startHatching(request: {
     spiritId: string;
     userId: string;
@@ -37,31 +45,31 @@ export class HatchingService {
     humidity?: number;
   }) {
     const { spiritId, userId, temperature = 30, humidity = 50 } = request;
-    
-    // 驗證精靈存在且處於蛋階段
+
+    // 驗�?精�?存在且�??��??�段
     const spirit = await prisma.spirit.findFirst({
-      where: { 
-        id: spiritId, 
+      where: {
+        id: spiritId,
         userId,
         stage: "EGG",
-        isActive: true 
+        isActive: true
       }
     });
-    
+
     if (!spirit) {
-      throw new Error("精靈不存在或不是蛋階段");
+      throw new Error("精�?不�??��?不是?��?�?);
     }
-    
-    // 檢查是否已經在孵化中
+
+    // 檢查?�否已�??�孵?�中
     if (this.hatchingStates.has(spiritId)) {
-      throw new Error("精靈已經在孵化中");
+      throw new Error("精�?已�??�孵?�中");
     }
-    
-    // 創建孵化狀態
+
+    // ?�建孵�??�??
     const startTime = new Date();
-    const estimatedHatchTime = new Date(startTime.getTime() + 
+    const estimatedHatchTime = new Date(startTime.getTime() +
       HATCHING_SYSTEM_CONFIG.CONDITIONS.HATCHING_TIME * 60 * 60 * 1000);
-    
+
     const state: HatchingState = {
       spiritId,
       stage: "EGG",
@@ -79,16 +87,16 @@ export class HatchingService {
         time: false
       }
     };
-    
-    // 保存狀態
+
+    // 保�??�??
     this.hatchingStates.set(spiritId, state);
-    
-    // 記錄開始事件
+
+    // 記�??��?事件
     this.addEvent(state, "TEMPERATURE_CHANGE", { temperature });
     this.addEvent(state, "HUMIDITY_CHANGE", { humidity });
     this.addEvent(state, "TIME_PASSED", { startTime });
-    
-    // 創建孵化記錄（如果模型存在）
+
+    // ?�建孵�?記�?（�??�模?��??��?
     try {
       await prisma.hatchingRecord.create({
         data: {
@@ -101,102 +109,102 @@ export class HatchingService {
         }
       });
     } catch (error) {
-      // 如果模型不存在，只記錄警告
+      // 如�?模�?不�??��??��??�警??
       console.warn("HatchingRecord model not available, skipping database record");
     }
-    
+
     return {
       success: true,
       state: this.getPublicState(state),
-      message: "孵化開始！保持適當的溫度和濕度，並經常互動。"
+      message: "孵�??��?！�??�適?��?溫度?��?度�?並�?常�??��?
     };
   }
-  
-  // 處理互動
+
+  // ?��?互�?
   async handleInteraction(request: {
     spiritId: string;
     userId: string;
-    interactionType: string;
+    interactionType: "TAP" | "SHAKE" | "WHISPER" | "SING" | "STORY";
     intensity?: number;
   }) {
     const { spiritId, userId, interactionType, intensity = 1 } = request;
-    
-    // 獲取孵化狀態
+
+    // ?��?孵�??�??
     const state = this.hatchingStates.get(spiritId);
     if (!state) {
-      throw new Error("精靈不在孵化中");
+      throw new Error("精�?不在孵�?�?);
     }
-    
-    // 驗證精靈所有權
+
+    // 驗�?精�??�?��?
     const spirit = await prisma.spirit.findFirst({
       where: { id: spiritId, userId }
     });
-    
+
     if (!spirit) {
-      throw new Error("精靈不存在或無權限");
+      throw new Error("精�?不�??��??��???);
     }
-    
-    // 獲取互動效果
+
+    // ?��?互�??��?
     const effect = INTERACTION_EFFECTS[interactionType as keyof typeof INTERACTION_EFFECTS];
     if (!effect) {
-      throw new Error("無效的互動類型");
+      throw new Error("?��??��??��???);
     }
-    
-    // 應用互動效果
+
+    // ?�用互�??��?
     const intensityMultiplier = Math.min(Math.max(intensity, 1), 10) / 5;
-    
-    // 增加進度
+
+    // 增�??�度
     const progressGain = effect.progress * intensityMultiplier;
     state.progress = Math.min(state.progress + progressGain, 100);
-    
-    // 調整環境
+
+    // 調整?��?
     if (effect.temperature) {
       state.temperature += effect.temperature * intensityMultiplier;
       state.temperature = this.clampTemperature(state.temperature);
       state.conditionsMet.temperature = this.checkTemperatureCondition(state.temperature);
     }
-    
+
     if (effect.humidity) {
       state.humidity += effect.humidity * intensityMultiplier;
       state.humidity = this.clampHumidity(state.humidity);
       state.conditionsMet.humidity = this.checkHumidityCondition(state.humidity);
     }
-    
-    // 增加互動計數
+
+    // 增�?互�?計數
     state.interactionCount++;
-    
-    // 檢查互動條件
+
+    // 檢查互�?條件
     if (state.interactionCount >= HATCHING_SYSTEM_CONFIG.CONDITIONS.INTERACTION_COUNT) {
       state.conditionsMet.interactions = true;
     }
-    
-    // 記錄互動事件
+
+    // 記�?互�?事件
     this.addEvent(state, "INTERACTION", {
       type: interactionType,
       intensity,
       progressGain,
       newProgress: state.progress
     });
-    
-    // 檢查時間條件
+
+    // 檢查?��?條件
     const timePassed = Date.now() - state.startTime.getTime();
     const requiredTime = HATCHING_SYSTEM_CONFIG.CONDITIONS.HATCHING_TIME * 60 * 60 * 1000;
-    
+
     if (timePassed >= requiredTime) {
       state.conditionsMet.time = true;
     }
-    
-    // 檢查是否可以孵化
+
+    // 檢查?�否?�以孵�?
     const canHatch = this.checkHatchingConditions(state);
-    
+
     if (canHatch && state.progress >= 100) {
       return await this.completeHatching(state, userId);
     }
-    
-    // 更新狀態
+
+    // ?�新?�??
     this.hatchingStates.set(spiritId, state);
-    
-    // 記錄互動（如果模型存在）
+
+    // 記�?互�?（�??�模?��??��?
     try {
       await prisma.hatchingInteraction.create({
         data: {
@@ -210,15 +218,15 @@ export class HatchingService {
         }
       });
     } catch (error) {
-      // 如果模型不存在，只記錄警告
+      // 如�?模�?不�??��??��??�警??
       console.warn("HatchingInteraction model not available, skipping database record");
     }
-    
-    // 如果滿足孵化條件，完成孵化
+
+    // 如�?滿足孵�?條件，�??�孵??
     if (canHatch) {
       return await this.completeHatching(state, userId);
     }
-    
+
     return {
       success: true,
       state: this.getPublicState(state),
@@ -228,20 +236,20 @@ export class HatchingService {
     };
   }
 
-  // 檢查孵化條件
+  // 檢查孵�?條件
   private checkHatchingConditions(state: HatchingState): boolean {
     return Object.values(state.conditionsMet).every(condition => condition === true);
   }
-  
-  // 完成孵化
+
+  // 完�?孵�?
   private async completeHatching(state: HatchingState, userId: string) {
-    // 更新精靈階段
+    // ?�新精�??�段
     await prisma.spirit.update({
       where: { id: state.spiritId },
       data: { stage: "JUVENILE" }
     });
 
-    // 更新孵化記錄（如果模型存在）
+    // ?�新孵�?記�?（�??�模?��??��?
     try {
       await prisma.hatchingRecord.updateMany({
         where: { spiritId: state.spiritId, status: "INCUBATING" },
@@ -253,31 +261,31 @@ export class HatchingService {
         }
       });
     } catch (error) {
-      // 如果模型不存在，只記錄警告
+      // 如�?模�?不�??��??��??�警??
       console.warn("HatchingRecord model not available, skipping database update");
     }
 
-    // 移除孵化狀態
+    // 移除孵�??�??
     this.hatchingStates.delete(state.spiritId);
 
-    // 記錄孵化事件
+    // 記�?孵�?事件
     this.addEvent(state, "HATCHING_COMPLETE", {
       hatchTime: new Date(),
       finalProgress: state.progress
     });
 
-    // 給予經驗值獎勵
-    await gameService.addExperience(userId, 100);
+    // 給�?經�??��???
+    await gameService.addXp(userId, 100);
 
     return {
       success: true,
       hatched: true,
-      message: "🎉 孵化成功！精靈已進化為幼年期！",
+      message: "?? 孵�??��?！精?�已?��??�幼年�?�?,
       experienceGained: 100
     };
   }
 
-  // 獲取公開狀態
+  // ?��??��??�??
   private getPublicState(state: HatchingState) {
     return {
       progress: state.progress,
@@ -301,29 +309,49 @@ export class HatchingService {
     return humidity >= 40 && humidity <= 60;
   }
 
-  // 限制溫度範圍
+  // ?�制溫度範�?
   private clampTemperature(temp: number): number {
     return Math.max(0, Math.min(50, temp));
   }
 
-  // 限制濕度範圍
+  // ?�制濕度範�?
   private clampHumidity(humidity: number): number {
     return Math.max(0, Math.min(100, humidity));
   }
 
-  // 獲取互動反饋
+  // ?��?互�??��?
   private getInteractionFeedback(interactionType: string, intensity: number): string {
     const feedback = {
-      TAP: "輕輕敲擊讓蛋殼產生共鳴...",
-      SHAKE: "搖動讓胚胎活動筋骨...",
-      WHISPER: "低語給予溫暖的鼓勵...",
-      SING: "歌唱創造和諧的振動...",
-      STORY: "講故事刺激大腦發育..."
+      TAP: "輕�??��?讓�?殼產?�共�?..",
+      SHAKE: "?��?讓�??�活?��?�?..",
+      WHISPER: "低�?給�?溫�??��???..",
+      SING: "歌唱?�造�?諧�??��?...",
+      STORY: "講�?事刺激大腦?�育..."
     };
-    return feedback[interactionType as keyof typeof feedback] || "互動有效果！";
+    return feedback[interactionType as keyof typeof feedback] || "互�??��??��?";
   }
 
-  // 獲取孵化狀態
+  // 添�?孵�?事件
+  private addEvent(
+    state: HatchingState,
+    eventType: HatchingEvent["eventType"],
+    data: HatchingEvent["data"],
+    significance = 1
+  ): HatchingEvent {
+    const event: HatchingEvent = {
+      id: randomUUID(),
+      spiritId: state.spiritId,
+      eventType,
+      data,
+      timestamp: new Date(),
+      significance
+    };
+
+    state.events.push(event);
+    return event;
+  }
+
+  // ?��?孵�??�??
   async getHatchingStatus(spiritId: string) {
     const state = this.hatchingStates.get(spiritId);
     if (!state) {
