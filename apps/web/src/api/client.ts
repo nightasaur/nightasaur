@@ -1,14 +1,14 @@
 import axios from "axios";
 
-// 根據環境設定 API 基礎 URL
+// 根據 Vite 環境設定 API 基礎 URL
 const getApiBaseUrl = () => {
   // 開發環境使用 localhost:3002
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     return 'http://localhost:3002/api';
   }
   
-  // 生產環境使用相對路徑或環境變數
-  return process.env.NEXT_PUBLIC_API_URL || '/api';
+  // 生產環境使用環境變數或相對路徑
+  return import.meta.env.VITE_API_URL || '/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -26,19 +26,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 響應攔截器 - 添加 fallback 支持
+// 響應攔截器
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // 如果請求超時或網絡錯誤
-    if (!error.response || error.code === 'ECONNABORTED') {
-      console.warn('API 連接失敗，前端將使用本地 fallback');
-      return Promise.reject({
-        isNetworkError: true,
-        message: "無法連接到伺服器",
-      });
-    }
-    
     // 處理未授權
     if (error.response?.status === 401) {
       localStorage.removeItem("nightasaur_token");
@@ -47,7 +38,7 @@ api.interceptors.response.use(
     
     return Promise.reject(error);
   }
-);
+);;
 
 // Auth API
 export const authAPI = {

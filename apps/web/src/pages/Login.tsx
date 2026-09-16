@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../api/client";
+import { SocialAuthButtons } from "../components/auth/SocialAuthButtons";
 
 export default function Login({ setUser }: { setUser: (u: any) => void }) {
   const nav = useNavigate();
@@ -25,8 +26,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
         setError("登入響應格式錯誤");
       }
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.response?.data?.error || "登入失敗");
+      setError(err.response?.data?.error || "登入失敗，請檢查您的憑證");
     } finally {
       setLoading(false);
     }
@@ -40,6 +40,17 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
 
         {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
 
+        {/* 社交登入 */}
+        <div className="mb-6">
+          <SocialAuthButtons disabled={true} showComingSoon={true} />
+        </div>
+
+        <div className="flex items-center justify-center mb-6">
+          <div className="h-px bg-white/10 flex-1"></div>
+          <span className="px-4 text-sm text-white/40">或</span>
+          <div className="h-px bg-white/10 flex-1"></div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-white/70 mb-2">Email</label>
@@ -50,6 +61,8 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
               required
               value={form.email} 
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              disabled={loading}
+              aria-label="Email address"
             />
           </div>
           
@@ -62,12 +75,15 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
               required
               value={form.password} 
               onChange={(e) => setForm({ ...form, password: e.target.value })}
+              disabled={loading}
+              aria-label="Password"
             />
             <button
               type="button"
               className="absolute right-3 top-9 transform -translate-y-1/2 text-white/50 hover:text-white/80 focus:outline-none text-sm"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
+              disabled={loading}
             >
               {showPassword ? "👁️" : "👁️‍🗨️"}
             </button>
@@ -77,6 +93,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg" 
             type="submit"
             disabled={loading}
+            aria-label={loading ? "登入中" : "登入"}
           >
             {loading ? (
               <>
@@ -93,12 +110,6 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
         </form>
         
         <div className="mt-8 space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="h-px bg-white/10 flex-1"></div>
-            <span className="px-4 text-sm text-white/40">或</span>
-            <div className="h-px bg-white/10 flex-1"></div>
-          </div>
-          
           <p className="text-center text-white/60">
             還沒有帳號？{" "}
             <Link to="/register" className="text-purple-400 hover:text-purple-300 font-medium">

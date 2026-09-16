@@ -26,43 +26,54 @@ export default function Navbar({ user, setUser }: NavbarProps) {
     <nav className="fixed top-0 w-full z-50 glass border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <span className="text-2xl">🌙</span>
+          <span className="text-2xl">??</span>
           <span className="text-xl font-black bg-gradient-to-r from-teal-300 to-cyan-200 bg-clip-text text-transparent">
             Nightasaur
           </span>
         </Link>
 
         <div className="flex items-center gap-4">
-          {/* 語言切換 */}
+          {/* IELTS Product Link - Always visible */}
+          <Link
+            to="/products/ielts-immersion"
+            className="text-yellow-300 hover:text-yellow-200 transition text-sm font-medium hidden md:block"
+          >
+            ?? IELTS Immersion
+          </Link>
+
+          {/* 語�??��? */}
           <div className="hidden md:block">
             <LanguageSwitcher compact={true} />
           </div>
-          
+
           {user ? (
             <>
               <Link to="/dashboard" className="text-white/70 hover:text-white transition text-sm">
-                儀表板
+                ?�表板
               </Link>
               <Link to="/academy" className="text-white/70 hover:text-white transition text-sm">
-                🦉 學院
+                ?? 學院
               </Link>
               <Link to="/assistant" className="text-white/70 hover:text-white transition text-sm">
-                🤖 AI 助手
+                ?? AI ?��?
               </Link>
               <Link to="/social" className="text-white/70 hover:text-white transition text-sm">
                 社群
               </Link>
+              <Link to="/account" className="text-white/70 hover:text-white transition text-sm">
+                帳戶
+              </Link>
               <Link to="/settings/language" className="text-white/70 hover:text-white transition text-sm">
-                語言設定
+                語�?設�?
               </Link>
               <Link to="/spirits/new" className="btn-primary text-sm py-2 px-4">
-                + 孵化精靈
+                + 孵�?精�?
               </Link>
               <button
                 onClick={handleLogout}
                 className="text-white/50 hover:text-white/80 transition text-sm"
               >
-                登出
+                ?�出
               </button>
               <span className="text-white/40">|</span>
               <span className="text-white/60 text-sm">{user.username}</span>
@@ -70,10 +81,10 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           ) : (
             <>
               <Link to="/login" className="text-white/70 hover:text-white transition">
-                登入
+                ?�入
               </Link>
               <Link to="/register" className="btn-primary text-sm py-2 px-4">
-                註冊
+                註�?
               </Link>
             </>
           )}
