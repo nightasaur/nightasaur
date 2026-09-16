@@ -1,28 +1,28 @@
 import { Router } from "express";
 import { puzzleController } from "../controllers/puzzle.js";
-import { authMiddleware } from "../middleware/auth.ts";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// æ‰€æœ‰è·¯ç”±éƒ½éœ€è¦èªè­‰
+// ?€?‰è·¯?±éƒ½?€è¦è?è­?
 router.use(authMiddleware);
 
-// ç²å–å¯ç”¨çš„ç›Šæ™ºé—œå¡
+// ?²å??¯ç”¨?„ç??ºé???
 router.get("/spirits/:spiritId/puzzles", puzzleController.getAvailablePuzzles);
 
-// ç²å–æ¯æ—¥ç›Šæ™º
+// ?²å?æ¯æ—¥?Šæ™º
 router.get("/daily", puzzleController.getDailyPuzzle);
 
-// å˜—è©¦è§£æ±ºç›Šæ™º
+// ?—è©¦è§?±º?Šæ™º
 router.post("/spirits/:spiritId/puzzles/:puzzleId/attempt", puzzleController.attemptPuzzle);
 
-// ç²å–ç²¾éˆå‡ç´šç‹€æ…‹
+// ?²å?ç²¾é??‡ç??€??
 router.get("/spirits/:spiritId/upgrades", puzzleController.getSpiritUpgrades);
 
-// ç²å–æ’è¡Œæ¦œ
+// ?²å??’è?æ¦?
 router.get("/leaderboard", puzzleController.getLeaderboard);
 
-// å‰µå»ºæ¸¬è©¦é—œå¡ï¼ˆç®¡ç†å“¡ç”¨ï¼‰
+// ?µå»ºæ¸¬è©¦?œå¡ï¼ˆç®¡?†å“¡?¨ï?
 router.post("/admin/test-puzzle", puzzleController.createTestPuzzle);
 
 export default router;

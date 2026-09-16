@@ -1,21 +1,21 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.ts";
+import { authMiddleware } from "../middleware/auth.js";
 import { imageGenService } from "../services/imagegen.js";
 
 const router = Router();
 router.use(authMiddleware);
 
-// POST /api/generate/spirit/:id - 手動觸發精靈圖像生成
+// POST /api/generate/spirit/:id - 觸發精靈圖像生成
 router.post("/spirit/:id", async (req, res, next) => {
   try {
     await imageGenService.generateSpiritImage(req.params.id);
-    res.json({ ok: true, message: "圖像生成任務已觸發" });
+    res.json({ ok: true, message: "生成任務已觸發" });
   } catch (err) {
     next(err);
   }
 });
 
-// POST /api/generate/process - 手動觸發批次處理
+// POST /api/generate/process - 觸發批次生成
 router.post("/process", async (_req, res, next) => {
   try {
     const result = await imageGenService.processPendingTasks();

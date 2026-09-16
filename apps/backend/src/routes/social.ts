@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { dialogueController, socialController, generationController } from "../controllers/social.js";
-import { authMiddleware, adminMiddleware } from "../middleware/auth.ts";
+import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 router.use(authMiddleware);

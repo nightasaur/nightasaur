@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { spiritsAPI, dialogueAPI } from "../api/client";
-import SpiritSprite from "../components/SpiritSprite";
+import SpiritSprite, { AnimState } from "../components/SpiritSprite";
 import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
 const STAGES = ["蛋","幼体","少年体","成年体","究极体","传说体"];
 const REQ: Record<string,number> = { "幼体":1,"少年体":5,"成年体":15,"究极体":30,"传说体":60 };

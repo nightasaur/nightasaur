@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Nightasaur Team
 
 import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { authAPI } from "./api/client";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -145,7 +146,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <Router>
+        <AppContent />
+      </Router>
     </LanguageProvider>
   );
 }
