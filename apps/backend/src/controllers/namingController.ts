@@ -83,7 +83,7 @@ export class NamingController {
       
       // 這裡可以從數據庫獲取歷史
       // 目前返回空數組，待實現
-      const history = [];
+      const history: unknown[] = [];
       
       res.json({
         success: true,
