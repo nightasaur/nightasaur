@@ -1,6 +1,7 @@
 import {
   HATCHING_SYSTEM_CONFIG,
   HatchingEvent,
+  HatchingInteraction,
   HatchingState,
   hatchingRequestSchema,
   hatchingInteractionSchema,
@@ -18,7 +19,7 @@ type InteractionEffect = {
 };
 
 // ‰∫íÂ??àÊ??çÁΩÆ
-const INTERACTION_EFFECTS: Record<string, InteractionEffect> = {
+const INTERACTION_EFFECTS: Record<HatchingInteraction["interactionType"], InteractionEffect> = {
   TAP: { progress: 2, temperature: 0.5 },
   SHAKE: { progress: 3, temperature: 1.0 },
   WHISPER: { progress: 1, humidity: 1.0 },
@@ -124,7 +125,7 @@ export class HatchingService {
   async handleInteraction(request: {
     spiritId: string;
     userId: string;
-    interactionType: "TAP" | "SHAKE" | "WHISPER" | "SING" | "STORY";
+    interactionType: HatchingInteraction["interactionType"];
     intensity?: number;
   }) {
     const { spiritId, userId, interactionType, intensity = 1 } = request;
@@ -145,7 +146,7 @@ export class HatchingService {
     }
 
     // ?≤Â?‰∫íÂ??àÊ?
-    const effect = INTERACTION_EFFECTS[interactionType as keyof typeof INTERACTION_EFFECTS];
+    const effect = INTERACTION_EFFECTS[interactionType];
     if (!effect) {
       throw new Error("?°Ê??Ñ‰??ïÈ???);
     }
