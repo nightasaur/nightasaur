@@ -204,11 +204,11 @@ return (
           <div className="flex justify-center gap-2 mt-4 flex-wrap">
             {[
               { key: "happy", icon: "😄", label: "開心" },
-              { key: "attack", icon: "⚔️", label: "攻擊" },
-              { key: "special", icon: "✨", label: "絕招" },
+              { key: "practice", icon: "💪", label: "練習" },
+              { key: "special", icon: "✨", label: "技能" },
               { key: "hurt", icon: "😵", label: "受傷" },
               { key: "sleep", icon: "😴", label: "睡覺" },
-              { key: "evolve", icon: "🌟", label: "進化" },
+              { key: "evolve", icon: "🌟", label: "成長" },
             ].map((a) => (
               <button key={a.key} onClick={() => setAnimState(a.key as any)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -261,7 +261,7 @@ return (
         </div>
         <div className="mt-8 space-y-3">
           {[
-            ["❤️ 生命力",7,20],["⚔️ 攻击力",5,18],["🛡️ 防御力",4,15],["💨 速度",6,12],["🔮 魔力",8,22]
+            ["❤️ 生命力",7,20],["💪 學習力",5,18],["🛡️ 專注力",4,15],["💨 反應力",6,12],["🔮 創造力",8,22]
           ].map(([label, m, b]) => {
             const v = s.level * (m as number) + (ci * (b as number));
             return (
@@ -289,7 +289,7 @@ return (
           <div className="mt-6 text-center">
             <Link to={`/spirits/${s.id}/battle`}
               className="btn-primary text-lg px-10 inline-block">
-              ⚔️ 開始對戰
+              🎯 學習挑戰
             </Link>
           </div>
         )}
