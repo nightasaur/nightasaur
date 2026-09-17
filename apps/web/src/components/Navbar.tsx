@@ -49,31 +49,31 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           {user ? (
             <>
               <Link to="/dashboard" className="text-white/70 hover:text-white transition text-sm">
-                儀表板
+                Dashboard
               </Link>
-              <Link to="/academy" className="text-white/70 hover:text-white transition text-sm">
-                🦉 學院
+              <Link to="/spirits" className="text-white/70 hover:text-white transition text-sm">
+                💞 Spirit
               </Link>
               <Link to="/assistant" className="text-white/70 hover:text-white transition text-sm">
-                🤖 AI 助手
+                🤖 Assistant
+              </Link>
+              <Link to="/academy" className="text-white/70 hover:text-white transition text-sm">
+                📚 Learning
               </Link>
               <Link to="/social" className="text-white/70 hover:text-white transition text-sm">
-                社群
+                🌍 Social
               </Link>
               <Link to="/account" className="text-white/70 hover:text-white transition text-sm">
-                帳戶
+                Account
               </Link>
               <Link to="/settings/language" className="text-white/70 hover:text-white transition text-sm">
-                語言設定
-              </Link>
-              <Link to="/spirits/new" className="btn-primary text-sm py-2 px-4">
-                + 孵化精靈
+                Language
               </Link>
               <button
                 onClick={handleLogout}
                 className="text-white/50 hover:text-white/80 transition text-sm"
               >
-                登出
+                Logout
               </button>
               <span className="text-white/40">|</span>
               <span className="text-white/60 text-sm">{user.username}</span>
@@ -81,10 +81,10 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           ) : (
             <>
               <Link to="/login" className="text-white/70 hover:text-white transition">
-                登入
+                Login
               </Link>
               <Link to="/register" className="btn-primary text-sm py-2 px-4">
-                註冊
+                Register
               </Link>
             </>
           )}
