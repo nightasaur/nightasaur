@@ -63,65 +63,64 @@ function AppContent() {
 
   return (
     <div className="min-h-screen relative z-10">
-      <SEO />
       <Navbar user={user} setUser={setUser} />
       <main className="pt-20">
         <Routes>
           <Route path="/" element={<><SEO title="Nightasaur — 陪你學習、創作與現實成長的 AI Spirit" canonical="https://www.nightasaur.com/" /><Home /></>} />
-          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
           <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
           <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />
           <Route
             path="/dashboard"
-            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Dashboard | Nightasaur" canonical="https://www.nightasaur.com/dashboard" /><Dashboard /></></ProtectedRoute>}
           />
           <Route
             path="/spirits"
-            element={<ProtectedRoute><Spirits /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="My Spirits | Nightasaur" canonical="https://www.nightasaur.com/spirits" /><Spirits /></></ProtectedRoute>}
           />
           <Route
             path="/spirits/new"
-            element={<ProtectedRoute><CreateSpirit /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Create New Spirit | Nightasaur" canonical="https://www.nightasaur.com/spirits/new" /><CreateSpirit /></></ProtectedRoute>}
           />
           <Route
             path="/spirits/:id"
-            element={<ProtectedRoute><SpiritDetail /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Spirit Details | Nightasaur" canonical="https://www.nightasaur.com/spirits" /><SpiritDetail /></></ProtectedRoute>}
           />
           <Route
             path="/social"
-            element={<ProtectedRoute><Social /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Community | Nightasaur" canonical="https://www.nightasaur.com/social" /><Social /></></ProtectedRoute>}
           />
           <Route
             path="/assistant"
-            element={<ProtectedRoute><Assistant /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="AI Assistant | Nightasaur" canonical="https://www.nightasaur.com/assistant" /><Assistant /></></ProtectedRoute>}
           />
           <Route
             path="/settings/language"
-            element={<ProtectedRoute><LanguageSettings /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Language Settings | Nightasaur" canonical="https://www.nightasaur.com/settings/language" /><LanguageSettings /></></ProtectedRoute>}
           />
 
           <Route
             path="/academy"
-            element={<ProtectedRoute><Academy /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Learning Academy | Nightasaur" canonical="https://www.nightasaur.com/academy" /><Academy /></></ProtectedRoute>}
           />
           <Route
             path="/academy/learn/:sessionId"
-            element={<ProtectedRoute><AcademyLearn /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Learning Session | Nightasaur" canonical="https://www.nightasaur.com/academy/learn" /><AcademyLearn /></></ProtectedRoute>}
           />
           <Route
             path="/academy/categories"
-            element={<ProtectedRoute><AcademyCategories /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Learning Categories | Nightasaur" canonical="https://www.nightasaur.com/academy/categories" /><AcademyCategories /></></ProtectedRoute>}
           />
           <Route
             path="/academy/category/:categoryId"
-            element={<ProtectedRoute><AcademyCategories /></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="Learning Category | Nightasaur" canonical="https://www.nightasaur.com/academy/categories" /><AcademyCategories /></></ProtectedRoute>}
           />
 
           {/* Front Office Routes */}
-          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><><SEO title="Account Settings | Nightasaur" canonical="https://www.nightasaur.com/account" /><AccountPage /></></ProtectedRoute>} />
           <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur Deep IELTS Immersion Experience — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
-          <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/receipts/preview" element={<ProtectedRoute><ReceiptPreviewPage /></ProtectedRoute>} />
+          <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><><SEO title="Checkout | Nightasaur" canonical="https://www.nightasaur.com/checkout/ielts-immersion" /><CheckoutPage /></></ProtectedRoute>} />
+          <Route path="/receipts/preview" element={<ProtectedRoute><><SEO title="Receipt Preview | Nightasaur" canonical="https://www.nightasaur.com/receipts/preview" /><ReceiptPreviewPage /></></ProtectedRoute>} />
         </Routes>
       </main>
     </div>
