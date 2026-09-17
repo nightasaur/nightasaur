@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { authAPI } from "../api/client";
 
 export default function Register({ setUser }: { setUser: (u: any) => void }) {
   const nav = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: "", username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const state = location.state as { returnTo?: string } | null;
+  const returnTo = state?.returnTo === '/academy/category/ielts' ? '/academy/category/ielts' : '/dashboard';
+  const isIeltsReturn = returnTo === '/academy/category/ielts';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +24,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
       if (res.data && res.data.token) {
         localStorage.setItem("nightasaur_token", res.data.token);
         setUser(res.data.user);
-        nav("/dashboard");
+        nav(returnTo);
       } else {
         setError("註冊響應格式錯誤");
       }
@@ -34,7 +39,12 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
     <div className="min-h-[80vh] flex items-center justify-center px-6 relative z-10">
       <div className="glass-card w-full max-w-md">
         <h2 className="text-3xl font-black text-center mb-2 neon-text">加入 Nightasaur 🌙</h2>
-        <p className="text-white/50 text-center mb-8">開始你的精靈冒險旅程</p>
+        <p className="text-white/50 text-center mb-3">建立帳號，開始你與 Spirit 的學習與成長歷程。</p>
+        {isIeltsReturn && (
+          <div className="bg-green-500/15 border border-green-500/30 text-green-200 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+            🎓 註冊完成後將直接進入 IELTS 陪伴學習 Early Access。
+          </div>
+        )}
 
         {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
 
@@ -57,7 +67,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
             <input
               className="input-field"
               type="text"
-              placeholder="選擇一個酷炫的名字"
+              placeholder="你的 Nightasaur 名稱"
               required
               minLength={3}
               maxLength={20}
@@ -94,23 +104,17 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
               </>
             ) : (
               <>
-                <span className="text-xl">🥚</span>
-                開始孵化！
+                <span className="text-xl">🌱</span>
+                {isIeltsReturn ? '建立帳號並開始 IELTS 學習' : '建立 Nightasaur 帳號'}
               </>
             )}
           </button>
         </form>
 
         <div className="mt-8 space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="h-px bg-white/10 flex-1"></div>
-            <span className="px-4 text-sm text-white/40">或</span>
-            <div className="h-px bg-white/10 flex-1"></div>
-          </div>
-
           <p className="text-center text-white/60">
             已經有帳號？{" "}
-            <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">
+            <Link to="/login" state={state || undefined} className="text-purple-400 hover:text-purple-300 font-medium">
               登入 →
             </Link>
           </p>
