@@ -40,10 +40,19 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
         const returnTo = state?.returnTo;
         nav(returnTo && allowedReturnToPaths.includes(returnTo) ? returnTo : "/dashboard");
       } else {
-        setError("登入響應格式錯誤");
+        setError("登入服務回傳格式異常，請稍後再試。");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "登入失敗，請檢查您的 Email 與密碼");
+      const status = err.response?.status;
+      const backendMessage = err.response?.data?.error || err.response?.data?.message;
+
+      if (!err.response) {
+        setError("登入服務目前無法連線，請稍後再試。");
+      } else if (status === 401) {
+        setError(backendMessage || "Email 或密碼錯誤");
+      } else {
+        setError(backendMessage || `登入服務錯誤${status ? ` (${status})` : ''}`);
+      }
     } finally {
       setLoading(false);
     }
