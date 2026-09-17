@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IELTS_IMMERSION_1M_AU, formatAUD } from '../../config/products';
+import { IELTS_IMMERSION_1M_AU, formatAUD, formatTWD } from '../../config/products';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,95 +31,59 @@ const CheckoutPage: React.FC = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="glass-card p-8">
-            <h1 className="text-3xl font-bold mb-8 text-center">Checkout Preview</h1>
-            
-            {/* Product Summary */}
+            <h1 className="text-3xl font-bold mb-3 text-center">30-Day Access Plan Preview</h1>
+            <p className="text-center text-white/55 mb-8">正式付款尚未開放；登入會員目前可直接使用 IELTS Early Access。</p>
+
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4">Product Summary</h2>
+              <h2 className="text-xl font-bold mb-4">Plan Summary</h2>
               <div className="bg-white/5 rounded-xl p-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
                   <div>
                     <h3 className="text-lg font-bold">{product.name.en}</h3>
                     <p className="text-white/70 text-sm">{product.name['zh-TW']}</p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{formatAUD(product.price)}</div>
-                    <div className="text-sm text-white/70">{product.currency}</div>
+                  <div className="md:text-right">
+                    <div className="text-2xl font-bold">{formatAUD(product.price)} AUD</div>
+                    <div className="text-lg text-white/75">約 {formatTWD(product.referencePriceTwd)} TWD</div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Quantity:</span>
-                    <span>1</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Duration:</span>
-                    <span>{product.accessDays} days</span>
-                  </div>
+                  <div className="flex justify-between"><span className="text-white/70">Duration:</span><span>{product.accessDays} days</span></div>
+                  <div className="flex justify-between"><span className="text-white/70">Current access:</span><span className="text-green-300">Authenticated Early Access</span></div>
+                  <div className="flex justify-between"><span className="text-white/70">Paid entitlement:</span><span className="text-yellow-300">Not activated</span></div>
                 </div>
               </div>
             </div>
 
-            {/* Payment Status */}
             <div className="mb-8">
               <h2 className="text-xl font-bold mb-4">Payment Status</h2>
               <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-yellow-400">⏳</span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-yellow-300">Payment Integration is Being Prepared</h3>
-                    <p className="text-sm text-yellow-200/70">Real payment processing is not yet available</p>
-                  </div>
+                <h3 className="font-bold text-yellow-300">Payment Integration is Being Prepared</h3>
+                <p className="text-sm text-yellow-200/70 mt-2">No payment, order, entitlement or official receipt will be created from this preview.</p>
+              </div>
+            </div>
+
+            <div className="mb-8 bg-white/5 rounded-xl p-6">
+              <div className="flex flex-col md:flex-row md:justify-between gap-4">
+                <div>
+                  <div className="text-lg font-bold">Future paid plan</div>
+                  <div className="text-sm text-white/70">Taxes and GST treatment, where applicable, will be confirmed before payment.</div>
+                </div>
+                <div className="md:text-right">
+                  <div className="text-3xl font-bold">{formatAUD(product.price)} AUD</div>
+                  <div className="text-sm text-white/55">參考：約 {formatTWD(product.referencePriceTwd)}</div>
                 </div>
               </div>
             </div>
 
-            {/* Total Amount */}
-            <div className="mb-8">
-              <div className="bg-white/5 rounded-xl p-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="text-lg font-bold">Total Amount</div>
-                    <div className="text-sm text-white/70">Taxes and GST treatment, where applicable, will be confirmed before payment.</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold">{formatAUD(product.price)}</div>
-                    <div className="text-sm text-white/70">{product.currency}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => navigate('/products/ielts-immersion')}
-                className="flex-1 px-6 py-4 border border-white/20 rounded-lg hover:bg-white/5 transition-colors text-center"
-              >
-                Back to Product
+              <button onClick={() => navigate('/academy/category/ielts')} className="flex-1 px-6 py-4 bg-green-600/20 border border-green-500/30 rounded-lg text-green-200 hover:bg-green-600/30">
+                直接開始 IELTS Early Access
               </button>
-              
-              <button
-                className="flex-1 px-6 py-4 bg-gray-600/50 border border-gray-600 rounded-lg text-gray-300 text-center cursor-not-allowed"
-                disabled
-              >
-                Complete Payment (Coming Soon)
+              <button onClick={() => navigate('/receipts/preview')} className="flex-1 px-6 py-4 border border-purple-500/30 bg-purple-500/10 rounded-lg hover:bg-purple-500/20">
+                查看收據格式
               </button>
-            </div>
-
-            {/* Important Notice */}
-            <div className="mt-8 pt-6 border-t border-white/10">
-              <div className="text-center text-sm text-white/50">
-                <p className="mb-2">
-                  This checkout preview is for demonstration purposes only.
-                </p>
-                <p>
-                  A real payment integration will be implemented in a future update.
-                </p>
-              </div>
             </div>
           </div>
         </div>
