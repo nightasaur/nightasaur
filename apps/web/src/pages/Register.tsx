@@ -21,10 +21,10 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
         setUser(res.data.user);
         nav("/dashboard");
       } else {
-        setError("註�??��??��??�誤");
+        setError("註冊響應格式錯誤");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data?.error || "註�?失�?，�?稍�??�試");
+      setError(err.response?.data?.message || err.response?.data?.error || "註冊失敗，請稍後再試");
     } finally {
       setLoading(false);
     }
@@ -33,8 +33,8 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6 relative z-10">
       <div className="glass-card w-full max-w-md">
-        <h2 className="text-3xl font-black text-center mb-2 neon-text">?�入 Nightasaur ??</h2>
-        <p className="text-white/50 text-center mb-8">?��?你�?精�??�險?��?</p>
+        <h2 className="text-3xl font-black text-center mb-2 neon-text">加入 Nightasaur 🌙</h2>
+        <p className="text-white/50 text-center mb-8">開始你的精靈冒險旅程</p>
 
         {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
 
@@ -53,11 +53,11 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">?�戶??/label>
+            <label className="block text-sm font-medium text-white/70 mb-2">用戶名</label>
             <input
               className="input-field"
               type="text"
-              placeholder="?��?一?�酷?��??��?"
+              placeholder="選擇一個酷炫的名字"
               required
               minLength={3}
               maxLength={20}
@@ -72,14 +72,14 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
             <input
               className="input-field"
               type="password"
-              placeholder="?��?8?��???
+              placeholder="至少8個字元"
               required
               minLength={8}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               disabled={loading}
             />
-            <p className="text-xs text-white/40 mt-1">建議使用大�?寫�?母、數字�?符�??��???/p>
+            <p className="text-xs text-white/40 mt-1">建議使用大小寫字母、數字和符號的組合</p>
           </div>
 
           <button
@@ -90,12 +90,12 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                註�?�?..
+                註冊中...
               </>
             ) : (
               <>
-                <span className="text-xl">??</span>
-                ?��?孵�?�?
+                <span className="text-xl">🥚</span>
+                開始孵化！
               </>
             )}
           </button>
@@ -104,14 +104,14 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
         <div className="mt-8 space-y-4">
           <div className="flex items-center justify-center">
             <div className="h-px bg-white/10 flex-1"></div>
-            <span className="px-4 text-sm text-white/40">??/span>
+            <span className="px-4 text-sm text-white/40">或</span>
             <div className="h-px bg-white/10 flex-1"></div>
           </div>
 
           <p className="text-center text-white/60">
-            已�??�帳?��?{" "}
+            已經有帳號？{" "}
             <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">
-              ?�入 ??
+              登入 →
             </Link>
           </p>
         </div>

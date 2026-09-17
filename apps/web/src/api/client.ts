@@ -38,7 +38,7 @@ api.interceptors.response.use(
     
     return Promise.reject(error);
   }
-);;
+);
 
 // Auth API
 export const authAPI = {
