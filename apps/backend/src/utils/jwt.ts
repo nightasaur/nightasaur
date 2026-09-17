@@ -8,11 +8,24 @@ export interface TokenPayload {
 }
 
 export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
-  });
+  const secret = config.jwt.secret;
+  const expiresIn = config.jwt.expiresIn;
+
+  if (!secret) {
+    throw new Error("JWT secret is not configured");
+  }
+
+  return jwt.sign(payload, secret, {
+    expiresIn,
+  } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, config.jwt.secret) as TokenPayload;
+  const secret = config.jwt.secret;
+
+  if (!secret) {
+    throw new Error("JWT secret is not configured");
+  }
+
+  return jwt.verify(token, secret) as TokenPayload;
 }

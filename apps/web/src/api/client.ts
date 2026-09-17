@@ -1,14 +1,14 @@
 import axios from "axios";
 
-// 根據環境設定 API 基礎 URL
+// 根據 Vite 環境設定 API 基礎 URL
 const getApiBaseUrl = () => {
   // 開發環境使用 localhost:3002
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     return 'http://localhost:3002/api';
   }
   
-  // 生產環境使用相對路徑或環境變數
-  return process.env.NEXT_PUBLIC_API_URL || '/api';
+  // 生產環境使用環境變數或相對路徑
+  return import.meta.env.VITE_API_URL || '/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -26,19 +26,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 響應攔截器 - 添加 fallback 支持
+// 響應攔截器
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // 如果請求超時或網絡錯誤
-    if (!error.response || error.code === 'ECONNABORTED') {
-      console.warn('API 連接失敗，前端將使用本地 fallback');
-      return Promise.reject({
-        isNetworkError: true,
-        message: "無法連接到伺服器",
-      });
-    }
-    
     // 處理未授權
     if (error.response?.status === 401) {
       localStorage.removeItem("nightasaur_token");
@@ -104,6 +95,7 @@ export const battleAPI = {
     api.post("/battle/action", { player, enemy, action }),
 };
 
+// Language API
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
   updatePreference: (data: any) => api.patch("/language/preference", data),
@@ -116,4 +108,39 @@ export const languageAPI = {
     api.get("/language/interface-translations", { params: { language } }),
   getSettingsMenu: () => api.get("/language/settings-menu"),
   resetSettings: () => api.post("/language/reset"),
+};
+
+// User API
+export const userAPI = {
+  // 註冊
+  register: async (userData: { email: string; username: string; password: string }) => {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  },
+
+  // 登入
+  login: async (credentials: { email: string; password: string }) => {
+    const response = await api.post('/auth/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('nightasaur_token', response.data.token);
+    }
+    return response.data;
+  },
+
+  // 獲取當前用戶信息
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  // 更新用戶信息
+  updateProfile: async (userData: { username?: string; avatarUrl?: string; bio?: string }) => {
+    const response = await api.put('/auth/profile', userData);
+    return response.data;
+  },
+
+  // 登出
+  logout: () => {
+    localStorage.removeItem('nightasaur_token');
+  },
 };

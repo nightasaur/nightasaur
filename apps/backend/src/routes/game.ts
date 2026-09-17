@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.ts";
+import { authMiddleware } from "../middleware/auth.js";
 import { getQuests, trackAction, getAchievements, getInventory, claimQuest, completeQuest, useItem } from "../controllers/game.js";
 
 const router = Router();

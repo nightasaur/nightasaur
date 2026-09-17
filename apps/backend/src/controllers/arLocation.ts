@@ -134,8 +134,8 @@ export class ARLocationController {
         userId,
         spiritId,
         locationId,
-        latitude,
-        longitude,
+        parseFloat(latitude as string),
+        parseFloat(longitude as string),
         arData,
         captureTime,
         accuracy

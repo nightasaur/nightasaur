@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { puzzleService } from "../services/puzzle.js";
+import prisma from "../config/prisma.js";
 
 export class PuzzleController {
   // 獲取可用的益智關卡

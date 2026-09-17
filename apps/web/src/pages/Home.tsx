@@ -31,51 +31,82 @@ export default function Home() {
       </h1>
 
       <p className="text-xl md:text-2xl text-white/60 mb-2 max-w-2xl">
-        你的 AI 數位精靈夥伴
+        讓 AI Spirit 陪你在真實世界一起成長。
       </p>
       <p className="text-lg text-white/40 mb-10 max-w-xl">
-        每人註冊即可生成一隻專屬 AI 精靈 🐉
-        像數碼寶貝一樣成長進化，陪你對話冒險
+        從學習、創作、職業技能到日常工作，
+        Spirit 會記住你的歷程、理解你的習慣，
+        並隨著你們共同完成的真實任務逐步成長。
       </p>
 
-      {/* 奈奈引導語 */}
-      <div className="night-night-guide mb-10 max-w-xl">
-        <div className="flex items-center gap-4">
-          <div className="night-night-avatar">
-            <span className="text-white">🌌</span>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold gradient-text mb-1">Night Night (奈奈)</h3>
-            <p className="text-sm text-white/70">你的冒險嚮導</p>
-          </div>
-        </div>
-        
-        <div className="night-night-speech mt-4">
-          <p className="text-white/90">
-            歡迎來到 Nightasaur 的奇幻世界！<br/>
-            我是奈奈，讓我帶你探索這個充滿魔法與 AI 精靈的夜間冒險！
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-4 justify-center">
+      {/* 主要行動按鈕 */}
+      <div className="flex flex-wrap gap-4 justify-center mb-12">
         {token ? (
           <Link to="/dashboard" className="btn-primary text-lg py-4 px-8 animate-pulse">
-            進入我的精靈世界 ✨
+            進入我的 Spirit 世界 ✨
           </Link>
         ) : (
           <>
             <Link to="/register" className="btn-primary text-lg py-4 px-8">
-              開始孵化你的精靈 🥚
+              建立我的 Spirit 🥚
             </Link>
             <Link
-              to="/login"
+              to="/products/ielts-immersion"
               className="btn-secondary text-lg py-4 px-8"
             >
-              我已經有精靈了
+              探索 IELTS 深度沉浸體驗 🎓
             </Link>
           </>
         )}
+      </div>
+
+      {/* 四大產品支柱 */}
+      <div className="mb-16 max-w-4xl w-full">
+        <h2 className="text-2xl font-bold mb-8 gradient-text">Nightasaur 核心支柱</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="glass-card text-center hover:scale-105 transition-transform duration-300">
+            <div className="text-5xl mb-4">🤖</div>
+            <h3 className="text-lg font-bold mb-2">Agent — 能力</h3>
+            <p className="text-white/50 text-sm">AI 驅動的學習與創作能力</p>
+          </div>
+          <div className="glass-card text-center hover:scale-105 transition-transform duration-300">
+            <div className="text-5xl mb-4">💞</div>
+            <h3 className="text-lg font-bold mb-2">Spirit — 關係</h3>
+            <p className="text-white/50 text-sm">專屬於你的成長夥伴關係</p>
+          </div>
+          <div className="glass-card text-center hover:scale-105 transition-transform duration-300">
+            <div className="text-5xl mb-4">📚</div>
+            <h3 className="text-lg font-bold mb-2">Learning & Profession — 現實能力</h3>
+            <p className="text-white/50 text-sm">真實世界的學習與職業技能</p>
+          </div>
+          <div className="glass-card text-center hover:scale-105 transition-transform duration-300">
+            <div className="text-5xl mb-4">🌍</div>
+            <h3 className="text-lg font-bold mb-2">Social — 世界</h3>
+            <p className="text-white/50 text-sm">與社群共同成長的世界</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 成長循環 */}
+      <div className="mb-16 max-w-4xl w-full">
+        <h2 className="text-2xl font-bold mb-8 gradient-text">Human × Spirit 成長循環</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[
+            { icon: "📖", label: "學習", color: "bg-blue-500/20" },
+            { icon: "💪", label: "練習", color: "bg-green-500/20" },
+            { icon: "🤝", label: "協作", color: "bg-purple-500/20" },
+            { icon: "✨", label: "創作", color: "bg-yellow-500/20" },
+            { icon: "🌐", label: "分享", color: "bg-pink-500/20" },
+            { icon: "📈", label: "成長", color: "bg-teal-500/20" },
+          ].map((item, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <div className={`w-16 h-16 rounded-full ${item.color} flex items-center justify-center mb-2`}>
+                <span className="text-2xl">{item.icon}</span>
+              </div>
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 語言系統介紹卡片 */}
@@ -83,7 +114,7 @@ export default function Home() {
         <div className="glass-card border border-purple-500/30">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="night-night-avatar">
+              <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
                 <span className="text-xl">🌐</span>
               </div>
               <div className="text-left">
@@ -114,37 +145,8 @@ export default function Home() {
           </div>
           
           <p className="text-sm text-white/40 mt-4 text-center">
-            語言設定會自動保存，並在整個遊戲中生效
+            語言設定會自動保存，並在整個應用中生效
           </p>
-        </div>
-      </div>
-
-      {/* 特性 */}
-      <div className="grid md:grid-cols-3 gap-6 mt-20 max-w-4xl w-full">
-        {[
-          { icon: "🥚", title: "AI 生成專屬精靈", desc: "選擇屬性與性格，AI 為你創造獨一無二的精靈" },
-          { icon: "🦎", title: "5 階段進化養成", desc: "從蛋到傳說體，互動越多進化越快" },
-          { icon: "💬", title: "陪伴你的精靈對話", desc: "精靈記得住你，用繁體中文跟你聊天冒險，還能語音通話" },
-        ].map((f, i) => (
-          <div key={i} className="glass-card text-center hover:scale-105 transition-transform duration-300">
-            <div className="text-5xl mb-4">{f.icon}</div>
-            <h3 className="text-lg font-bold mb-2 gradient-text">{f.title}</h3>
-            <p className="text-white/50 text-sm">{f.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* 屬性展示 */}
-      <div className="mt-16 mb-10">
-        <p className="text-white/30 text-sm mb-4">十大元素屬性</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          {["🔥 火", "💧 水", "✨ 光", "🌑 暗", "⭐ 星", "🦊 幻", "🌙 月", "🌿 自然", "⚡ 雷", "❄️ 冰"].map(
-            (el, i) => (
-              <span key={i} className="glass px-4 py-2 rounded-full text-sm text-white/60 hover:bg-purple-500/20 transition-colors">
-                {el}
-              </span>
-            )
-          )}
         </div>
       </div>
 
@@ -155,19 +157,19 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 rounded-lg p-3">
               <p className="text-sm font-medium text-white/80 mb-1">PWA 支援</p>
-              <p className="text-xs text-white/50">可安裝到桌面，離線使用</p>
+              <p className="text-xs text-white/50">可安裝到桌面，行動體驗</p>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
               <p className="text-sm font-medium text-white/80 mb-1">夜間主題</p>
               <p className="text-xs text-white/50">沉浸式深色設計，保護眼睛</p>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-sm font-medium text-white/80 mb-1">離線模式</p>
-              <p className="text-xs text-white/50">網絡異常時自動切換本地模式</p>
-            </div>
-            <div className="bg-white/5 rounded-lg p-3">
               <p className="text-sm font-medium text-white/80 mb-1">響應式設計</p>
               <p className="text-xs text-white/50">支援所有裝置，完美適配</p>
+            </div>
+            <div className="bg-white/5 rounded-lg p-3">
+              <p className="text-sm font-medium text-white/80 mb-1">即時同步</p>
+              <p className="text-xs text-white/50">跨裝置同步學習進度</p>
             </div>
           </div>
         </div>
@@ -175,8 +177,8 @@ export default function Home() {
 
       {/* 頁尾 */}
       <div className="mt-12 text-white/30 text-sm">
-        <p>© 2024 Nightasaur. All rights reserved.</p>
-        <p className="mt-1 text-xs">一個關於夢想、AI 與奇幻冒險的專案</p>
+        <p>© 2026 Nightasaur. All rights reserved.</p>
+        <p className="mt-1 text-xs">AI Spirit for Learning, Creation and Real-World Growth</p>
       </div>
     </div>
   );

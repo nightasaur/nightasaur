@@ -29,7 +29,8 @@ export class ARLocationService {
         accuracy,
         altitude,
         speed,
-        heading
+        heading,
+        lastUpdate: new Date()
       }
     });
     
@@ -53,7 +54,7 @@ export class ARLocationService {
     const allSpawns = await prisma.locationSpawn.findMany({
       where: {
         OR: [
-          { activeSpawn: { not: null } },
+          { activeSpawn: { not: "" } },
           { spawnStartTime: { lte: new Date() } },
           { spawnEndTime: { gte: new Date() } }
         ]
@@ -72,7 +73,7 @@ export class ARLocationService {
     }).map(spawn => ({
       ...spawn,
       availableSpirits: JSON.parse(spawn.availableSpirits),
-      activeSpawn: spawn.activeSpawn ? JSON.parse(spawn.activeSpawn) : null,
+      activeSpawn: spawn.activeSpawn && spawn.activeSpawn !== "" ? JSON.parse(spawn.activeSpawn) : null,
       distance: this.calculateDistance(latitude, longitude, spawn.latitude, spawn.longitude)
     }));
   }
@@ -154,7 +155,7 @@ export class ARLocationService {
     let foundSpirit = null;
     let spiritId = null;
     
-    if (location.activeSpawn) {
+    if (location.activeSpawn && location.activeSpawn !== "") {
       const activeSpawn = JSON.parse(location.activeSpawn);
       const spawnChance = location.spawnRate * (Math.random() * 0.3 + 0.85);
       
@@ -177,8 +178,7 @@ export class ARLocationService {
             level: 1,
             experience: 0,
             stage: "HATCHLING",
-            isActive: false,
-            source: "AR_CAPTURE"
+            isActive: false
           }
         });
         
@@ -188,7 +188,7 @@ export class ARLocationService {
         // 清空當前生成
         await prisma.locationSpawn.update({
           where: { id: locationId },
-          data: { activeSpawn: null }
+          data: { activeSpawn: "" }
         });
       }
     }
@@ -198,9 +198,9 @@ export class ARLocationService {
       data: {
         userId,
         locationId,
-        distance,
         spiritFound,
-        spiritId
+        spiritId,
+        visitedAt: new Date()
       },
       include: {
         spirit: true,
@@ -211,18 +211,14 @@ export class ARLocationService {
     // 更新地點統計
     await prisma.locationSpawn.update({
       where: { id: locationId },
-      data: {
-        totalVisits: { increment: 1 },
-        totalSpawns: spiritFound ? { increment: 1 } : undefined,
-        lastSpawnTime: spiritFound ? new Date() : undefined
-      }
+      data: {}
     });
     
     return {
       visit,
       spiritFound,
       foundSpirit: spiritFound ? foundSpirit : null,
-      cooldownRemaining: cooldownHours > 0 ? cooldownHours : 0
+      cooldownRemaining: location.cooldownHours > 0 ? location.cooldownHours : 0
     };
   }
   
@@ -270,7 +266,7 @@ export class ARLocationService {
     const itemsFound = this.generateARCaptureItems(accuracy);
     
     // 記錄 AR 捕捉
-    const capture = await prisma.ARCapture.create({
+    const capture = await prisma.aRCapture.create({
       data: {
         userId,
         spiritId,
@@ -324,7 +320,7 @@ export class ARLocationService {
     accuracy: number, 
     rarity: string
   ): number {
-    const rarityMultiplier = {
+    const rarityMultiplier: Record<string, number> = {
       COMMON: 1,
       UNCOMMON: 1.5,
       RARE: 2,
@@ -521,8 +517,8 @@ export class ARLocationService {
   }
   
   // 根據地點類型獲取精靈
-  private getSpiritsByLocationType(locationType: string): Array<any> {
-    const spiritsByType = {
+  private getSpiritsByLocationType(locationType: string): Array<{name: string, species: string, element: string}> {
+    const spiritsByType: Record<string, Array<{name: string, species: string, element: string}>> = {
       SHOPPING: [
         { name: "閃亮寶石獸", species: "Crystal", element: "✨" },
         { name: "金錢鼠", species: "Gold", element: "💰" },
@@ -571,7 +567,7 @@ export class ARLocationService {
       include: { location: true, spirit: true }
     });
     
-    const captures = await prisma.ARCapture.findMany({
+    const captures = await prisma.aRCapture.findMany({
       where: { userId },
       include: { location: true, spirit: true }
     });
@@ -584,7 +580,7 @@ export class ARLocationService {
       uniqueLocations: uniqueLocations.length,
       spiritsFound,
       totalCaptures: captures.length,
-      totalXPEarned: captures.reduce((sum, c) => sum + c.xpEarned, 0),
+      totalXPEarned: captures.reduce((sum: number, c) => sum + c.xpEarned, 0),
       recentVisits: visits.slice(0, 10),
       recentCaptures: captures.slice(0, 10)
     };

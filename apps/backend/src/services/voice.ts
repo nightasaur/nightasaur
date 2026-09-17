@@ -1,12 +1,11 @@
 import { WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
-import { MediaStream } from "worker_threads";
 
 interface VoiceSession {
   id: string;
   participants: Set<string>;
   connections: Map<string, WebSocket>;
-  mediaStream?: MediaStream;
+  mediaStream?: any; // 使用 any 類型避免導入問題
 }
 
 export class VoiceService {
@@ -32,13 +31,13 @@ export class VoiceService {
     session.participants.add(userId);
     session.connections.set(userId, ws);
     
-    // ?�知?�?��??�者新?�員?�入
+    // 通知所有參與者新成員加入
     this.broadcast(sessionId, {
       type: "user_joined",
       userId
     });
     
-    // ?�送現?��??�給?�用??
+    // 發送現有用戶給新用戶
     ws.send(JSON.stringify({
       type: "current_users",
       users: Array.from(session.participants)
@@ -52,13 +51,13 @@ export class VoiceService {
     session.participants.delete(userId);
     session.connections.delete(userId);
     
-    // ?�知?�?��??�者�??�離??
+    // ?�知?�?��??�者�??�離??
     this.broadcast(sessionId, {
       type: "user_left",
       userId
     });
     
-    // 如�?沒�??�員，�??��?�?
+    // 如�?沒�??�員，�??��?�?
     if (session.participants.size === 0) {
       this.sessions.delete(sessionId);
     }

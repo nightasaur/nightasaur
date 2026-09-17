@@ -1,13 +1,26 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { authAPI } from "../api/client";
+import { SocialAuthButtons } from "../components/auth/SocialAuthButtons";
 
 export default function Login({ setUser }: { setUser: (u: any) => void }) {
   const nav = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // 安全的重定向允許列表
+  const allowedReturnToPaths = [
+    '/dashboard',
+    '/checkout/ielts-immersion',
+    '/spirits',
+    '/account',
+    '/assistant',
+    '/social',
+    '/academy'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,13 +33,21 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
       if (res.data && res.data.user) {
         localStorage.setItem("nightasaur_token", res.data.token);
         setUser(res.data.user);
-        nav("/dashboard");
+        
+        // 處理安全重定向
+        const state = location.state as { returnTo?: string };
+        const returnTo = state?.returnTo;
+        
+        if (returnTo && allowedReturnToPaths.includes(returnTo)) {
+          nav(returnTo);
+        } else {
+          nav("/dashboard");
+        }
       } else {
         setError("登入響應格式錯誤");
       }
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.response?.data?.error || "登入失敗");
+      setError(err.response?.data?.error || "登入失敗，請檢查您的憑證");
     } finally {
       setLoading(false);
     }
@@ -36,9 +57,20 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
     <div className="min-h-[80vh] flex items-center justify-center px-6 relative z-10">
       <div className="glass-card w-full max-w-md">
         <h2 className="text-3xl font-black text-center mb-2 neon-text">歡迎回來 🌙</h2>
-        <p className="text-white/50 text-center mb-8">你的精靈在等你！</p>
+        <p className="text-white/50 text-center mb-8">你的 Spirit 在等你！</p>
 
         {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
+
+        {/* 社交登入 */}
+        <div className="mb-6">
+          <SocialAuthButtons disabled={true} showComingSoon={true} />
+        </div>
+
+        <div className="flex items-center justify-center mb-6">
+          <div className="h-px bg-white/10 flex-1"></div>
+          <span className="px-4 text-sm text-white/40">或</span>
+          <div className="h-px bg-white/10 flex-1"></div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -50,6 +82,8 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
               required
               value={form.email} 
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              disabled={loading}
+              aria-label="Email address"
             />
           </div>
           
@@ -62,12 +96,15 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
               required
               value={form.password} 
               onChange={(e) => setForm({ ...form, password: e.target.value })}
+              disabled={loading}
+              aria-label="Password"
             />
             <button
               type="button"
               className="absolute right-3 top-9 transform -translate-y-1/2 text-white/50 hover:text-white/80 focus:outline-none text-sm"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
+              disabled={loading}
             >
               {showPassword ? "👁️" : "👁️‍🗨️"}
             </button>
@@ -77,6 +114,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg" 
             type="submit"
             disabled={loading}
+            aria-label={loading ? "登入中" : "登入"}
           >
             {loading ? (
               <>
@@ -86,19 +124,13 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             ) : (
               <>
                 <span className="text-xl">🔑</span>
-                進入冒險
+                進入 Spirit 世界
               </>
             )}
           </button>
         </form>
         
         <div className="mt-8 space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="h-px bg-white/10 flex-1"></div>
-            <span className="px-4 text-sm text-white/40">或</span>
-            <div className="h-px bg-white/10 flex-1"></div>
-          </div>
-          
           <p className="text-center text-white/60">
             還沒有帳號？{" "}
             <Link to="/register" className="text-purple-400 hover:text-purple-300 font-medium">
