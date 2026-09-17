@@ -1,14 +1,13 @@
 import axios from "axios";
 
-// 根據 Vite 環境設定 API 基礎 URL
+// Production always uses the same-origin /api proxy so the browser does not depend
+// on a stale VITE_API_URL or cross-origin CORS configuration.
 const getApiBaseUrl = () => {
-  // 開發環境使用 localhost:3002
   if (import.meta.env.DEV) {
-    return 'http://localhost:3002/api';
+    return import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
   }
-  
-  // 生產環境使用環境變數或相對路徑
-  return import.meta.env.VITE_API_URL || '/api';
+
+  return '/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -19,28 +18,24 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Token 攔截器
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("nightasaur_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// 響應攔截器
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // 處理未授權
     if (error.response?.status === 401) {
       localStorage.removeItem("nightasaur_token");
       window.location.href = "/login";
     }
-    
+
     return Promise.reject(error);
   }
 );
 
-// Auth API
 export const authAPI = {
   register: (data: { email: string; username: string; password: string }) =>
     api.post("/auth/register", data),
@@ -50,7 +45,6 @@ export const authAPI = {
   me: () => api.get("/auth/me"),
 };
 
-// Spirits API
 export const spiritsAPI = {
   create: (data: { name: string; element: string; personality?: string; appearance?: string }) =>
     api.post("/spirits", data),
@@ -59,17 +53,15 @@ export const spiritsAPI = {
   evolve: (id: string) => api.post(`/spirits/${id}/evolve`),
   rename: (id: string, name: string) => api.patch(`/spirits/${id}/rename`, { name }),
   delete: (id: string) => api.delete(`/spirits/${id}`),
-  updateCustomization: (id: string, customization: any) => 
+  updateCustomization: (id: string, customization: any) =>
     api.patch(`/spirits/${id}/customization`, { customization }),
 };
 
-// Dialogue API
 export const dialogueAPI = {
   chat: (spiritId: string, message: string) =>
     api.post("/dialogue", { spiritId, message }),
 };
 
-// Social API
 export const socialAPI = {
   createPost: (data: any) => api.post("/social/posts", data),
   publishPost: (id: string) => api.post(`/social/posts/${id}/publish`),
@@ -77,7 +69,6 @@ export const socialAPI = {
   getAllPosts: () => api.get("/social/posts/admin/posts"),
 };
 
-// Assistant API
 export const assistantAPI = {
   chat: (message: string, history: { role: string; content: string }[] = []) =>
     api.post("/assistant/chat", { message, history }),
@@ -95,12 +86,11 @@ export const battleAPI = {
     api.post("/battle/action", { player, enemy, action }),
 };
 
-// Language API
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
   updatePreference: (data: any) => api.patch("/language/preference", data),
   autoDetect: () => api.post("/language/auto-detect"),
-  getTranslation: (module: string, key: string, language?: string) => 
+  getTranslation: (module: string, key: string, language?: string) =>
     api.get(`/language/translation/${module}/${key}`, { params: { language } }),
   getBatchTranslations: (module: string, keys: string[], language?: string) =>
     api.post(`/language/translations/${module}/batch`, { keys, language }),
@@ -110,15 +100,12 @@ export const languageAPI = {
   resetSettings: () => api.post("/language/reset"),
 };
 
-// User API
 export const userAPI = {
-  // 註冊
   register: async (userData: { email: string; username: string; password: string }) => {
     const response = await api.post('/auth/register', userData);
     return response.data;
   },
 
-  // 登入
   login: async (credentials: { email: string; password: string }) => {
     const response = await api.post('/auth/login', credentials);
     if (response.data.token) {
@@ -127,19 +114,16 @@ export const userAPI = {
     return response.data;
   },
 
-  // 獲取當前用戶信息
   getCurrentUser: async () => {
     const response = await api.get('/auth/me');
     return response.data;
   },
 
-  // 更新用戶信息
   updateProfile: async (userData: { username?: string; avatarUrl?: string; bio?: string }) => {
     const response = await api.put('/auth/profile', userData);
     return response.data;
   },
 
-  // 登出
   logout: () => {
     localStorage.removeItem('nightasaur_token');
   },
