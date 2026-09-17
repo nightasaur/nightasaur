@@ -1,14 +1,26 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { authAPI } from "../api/client";
 import { SocialAuthButtons } from "../components/auth/SocialAuthButtons";
 
 export default function Login({ setUser }: { setUser: (u: any) => void }) {
   const nav = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // 安全的重定向允許列表
+  const allowedReturnToPaths = [
+    '/dashboard',
+    '/checkout/ielts-immersion',
+    '/spirits',
+    '/account',
+    '/assistant',
+    '/social',
+    '/academy'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +33,16 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
       if (res.data && res.data.user) {
         localStorage.setItem("nightasaur_token", res.data.token);
         setUser(res.data.user);
-        nav("/dashboard");
+        
+        // 處理安全重定向
+        const state = location.state as { returnTo?: string };
+        const returnTo = state?.returnTo;
+        
+        if (returnTo && allowedReturnToPaths.some(path => returnTo.startsWith(path))) {
+          nav(returnTo);
+        } else {
+          nav("/dashboard");
+        }
       } else {
         setError("登入響應格式錯誤");
       }
@@ -36,7 +57,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
     <div className="min-h-[80vh] flex items-center justify-center px-6 relative z-10">
       <div className="glass-card w-full max-w-md">
         <h2 className="text-3xl font-black text-center mb-2 neon-text">歡迎回來 🌙</h2>
-        <p className="text-white/50 text-center mb-8">你的精靈在等你！</p>
+        <p className="text-white/50 text-center mb-8">你的 Spirit 在等你！</p>
 
         {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
 
@@ -103,7 +124,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             ) : (
               <>
                 <span className="text-xl">🔑</span>
-                進入冒險
+                進入 Spirit 世界
               </>
             )}
           </button>
