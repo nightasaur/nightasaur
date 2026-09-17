@@ -21,6 +21,7 @@ import AcademyLearn from "./pages/AcademyLearn";
 import LanguageSettings from "./pages/LanguageSettings";
 import AcademyCategories from "./pages/AcademyCategories";
 import IeltsLearningHub from "./pages/IeltsLearningHub";
+import IeltsAssessment from "./pages/IeltsAssessment";
 import Assistant from "./pages/Assistant";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import AccountPage from "./pages/Account";
@@ -113,6 +114,10 @@ function AppContent() {
           <Route
             path="/academy/category/ielts"
             element={<ProtectedRoute><><SEO title="IELTS Companion Learning | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts" /><IeltsLearningHub /></></ProtectedRoute>}
+          />
+          <Route
+            path="/academy/category/ielts/assessment"
+            element={<ProtectedRoute><><SEO title="IELTS Assessment | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts/assessment" /><IeltsAssessment /></></ProtectedRoute>}
           />
           <Route
             path="/academy/category/:categoryId"
