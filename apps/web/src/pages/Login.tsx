@@ -38,7 +38,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
         const state = location.state as { returnTo?: string };
         const returnTo = state?.returnTo;
         
-        if (returnTo && allowedReturnToPaths.some(path => returnTo.startsWith(path))) {
+        if (returnTo && allowedReturnToPaths.includes(returnTo)) {
           nav(returnTo);
         } else {
           nav("/dashboard");

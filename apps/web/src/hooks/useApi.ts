@@ -1,6 +1,6 @@
 // React Hook 用於 API 調用
 import { useState, useEffect, useCallback } from 'react';
-import { userAPI } from '../api/index';
+import { userAPI } from '../api/client';
 
 // 使用狀態的類型
 interface ApiState<T> {

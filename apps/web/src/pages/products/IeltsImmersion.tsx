@@ -23,7 +23,14 @@ const ProductPage: React.FC = () => {
           <div className="glass-card p-8 mb-8">
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="lg:w-2/3">
-                <h1 className="text-4xl font-black mb-4 neon-text">{product.name.en}</h1>
+                <div className="flex items-center gap-4 mb-4">
+                  <h1 className="text-4xl font-black mb-4 neon-text">{product.name.en}</h1>
+                  {product.salesStatus === 'preview' && (
+                    <div className="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-sm font-bold">
+                      Preview / 尚未開放正式付款
+                    </div>
+                  )}
+                </div>
                 <h2 className="text-2xl font-bold mb-6 text-purple-300">{product.name['zh-TW']}</h2>
                 
                 <div className="mb-6">

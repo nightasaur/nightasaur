@@ -17,8 +17,8 @@ const ICO: Record<string,string> = {
   MOON:"🌙",NATURE:"🌿",THUNDER:"⚡",ICE:"❄️",
 };
 const EXPS = ["😄开心","😤认真","😴慵懒","😎酷炫","🥺撒娇","🤩兴奋"];
-const OUTFITS = ["🧣探险围巾","🦺战斗铠甲","🎀星光缎带","🧢训练家帽","🪖水晶头盔","⛓️暗影披风"];
-const ACCS = ["💍勇气戒指","🔮占卜水晶","🗡️龙牙匕首","📿先祖护符","🪶风之羽毛"];
+const OUTFITS = ["🧣探索背心", "🎓學習外套", "🎀創作圍巾", "🧢專注帽子", "🪖記憶頭盔", "⛓️協作披風"];
+const ACCS = ["💍學習徽章", "🔮創造水晶", "📿記憶護符", "🪶靈感羽毛", "🌟成長徽章"];
 export default function SpiritDetail() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
@@ -188,7 +188,7 @@ return (
 {tab === "customize" && (
         <div className="glass-card space-y-6">
           <h3 className="text-xl font-bold text-white">🎨 装扮你的精灵 — 纸娃娃系统</h3>
-          <p className="text-white/60 text-sm">取得方式：进化奖励 / 每日登入 / 社群分享获得配件</p>
+          <p className="text-white/60 text-sm">取得方式：成長獎勵 / 每日學習 / 社群分享獲得配件</p>
 
           {/* 大型预览 */}
           <div className="flex justify-center py-4">
@@ -206,7 +206,7 @@ return (
               { key: "happy", icon: "😄", label: "開心" },
               { key: "practice", icon: "💪", label: "練習" },
               { key: "special", icon: "✨", label: "技能" },
-              { key: "hurt", icon: "😵", label: "受傷" },
+              { key: "rest", icon: "🛌", label: "休息" },
               { key: "sleep", icon: "😴", label: "睡覺" },
               { key: "evolve", icon: "🌟", label: "成長" },
             ].map((a) => (

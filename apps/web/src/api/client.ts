@@ -95,6 +95,7 @@ export const battleAPI = {
     api.post("/battle/action", { player, enemy, action }),
 };
 
+// Language API
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
   updatePreference: (data: any) => api.patch("/language/preference", data),
@@ -107,4 +108,39 @@ export const languageAPI = {
     api.get("/language/interface-translations", { params: { language } }),
   getSettingsMenu: () => api.get("/language/settings-menu"),
   resetSettings: () => api.post("/language/reset"),
+};
+
+// User API
+export const userAPI = {
+  // 註冊
+  register: async (userData: { email: string; username: string; password: string }) => {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  },
+
+  // 登入
+  login: async (credentials: { email: string; password: string }) => {
+    const response = await api.post('/auth/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('nightasaur_token', response.data.token);
+    }
+    return response.data;
+  },
+
+  // 獲取當前用戶信息
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  // 更新用戶信息
+  updateProfile: async (userData: { username?: string; avatarUrl?: string; bio?: string }) => {
+    const response = await api.put('/auth/profile', userData);
+    return response.data;
+  },
+
+  // 登出
+  logout: () => {
+    localStorage.removeItem('nightasaur_token');
+  },
 };

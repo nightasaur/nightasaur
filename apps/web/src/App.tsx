@@ -67,10 +67,10 @@ function AppContent() {
       <Navbar user={user} setUser={setUser} />
       <main className="pt-20">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<><SEO title="Nightasaur — 陪你學習、創作與現實成長的 AI Spirit" canonical="https://www.nightasaur.com/" /><Home /></>} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="/login" element={<Login setUser={setUser} />} />
-          <Route path="/register" element={<Register setUser={setUser} />} />
+          <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
+          <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />
           <Route
             path="/dashboard"
             element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
@@ -119,7 +119,7 @@ function AppContent() {
 
           {/* Front Office Routes */}
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
-          <Route path="/products/ielts-immersion" element={<ProductPage />} />
+          <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur Deep IELTS Immersion Experience — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
           <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/receipts/preview" element={<ProtectedRoute><ReceiptPreviewPage /></ProtectedRoute>} />
         </Routes>
