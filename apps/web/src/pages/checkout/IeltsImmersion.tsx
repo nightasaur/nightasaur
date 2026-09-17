@@ -83,7 +83,7 @@ const CheckoutPage: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <div className="text-lg font-bold">Total Amount</div>
-                    <div className="text-sm text-white/70">Including any applicable taxes</div>
+                    <div className="text-sm text-white/70">Taxes and GST treatment, where applicable, will be confirmed before payment.</div>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold">{formatAUD(product.price)}</div>

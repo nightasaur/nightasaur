@@ -16,8 +16,8 @@ interface SEOProps {
 }
 
 export default function SEO({
-  title = 'Nightasaur - AI 數位精靈夥伴',
-  description = '每人註冊即可生成專屬 AI 精靈，像數碼寶貝一樣成長進化，陪你對話冒險！支援多語言、夜間主題、PWA 安裝。',
+  title = 'Nightasaur — AI Spirit for Learning, Creation and Real-World Growth',
+  description = 'Nightasaur — 陪你學習、創作與現實成長的 AI Spirit。讓 AI Spirit 陪你在真實世界一起成長，從學習、創作、職業技能到日常工作，Spirit 會記住你的歷程、理解你的習慣，並隨著你們共同完成的真實任務逐步成長。',
   image = '/nightasaur-og.png',
   url = 'https://nightasaur.com',
   type = 'website',
@@ -29,7 +29,7 @@ export default function SEO({
   locale = 'zh_TW',
   jsonLd,
 }: SEOProps) {
-  const keywords = 'AI精靈,數位寵物,虛擬夥伴,中文AI,夜間主題,PWA,多語言,數碼寶貝,AI對話,精靈養成';
+  const keywords = 'AI Spirit,AI學習,AI創作,職業技能,現實成長,AI夥伴,多語言,PWA,深色主題,學習夥伴';
   const fullUrl = canonical || url;
 
   React.useEffect(() => {

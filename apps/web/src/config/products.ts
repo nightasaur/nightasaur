@@ -16,7 +16,8 @@ export interface CommercialProduct {
     'zh-TW': string;
   };
   features: string[];
-  status: 'active' | 'coming_soon' | 'archived';
+  displayStatus: 'visible' | 'hidden'; // 顯示狀態
+  salesStatus: 'available' | 'preview' | 'coming_soon' | 'sold_out'; // 銷售狀態
 }
 
 // AUD 格式化器
@@ -46,16 +47,20 @@ export const IELTS_IMMERSION_1M_AU: CommercialProduct = {
     'zh-TW': '為雅思準備設計的深度沉浸體驗，結合AI驅動的個性化學習與Nightasaur獨特的夥伴陪伴方式。',
   },
   features: [
-    'AI-powered personalized study journey',
-    'Speaking practice with feedback',
-    'Writing assessment and improvement',
+    'Personal assessment and learning path',
+    '30-day personalized learning journey',
+    'Daily AI-guided missions and practice',
+    'Speaking feedback with pronunciation analysis',
+    'Writing assessment with improvement suggestions',
     'Reading comprehension training',
     'Listening skill development',
-    'Learning history tracking',
-    'Future Spirit Companion integration',
-    'Progress analytics dashboard',
+    'Learning history and progress tracking',
+    'Progress analytics and insights',
+    'Spirit-enabled learning direction',
+    '30-day progress summary report',
   ],
-  status: 'active',
+  displayStatus: 'visible',
+  salesStatus: 'preview',
 };
 
 // 所有產品列表
@@ -68,7 +73,12 @@ export const getProductByCode = (code: string): CommercialProduct | null => {
   return PRODUCTS[code] || null;
 };
 
-// 獲取活躍產品列表
-export const getActiveProducts = (): CommercialProduct[] => {
-  return Object.values(PRODUCTS).filter(product => product.status === 'active');
+// 獲取可見產品列表
+export const getVisibleProducts = (): CommercialProduct[] => {
+  return Object.values(PRODUCTS).filter(product => product.displayStatus === 'visible');
+};
+
+// 獲取可銷售產品列表
+export const getAvailableProducts = (): CommercialProduct[] => {
+  return Object.values(PRODUCTS).filter(product => product.salesStatus === 'available');
 };

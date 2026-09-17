@@ -106,7 +106,7 @@ export function useUser() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('nightasaur_token');
     if (token) {
       fetchUser();
     } else {

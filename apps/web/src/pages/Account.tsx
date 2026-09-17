@@ -58,7 +58,7 @@ const AccountPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <div className="glass-card p-8">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold">My Account</h1>
+              <h1 className="text-3xl font-bold gradient-text">My Account</h1>
               <button
                 onClick={handleLogout}
                 className="px-6 py-3 border border-white/20 rounded-lg hover:bg-white/5 transition-colors"
@@ -70,7 +70,7 @@ const AccountPage: React.FC = () => {
             <div className="space-y-8">
               {/* Profile */}
               <div className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-xl font-bold mb-4">Profile</h2>
+                <h2 className="text-xl font-bold mb-4 gradient-text">Profile</h2>
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center">
                     <span className="text-2xl">👤</span>
@@ -84,21 +84,49 @@ const AccountPage: React.FC = () => {
 
               {/* Quick Links */}
               <div className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-xl font-bold mb-4">Quick Links</h2>
+                <h2 className="text-xl font-bold mb-4 gradient-text">Quick Links</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
-                    onClick={() => navigate('/products/ielts-immersion')}
+                    onClick={() => navigate('/spirits')}
                     className="p-4 bg-purple-600/20 border border-purple-500/30 rounded-lg hover:bg-purple-600/30 transition-colors text-left"
                   >
-                    <div className="font-bold">IELTS Immersion</div>
-                    <div className="text-sm text-white/70">Start learning journey</div>
+                    <div className="font-bold flex items-center gap-2">
+                      <span>💞</span>
+                      My Spirit
+                    </div>
+                    <div className="text-sm text-white/70">Manage your Spirit companion</div>
                   </button>
                   
                   <button
-                    onClick={() => navigate('/receipts/preview')}
+                    onClick={() => navigate('/products/ielts-immersion')}
+                    className="p-4 bg-yellow-600/20 border border-yellow-500/30 rounded-lg hover:bg-yellow-600/30 transition-colors text-left"
+                  >
+                    <div className="font-bold flex items-center gap-2">
+                      <span>🎓</span>
+                      IELTS Immersion
+                    </div>
+                    <div className="text-sm text-white/70">Start your learning journey</div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/assistant')}
                     className="p-4 bg-blue-600/20 border border-blue-500/30 rounded-lg hover:bg-blue-600/30 transition-colors text-left"
                   >
-                    <div className="font-bold">Receipt Preview</div>
+                    <div className="font-bold flex items-center gap-2">
+                      <span>🤖</span>
+                      AI Assistant
+                    </div>
+                    <div className="text-sm text-white/70">Chat with AI Assistant</div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/receipts/preview')}
+                    className="p-4 bg-green-600/20 border border-green-500/30 rounded-lg hover:bg-green-600/30 transition-colors text-left"
+                  >
+                    <div className="font-bold flex items-center gap-2">
+                      <span>🧾</span>
+                      Receipt Preview
+                    </div>
                     <div className="text-sm text-white/70">View receipt format</div>
                   </button>
                 </div>
@@ -106,7 +134,7 @@ const AccountPage: React.FC = () => {
 
               {/* Status */}
               <div className="bg-white/5 rounded-xl p-6">
-                <h2 className="text-xl font-bold mb-4">Account Status</h2>
+                <h2 className="text-xl font-bold mb-4 gradient-text">Account Status</h2>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Status:</span>
@@ -115,6 +143,41 @@ const AccountPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span>Plan:</span>
                     <span className="text-yellow-400">No active plan</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Orders:</span>
+                    <span className="text-white/50">No purchases yet</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Receipts:</span>
+                    <span className="text-white/50">No receipts yet</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Learning & Skills */}
+              <div className="bg-white/5 rounded-xl p-6">
+                <h2 className="text-xl font-bold mb-4 gradient-text">Learning & Skills</h2>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Active Learning:</span>
+                    <span className="text-white/50">None</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Skills Developed:</span>
+                    <span className="text-white/50">0</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Learning Hours:</span>
+                    <span className="text-white/50">0</span>
+                  </div>
+                  <div className="pt-4">
+                    <button
+                      onClick={() => navigate('/products/ielts-immersion')}
+                      className="px-6 py-3 bg-purple-600/30 border border-purple-500/40 rounded-lg hover:bg-purple-600/40 transition-colors w-full"
+                    >
+                      Start Learning Journey
+                    </button>
                   </div>
                 </div>
               </div>

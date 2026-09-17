@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { authAPI } from "./api/client";
 import Navbar from "./components/Navbar";
+import SEO from "./components/SEO";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,40 +20,14 @@ import Academy from "./pages/Academy";
 import AcademyLearn from "./pages/AcademyLearn";
 import LanguageSettings from "./pages/LanguageSettings";
 import AcademyCategories from "./pages/AcademyCategories";
+import Assistant from "./pages/Assistant";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import AccountPage from "./pages/Account";
 import ProductPage from "./pages/products/IeltsImmersion";
 import CheckoutPage from "./pages/checkout/IeltsImmersion";
 import ReceiptPreviewPage from "./pages/receipts/Preview";
 
-// 簡單 SEO 元資料
-function SEO() {
-  return (
-    <>
-      <title>Nightasaur - AI 數位精靈夥伴</title>
-      <meta name="description" content="每人註冊即可獲得專屬 AI 精靈，像寶可夢一樣進化，陪你聊天、支援多語言、主題、PWA 安裝" />
-      <meta name="keywords" content="AI精靈,數位寵物,虛擬夥伴,中文AI,夜晚主題,PWA,多語言" />
-      <meta name="author" content="Nightasaur Team" />
-      <meta name="theme-color" content="#0a0d14" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="language" content="zh-TW" />
 
-      {/* Open Graph */}
-      <meta property="og:title" content="Nightasaur - AI 數位精靈夥伴" />
-      <meta property="og:description" content="每人註冊即可獲得專屬 AI 精靈，像寶可夢一樣進化，陪你聊天、支援多語言" />
-      <meta property="og:image" content="/nightasaur-og.png" />
-      <meta property="og:url" content="https://nightasaur.com" />
-      <meta property="og:type" content="website" />
-
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="Nightasaur - AI 數位精靈夥伴" />
-      <meta name="twitter:description" content="每人註冊即可獲得專屬 AI 精靈，像寶可夢一樣進化，陪你聊天、支援多語言" />
-      <meta name="twitter:image" content="/nightasaur-og.png" />
-    </>
-  );
-}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("nightasaur_token");
@@ -117,8 +92,8 @@ function AppContent() {
             element={<ProtectedRoute><Social /></ProtectedRoute>}
           />
           <Route
-            path="/settings/api"
-            element={<ProtectedRoute><APISettings /></ProtectedRoute>}
+            path="/assistant"
+            element={<ProtectedRoute><Assistant /></ProtectedRoute>}
           />
           <Route
             path="/settings/language"
