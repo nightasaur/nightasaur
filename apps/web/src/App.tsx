@@ -20,14 +20,13 @@ import Academy from "./pages/Academy";
 import AcademyLearn from "./pages/AcademyLearn";
 import LanguageSettings from "./pages/LanguageSettings";
 import AcademyCategories from "./pages/AcademyCategories";
+import IeltsLearningHub from "./pages/IeltsLearningHub";
 import Assistant from "./pages/Assistant";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import AccountPage from "./pages/Account";
 import ProductPage from "./pages/products/IeltsImmersion";
 import CheckoutPage from "./pages/checkout/IeltsImmersion";
 import ReceiptPreviewPage from "./pages/receipts/Preview";
-
-
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("nightasaur_token");
@@ -110,6 +109,10 @@ function AppContent() {
           <Route
             path="/academy/categories"
             element={<ProtectedRoute><><SEO title="Learning Categories | Nightasaur" canonical="https://www.nightasaur.com/academy/categories" /><AcademyCategories /></></ProtectedRoute>}
+          />
+          <Route
+            path="/academy/category/ielts"
+            element={<ProtectedRoute><><SEO title="IELTS Companion Learning | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts" /><IeltsLearningHub /></></ProtectedRoute>}
           />
           <Route
             path="/academy/category/:categoryId"
