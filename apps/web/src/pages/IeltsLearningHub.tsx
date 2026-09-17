@@ -39,14 +39,14 @@ export default function IeltsLearningHub() {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="glass-card p-8 mb-8 border border-emerald-400/20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="glass-card p-6 sm:p-8 mb-8 border border-emerald-400/20">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-200 text-sm mb-4">
               🌙 Authenticated Early Access
             </div>
-            <h1 className="text-4xl font-black mb-3">Nightasaur IELTS Companion</h1>
+            <h1 className="text-3xl sm:text-4xl font-black mb-3">Nightasaur IELTS Companion</h1>
             <p className="text-white/65 max-w-3xl leading-relaxed">
               這裡是 IELTS 陪伴學習的主入口。先建立你的起始程度，再由 Spirit 陪你拆解每日任務、練習四科、回顧錯誤與累積學習紀錄。
             </p>
@@ -62,12 +62,12 @@ export default function IeltsLearningHub() {
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
         <div className="glass-card p-6 lg:col-span-2">
-          <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
             <div>
               <h2 className="text-2xl font-bold mb-2">🎯 第一步：起始評量</h2>
-              <p className="text-white/60">建立目前程度後，才會產生個人化學習計畫。現在不會顯示虛構分數或進度。</p>
+              <p className="text-white/60">先設定 Target Band（目標分數）與每日可投入時間，再進入真實作答評量。尚未作答前不顯示虛構分數。</p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-200 text-xs whitespace-nowrap">尚未開始</span>
+            <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-200 text-xs whitespace-nowrap w-fit">設定已開放</span>
           </div>
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             <div className="rounded-xl bg-white/5 p-4">
@@ -76,18 +76,19 @@ export default function IeltsLearningHub() {
             </div>
             <div className="rounded-xl bg-white/5 p-4">
               <div className="text-white/40 text-xs mb-1">目標 Band</div>
-              <div className="text-xl font-bold">—</div>
+              <div className="text-xl font-bold">待設定</div>
             </div>
             <div className="rounded-xl bg-white/5 p-4">
               <div className="text-white/40 text-xs mb-1">今日任務</div>
-              <div className="text-xl font-bold">尚未生成</div>
+              <div className="text-xl font-bold">等待評量</div>
             </div>
           </div>
           <button
-            disabled
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/10 text-white/40 cursor-not-allowed"
+            type="button"
+            onClick={() => navigate("/academy/category/ielts/assessment")}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium transition-colors"
           >
-            起始評量即將開放
+            開始起始評量設定
           </button>
         </div>
 
