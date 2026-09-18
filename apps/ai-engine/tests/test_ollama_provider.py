@@ -190,6 +190,54 @@ async def test_generate_with_tools_injects_fallback_instruction_message(
 
 
 @pytest.mark.asyncio
+async def test_generate_with_tools_renders_tool_history_as_text_messages(
+    patch_ollama_httpx_client,
+):
+    """AgentCore tool history must satisfy Ollama's string-content contract.
+
+    Provider-neutral tool calls/results deliberately use a different shape
+    from Ollama's native tool-calling API. The prompt fallback therefore sends
+    them as plain text instead of leaking incompatible fields into /api/chat.
+    """
+    calls = patch_ollama_httpx_client(
+        post_result=FakeHttpxResponse(200, {"message": {"content": "summary"}})
+    )
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    tools = [ToolSpec(name="workspace_inspect", description="Inspect workspace")]
+    messages = [
+        {"role": "user", "content": "list the workspace"},
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "name": "workspace_inspect",
+                    "arguments": {"action": "list", "path": "."},
+                }
+            ],
+        },
+        {
+            "role": "tool",
+            "tool_call_id": "call-1",
+            "name": "workspace_inspect",
+            "content": {"path": ".", "entries": [{"name": "apps"}]},
+        },
+    ]
+
+    result = await provider.generate(messages, tools=tools)
+
+    assert result.content == "summary"
+    _, _, payload = calls[0]
+    outgoing = payload["messages"]
+    assert all(isinstance(message["content"], str) for message in outgoing)
+    assert all(set(message) == {"role", "content"} for message in outgoing)
+    assert "workspace_inspect" in outgoing[-2]["content"]
+    assert outgoing[-1]["role"] == "user"
+    assert '"entries"' in outgoing[-1]["content"]
+
+
+@pytest.mark.asyncio
 async def test_generate_with_tools_parses_valid_tool_call_marker(patch_ollama_httpx_client):
     """模型輸出精確符合 tool_call marker 格式時，應被解析成 ToolCallRequest，
     而不是被當成一般文字內容。
