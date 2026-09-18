@@ -12,8 +12,14 @@ v0.2 預設實作 AllowAllExecutionPolicy 全部放行，行為等同「一律�
 未來掛上高風險工具、side-effect 工具、企業政策、人工核可流程時，不需要更動
 AgentCore 的 loop 邏輯。
 """
+import hashlib
+import hmac
+import re
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from dataclasses import dataclass
 from enum import Enum
+from pathlib import PurePosixPath
 
 from agent.tool_calls import ToolCallRequest, ToolSpec
 
@@ -79,3 +85,109 @@ class ReadOnlyExecutionPolicy(ExecutionPolicy):
             if tool_spec.read_only is True
             else ExecutionDecision.DENY
         )
+
+
+_SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
+
+
+def _normalize_workspace_path(raw_path: object) -> str | None:
+    """Return a portable relative path for policy comparison.
+
+    The policy must not rely on the host operating system when comparing an
+    approval with model-provided arguments.  Windows separators are therefore
+    normalized before absolute paths and traversal are rejected.
+    """
+
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        return None
+    portable = raw_path.strip().replace("\\", "/")
+    if portable.startswith(("/", "//")) or re.match(r"^[A-Za-z]:", portable):
+        return None
+    parts = PurePosixPath(portable).parts
+    if not parts or ".." in parts:
+        return None
+    return "/".join(parts)
+
+
+class CodingExecutionPolicy(ExecutionPolicy):
+    """Fail-closed policy for the opt-in v0.6 coding Tool Loop.
+
+    Read-only tools and ``workspace_patch`` previews are allowed.  Applying a
+    patch requires a constructor-provided approval that binds one normalized
+    path to the exact before and after SHA-256 hashes. Runtime metadata is
+    intentionally not accepted as approval because it is descriptive,
+    untrusted input rather than an authorization credential.
+    """
+
+    def __init__(
+        self, approved_writes: Iterable["WorkspaceWriteApproval"] | None = None
+    ):
+        normalized: dict[str, tuple[str, str]] = {}
+        for approval in approved_writes or ():
+            if not isinstance(approval, WorkspaceWriteApproval):
+                raise TypeError("approved writes must be WorkspaceWriteApproval values")
+            path = _normalize_workspace_path(approval.path)
+            if path is None:
+                raise ValueError("approved write paths must be workspace-relative")
+            digests = (approval.before_sha256, approval.after_sha256)
+            if any(
+                not isinstance(digest, str)
+                or _SHA256_PATTERN.fullmatch(digest) is None
+                for digest in digests
+            ):
+                raise ValueError("approved write hashes must be SHA-256 hex digests")
+            hashes = (digests[0].lower(), digests[1].lower())
+            if path in normalized and normalized[path] != hashes:
+                raise ValueError("conflicting approvals normalize to the same path")
+            normalized[path] = hashes
+        self._approved_writes = normalized
+
+    def evaluate(
+        self,
+        tool_call: ToolCallRequest,
+        tool_spec: ToolSpec | None,
+        context: dict,
+    ) -> ExecutionDecision:
+        if tool_spec is None or tool_spec.name != tool_call.name:
+            return ExecutionDecision.DENY
+        if tool_spec.read_only is True:
+            return ExecutionDecision.ALLOW
+        if tool_spec.name != "workspace_patch":
+            return ExecutionDecision.DENY
+        if not isinstance(tool_call.arguments, dict):
+            return ExecutionDecision.DENY
+
+        dry_run = tool_call.arguments.get("dry_run", True)
+        if dry_run is True:
+            return ExecutionDecision.ALLOW
+        if dry_run is not False:
+            return ExecutionDecision.DENY
+
+        path = _normalize_workspace_path(tool_call.arguments.get("path"))
+        expected_sha256 = tool_call.arguments.get("expected_sha256")
+        content = tool_call.arguments.get("content")
+        if (
+            path is None
+            or not isinstance(expected_sha256, str)
+            or _SHA256_PATTERN.fullmatch(expected_sha256) is None
+            or not isinstance(content, str)
+        ):
+            return ExecutionDecision.DENY
+
+        approved_hashes = self._approved_writes.get(path)
+        requested_after_sha256 = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        if approved_hashes is None or not (
+            hmac.compare_digest(approved_hashes[0], expected_sha256.lower())
+            and hmac.compare_digest(approved_hashes[1], requested_after_sha256)
+        ):
+            return ExecutionDecision.CONFIRMATION_REQUIRED
+        return ExecutionDecision.ALLOW
+
+
+@dataclass(frozen=True)
+class WorkspaceWriteApproval:
+    """Trusted approval for one exact workspace text replacement."""
+
+    path: str
+    before_sha256: str
+    after_sha256: str
