@@ -29,6 +29,13 @@ app.get("/api/health", (_req, res) => {
     timestamp: new Date().toISOString(),
     service: "Nightasaur Backend",
     version: "1.0.0",
+    ...(config.nodeEnv === "preview"
+      ? {
+          gate: "W3-PR18",
+          commit: process.env.RAILWAY_GIT_COMMIT_SHA || null,
+          database: "isolated-sqlite",
+        }
+      : {}),
   });
 });
 

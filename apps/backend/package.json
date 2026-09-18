@@ -8,6 +8,7 @@
     "test": "tsc && node --test dist/services/ieltsDiagnostic.test.js dist/controllers/academy.ieltsDiagnostic.test.js",
     "build": "tsc",
     "start": "node dist/index.js",
+    "preview:prepare": "node scripts/prepare-preview.mjs",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",

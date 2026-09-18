@@ -1,16 +1,17 @@
 import axios from "axios";
+import { resolveApiBaseUrl } from "../config/apiBaseUrl";
 
-// Production always uses the same-origin /api proxy so the browser does not depend
-// on a stale VITE_API_URL or cross-origin CORS configuration.
-const getApiBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    return import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-  }
+declare const __NIGHTASAUR_DEPLOYMENT_ENV__: string;
 
-  return '/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = resolveApiBaseUrl({
+  isDevelopment: import.meta.env.DEV,
+  deploymentEnvironment:
+    typeof __NIGHTASAUR_DEPLOYMENT_ENV__ === "string"
+      ? __NIGHTASAUR_DEPLOYMENT_ENV__
+      : undefined,
+  developmentApiUrl: import.meta.env.VITE_API_URL,
+  previewApiUrl: import.meta.env.VITE_PREVIEW_API_URL,
+});
 
 const api = axios.create({
   baseURL: API_BASE_URL,
