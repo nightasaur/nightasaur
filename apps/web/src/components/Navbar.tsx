@@ -5,14 +5,31 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../api/client";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface NavbarProps {
   user: any;
   setUser: (user: any) => void;
 }
 
+const PUBLIC_NAV_COPY: Record<string, {
+  ielts: string;
+  login: string;
+  register: string;
+  openMenu: string;
+  closeMenu: string;
+}> = {
+  "zh-TW": { ielts: "IELTS 深度沉浸", login: "登入", register: "註冊", openMenu: "開啟選單", closeMenu: "關閉選單" },
+  "zh-CN": { ielts: "IELTS 深度沉浸", login: "登录", register: "注册", openMenu: "打开菜单", closeMenu: "关闭菜单" },
+  "en-US": { ielts: "IELTS Immersion", login: "Login", register: "Register", openMenu: "Open menu", closeMenu: "Close menu" },
+  "ja-JP": { ielts: "IELTS 深度イマージョン", login: "ログイン", register: "登録", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
+  "ko-KR": { ielts: "IELTS 심층 몰입", login: "로그인", register: "가입", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기" },
+};
+
 export default function Navbar({ user, setUser }: NavbarProps) {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const publicCopy = PUBLIC_NAV_COPY[currentLanguage] ?? PUBLIC_NAV_COPY["zh-TW"];
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const closeMobile = () => setMobileOpen(false);
@@ -54,7 +71,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
             to="/products/ielts-immersion"
             className="text-yellow-300 hover:text-yellow-200 transition text-sm font-medium whitespace-nowrap"
           >
-            🎓 IELTS Immersion
+            🎓 {publicCopy.ielts}
           </Link>
 
           <div className="shrink-0">
@@ -70,8 +87,8 @@ export default function Navbar({ user, setUser }: NavbarProps) {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-white/70 hover:text-white transition">Login</Link>
-              <Link to="/register" className="btn-primary text-sm py-2 px-4 whitespace-nowrap">Register</Link>
+              <Link to="/login" className="text-white/70 hover:text-white transition">{publicCopy.login}</Link>
+              <Link to="/register" className="btn-primary text-sm py-2 px-4 whitespace-nowrap">{publicCopy.register}</Link>
             </>
           )}
         </div>
@@ -80,7 +97,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           type="button"
           onClick={() => setMobileOpen((open) => !open)}
           className="lg:hidden shrink-0 w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-xl text-white"
-          aria-label={mobileOpen ? "關閉選單" : "開啟選單"}
+          aria-label={mobileOpen ? publicCopy.closeMenu : publicCopy.openMenu}
           aria-expanded={mobileOpen}
         >
           {mobileOpen ? "✕" : "☰"}
@@ -95,7 +112,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
               onClick={closeMobile}
               className="px-3 py-3 rounded-lg text-yellow-300 hover:bg-white/5 transition text-sm font-medium"
             >
-              🎓 IELTS Immersion
+              🎓 {publicCopy.ielts}
             </Link>
 
             {user ? (
@@ -113,8 +130,8 @@ export default function Navbar({ user, setUser }: NavbarProps) {
               </>
             ) : (
               <div className="grid grid-cols-2 gap-3 mt-2">
-                <Link to="/login" onClick={closeMobile} className="px-4 py-3 rounded-xl border border-white/10 text-center text-white/80">Login</Link>
-                <Link to="/register" onClick={closeMobile} className="btn-primary px-4 py-3 text-center">Register</Link>
+                <Link to="/login" onClick={closeMobile} className="px-4 py-3 rounded-xl border border-white/10 text-center text-white/80">{publicCopy.login}</Link>
+                <Link to="/register" onClick={closeMobile} className="btn-primary px-4 py-3 text-center">{publicCopy.register}</Link>
               </div>
             )}
 
