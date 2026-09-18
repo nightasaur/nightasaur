@@ -44,6 +44,7 @@ class ToolRegistry:
                 name=tool.name,
                 description=tool.description,
                 parameters=dict(tool.parameters),
+                read_only=tool.read_only,
             )
             for tool in self._tools.values()
         ]

@@ -55,3 +55,27 @@ class AllowAllExecutionPolicy(ExecutionPolicy):
         context: dict,
     ) -> ExecutionDecision:
         return ExecutionDecision.ALLOW
+
+
+class ReadOnlyExecutionPolicy(ExecutionPolicy):
+    """v0.4 fail-closed policy for an inspect-only runtime.
+
+    A model-provided tool name is never trusted by itself. The matching
+    registry specification must exist and must explicitly declare
+    ``read_only=True``. Unknown, legacy, and mutation-capable tools are
+    denied without invoking their implementation.
+    """
+
+    def evaluate(
+        self,
+        tool_call: ToolCallRequest,
+        tool_spec: ToolSpec | None,
+        context: dict,
+    ) -> ExecutionDecision:
+        if tool_spec is None or tool_spec.name != tool_call.name:
+            return ExecutionDecision.DENY
+        return (
+            ExecutionDecision.ALLOW
+            if tool_spec.read_only is True
+            else ExecutionDecision.DENY
+        )

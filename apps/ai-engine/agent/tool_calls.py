@@ -20,6 +20,10 @@ class ToolSpec:
     description: str = ""
     # JSON-schema 風格的參數描述，供模型（或 prompt fallback）了解如何呼叫。
     parameters: dict = field(default_factory=dict)
+    # v0.4: explicit safety declaration. The default is deliberately False so
+    # older or third-party tools are denied by ReadOnlyExecutionPolicy until
+    # they opt in after review.
+    read_only: bool = False
 
 
 @dataclass

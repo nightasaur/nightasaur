@@ -21,17 +21,19 @@ from agent.contexts import (
     RuntimeContext,
 )
 from agent.core import DEFAULT_MAX_TOOL_ITERATIONS, AgentCore
-from agent.execution_policy import AllowAllExecutionPolicy
+from agent.execution_policy import ReadOnlyExecutionPolicy
 from agent.memory.in_memory import EphemeralMemoryProvider
 from agent.providers.ollama_provider import OllamaModelProvider
 from agent.schemas import AgentInput, AgentOutput
 from agent.tools.registry import ToolRegistry
+from agent.tools.workspace_inspect import WorkspaceInspectTool
 
 __all__ = [
     "AgentCore",
     "AgentInput",
     "AgentOutput",
     "build_default_agent_core",
+    "build_read_only_agent_core",
     # v0.3 exports
     "Capability",
     "CapabilitySet",
@@ -40,13 +42,14 @@ __all__ = [
     "ProviderContext",
     "ProviderDescriptor",
     "RuntimeContext",
+    "ReadOnlyExecutionPolicy",
 ]
 
 
 def build_default_agent_core(base_url: str, model: str) -> AgentCore:
     """組裝目前正式環境使用的 AgentCore：Ollama ModelProvider + 空的
     ToolRegistry（v0.2 仍不預掛真實工具）+ EphemeralMemoryProvider +
-    預設全部放行的 AllowAllExecutionPolicy + 預設的 max_tool_iterations。
+    v0.4 fail-closed 的 ReadOnlyExecutionPolicy + 預設 max_tool_iterations。
 
     ToolRegistry 為空時，AgentCore 的 tool-calling loop 只會執行一次
     generate() 就結束，行為與 v0.1 完全相同。
@@ -55,6 +58,26 @@ def build_default_agent_core(base_url: str, model: str) -> AgentCore:
         model_provider=OllamaModelProvider(base_url=base_url, model=model),
         tool_registry=ToolRegistry(),
         memory_provider=EphemeralMemoryProvider(),
-        execution_policy=AllowAllExecutionPolicy(),
+        execution_policy=ReadOnlyExecutionPolicy(),
+        max_tool_iterations=DEFAULT_MAX_TOOL_ITERATIONS,
+    )
+
+
+def build_read_only_agent_core(
+    base_url: str, model: str, workspace_root: str
+) -> AgentCore:
+    """Build the v0.4 inspect-only runtime for a bounded workspace.
+
+    This is opt-in so existing dialogue/assistant call sites keep their
+    empty-registry behavior. Only explicitly read-only tools are registered,
+    and the fail-closed policy rejects every other tool specification.
+    """
+    registry = ToolRegistry()
+    registry.register(WorkspaceInspectTool(workspace_root))
+    return AgentCore(
+        model_provider=OllamaModelProvider(base_url=base_url, model=model),
+        tool_registry=registry,
+        memory_provider=EphemeralMemoryProvider(),
+        execution_policy=ReadOnlyExecutionPolicy(),
         max_tool_iterations=DEFAULT_MAX_TOOL_ITERATIONS,
     )
