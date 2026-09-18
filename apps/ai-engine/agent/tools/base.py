@@ -17,6 +17,9 @@ class Tool(ABC):
     #: provider-neutral 的 ToolSpec，讓模型（或 prompt fallback）知道
     #: 如何呼叫這個工具。預設為空字典，代表工具不需要（或未描述）參數。
     parameters: dict = {}
+    #: A tool must explicitly declare that it cannot mutate external state
+    #: before the v0.4 read-only runtime will execute it.
+    read_only: bool = False
 
     @abstractmethod
     async def run(self, **kwargs) -> Any:

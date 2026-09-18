@@ -9,6 +9,7 @@ from agent.tools.base import (
     ToolNotFoundError,
 )
 from agent.tools.registry import ToolRegistry
+from agent.tools.workspace_inspect import WorkspaceInspectTool
 
 __all__ = [
     "Tool",
@@ -17,4 +18,5 @@ __all__ = [
     "ToolExecutionError",
     "ToolNotFoundError",
     "ToolRegistry",
+    "WorkspaceInspectTool",
 ]
