@@ -28,7 +28,7 @@ export class GameService {
       const target = req.count || 1;
 
       const existing = await prisma.questProgress.findUnique({
-        where: { questId_userId: { questId: q.id, userId } },
+        where: { userId_questId: { userId, questId: q.id } },
       });
 
       if (existing?.claimed) continue;
@@ -37,7 +37,7 @@ export class GameService {
       const completed = newProgress >= target;
 
       await prisma.questProgress.upsert({
-        where: { questId_userId: { questId: q.id, userId } },
+        where: { userId_questId: { userId, questId: q.id } },
         create: { questId: q.id, userId, progress: newProgress, completed },
         update: { progress: newProgress, completed, completedAt: completed ? new Date() : null },
       });
@@ -48,7 +48,7 @@ export class GameService {
         if (reward.xp) awardedXp += reward.xp;
         if (reward.items) awardedItems.push(...reward.items);
         await prisma.questProgress.update({
-          where: { questId_userId: { questId: q.id, userId } },
+          where: { userId_questId: { userId, questId: q.id } },
           data: { claimed: true },
         });
       }
@@ -179,7 +179,7 @@ export class GameService {
   // Claim quest reward
   async claimQuest(userId: string, questId: string) {
     const p = await prisma.questProgress.findUnique({
-      where: { questId_userId: { questId, userId } },
+      where: { userId_questId: { userId, questId } },
     });
     if (!p || !p.completed || p.claimed) return null;
     const q = await prisma.quest.findUnique({ where: { id: questId } });
@@ -188,7 +188,7 @@ export class GameService {
     if (reward.xp) await this.addXp(userId, reward.xp);
     if (reward.items) await this.grantItems(userId, reward.items);
     await prisma.questProgress.update({
-      where: { questId_userId: { questId, userId } },
+      where: { userId_questId: { userId, questId } },
       data: { claimed: true },
     });
     return reward;

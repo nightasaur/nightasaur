@@ -43,7 +43,7 @@ export class GoogleMapsService {
     const places = [];
     const placeCount = 5 + Math.floor(Math.random() * 10);
     
-    const typeNames = {
+    const typeNames: Record<string, string[]> = {
       shopping_mall: ["購物中心", "百貨公司", "商場", "Outlet"],
       park: ["公園", "綠地", "森林公園", "河濱公園"],
       train_station: ["火車站", "捷運站", "高鐵站", "轉運站"],
@@ -123,7 +123,7 @@ export class GoogleMapsService {
   
   // 將 Google Place 類型映射到遊戲熱點類型
   private mapPlaceTypeToHotspotType(placeType: string): string {
-    const typeMapping = {
+    const typeMapping: Record<string, string> = {
       "shopping_mall": "SHOPPING",
       "department_store": "SHOPPING",
       "park": "PARK",
@@ -151,7 +151,7 @@ export class GoogleMapsService {
   
   // 根據熱點類型獲取生成類型
   private getSpawnTypesForHotspotType(hotspotType: string): string[] {
-    const spawnTypes = {
+    const spawnTypes: Record<string, string[]> = {
       SHOPPING: ["SHOPPING", "LUXURY", "MODERN", "TRENDY"],
       PARK: ["PARK", "NATURE", "RELAX", "SCENIC"],
       STATION: ["STATION", "TRANSPORT", "BUSY", "SPEED"],
@@ -164,7 +164,7 @@ export class GoogleMapsService {
   
   // 生成高峰時段
   private generatePeakHours(hotspotType: string): number[] {
-    const peakHours = {
+    const peakHours: Record<string, number[]> = {
       SHOPPING: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
       PARK: [6, 7, 8, 9, 16, 17, 18, 19],
       STATION: [7, 8, 9, 17, 18, 19, 20],
@@ -208,7 +208,7 @@ export class GoogleMapsService {
   
   // 根據地點類型獲取精靈
   private getSpiritsByLocationType(locationType: string): Array<any> {
-    const spiritsByType = {
+    const spiritsByType: Record<string, Array<{ name: string; species: string; element: string }>> = {
       SHOPPING: [
         { name: "閃亮寶石獸", species: "Crystal", element: "✨" },
         { name: "金錢鼠", species: "Gold", element: "💰" },
@@ -324,17 +324,19 @@ export class GoogleMapsService {
     // 保存到資料庫
     const createdHotspots = [];
     for (const hotspot of hotspots) {
-      const created = await prisma.hotspot.upsert({
+      const existing = await prisma.hotspot.findFirst({
         where: {
-          name_latitude_longitude: {
-            name: hotspot.name,
-            latitude: hotspot.latitude,
-            longitude: hotspot.longitude
-          }
-        },
-        update: hotspot,
-        create: hotspot
+          name: hotspot.name,
+          latitude: hotspot.latitude,
+          longitude: hotspot.longitude
+        }
       });
+      const created = existing
+        ? await prisma.hotspot.update({
+            where: { id: existing.id },
+            data: hotspot
+          })
+        : await prisma.hotspot.create({ data: hotspot });
       
       createdHotspots.push(created);
     }

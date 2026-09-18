@@ -101,11 +101,12 @@ export class NamingService {
           name = this.getRandomItem(themes.length > 0 ? themes : [this.getRandomItem(db.NOUNS)]);
           break;
           
-        case "CUTE":
+        case "CUTE": {
           // 可愛風格：疊字或可愛後綴
           const base = this.getRandomItem(themes.length > 0 ? themes : [this.getRandomItem(db.NOUNS)]);
           name = base + base.slice(-1); // 疊字
           break;
+        }
           
         default:
           name = this.getRandomItem(db.PREFIXES) + 

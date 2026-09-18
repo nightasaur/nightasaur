@@ -2,6 +2,44 @@ import axios from "axios";
 import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
 
+const SOCIAL_CONTENT_PREFIX = "__NIGHTASAUR_SOCIAL_V1__:";
+
+interface StoredSocialContent {
+  content: string;
+  platform: "FACEBOOK" | "INSTAGRAM";
+  imageUrl?: string | null;
+  externalPostId?: string | null;
+}
+
+function encodeSocialContent(value: StoredSocialContent): string {
+  return `${SOCIAL_CONTENT_PREFIX}${JSON.stringify(value)}`;
+}
+
+function decodeSocialContent(value: string): StoredSocialContent | null {
+  if (!value.startsWith(SOCIAL_CONTENT_PREFIX)) return null;
+
+  try {
+    return JSON.parse(value.slice(SOCIAL_CONTENT_PREFIX.length)) as StoredSocialContent;
+  } catch {
+    return null;
+  }
+}
+
+function normalizePost<T extends { content: string }>(post: T) {
+  const stored = decodeSocialContent(post.content);
+  if (!stored) {
+    return { ...post, platform: "UNKNOWN", imageUrl: null, postId: null };
+  }
+
+  return {
+    ...post,
+    content: stored.content,
+    platform: stored.platform,
+    imageUrl: stored.imageUrl || null,
+    postId: stored.externalPostId || null,
+  };
+}
+
 export class SocialService {
   /**
    * 建立社群貼文（草稿或預約）
@@ -11,16 +49,18 @@ export class SocialService {
     spiritId?: string;
     content: string;
     imageUrl?: string;
-    platform: string;
+    platform: "FACEBOOK" | "INSTAGRAM";
     scheduledAt?: Date;
   }) {
     const post = await prisma.socialPost.create({
       data: {
         userId: params.userId,
         spiritId: params.spiritId || null,
-        content: params.content,
-        imageUrl: params.imageUrl || null,
-        platform: params.platform,
+        content: encodeSocialContent({
+          content: params.content,
+          platform: params.platform,
+          imageUrl: params.imageUrl || null,
+        }),
         status: params.scheduledAt ? "SCHEDULED" : "DRAFT",
         scheduledAt: params.scheduledAt || null,
       },
@@ -29,9 +69,11 @@ export class SocialService {
     // 如果是立即發布，直接執行
     if (!params.scheduledAt) {
       await this.publishPost(post.id);
+      const publishedPost = await prisma.socialPost.findUnique({ where: { id: post.id } });
+      return publishedPost ? normalizePost(publishedPost) : normalizePost(post);
     }
 
-    return post;
+    return normalizePost(post);
   }
 
   /**
@@ -40,14 +82,18 @@ export class SocialService {
   async publishPost(postId: string) {
     const post = await prisma.socialPost.findUnique({ where: { id: postId } });
     if (!post) throw Object.assign(new Error("貼文不存在"), { statusCode: 404 });
+    const stored = decodeSocialContent(post.content);
+    if (!stored) {
+      throw Object.assign(new Error("舊貼文缺少發布平台資訊，請重新建立貼文"), { statusCode: 400 });
+    }
 
     try {
       let publishedPostId: string | null = null;
 
-      if (post.platform === "FACEBOOK") {
-        publishedPostId = await this.publishToFacebook(post.content, post.imageUrl);
-      } else if (post.platform === "INSTAGRAM") {
-        publishedPostId = await this.publishToInstagram(post.content, post.imageUrl);
+      if (stored.platform === "FACEBOOK") {
+        publishedPostId = await this.publishToFacebook(stored.content, stored.imageUrl);
+      } else if (stored.platform === "INSTAGRAM") {
+        publishedPostId = await this.publishToInstagram(stored.content, stored.imageUrl);
       }
 
       await prisma.socialPost.update({
@@ -55,7 +101,10 @@ export class SocialService {
         data: {
           status: "PUBLISHED",
           publishedAt: new Date(),
-          postId: publishedPostId,
+          content: encodeSocialContent({
+            ...stored,
+            externalPostId: publishedPostId,
+          }),
         },
       });
 
@@ -189,20 +238,22 @@ export class SocialService {
    * 取得使用者貼文列表
    */
   async getUserPosts(userId: string) {
-    return prisma.socialPost.findMany({
+    const posts = await prisma.socialPost.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
+    return posts.map(normalizePost);
   }
 
   /**
    * 取得所有貼文（管理員用）
    */
   async getAllPosts() {
-    return prisma.socialPost.findMany({
+    const posts = await prisma.socialPost.findMany({
       orderBy: { createdAt: "desc" },
       include: { user: { select: { username: true } } },
     });
+    return posts.map(normalizePost);
   }
 }
 
