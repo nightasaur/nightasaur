@@ -19,6 +19,34 @@ interface HomeCopy {
   features: Array<{ title: string; description: string }>;
 }
 
+interface HomeMetadata {
+  title: string;
+  description: string;
+}
+
+export const HOME_METADATA: Record<string, HomeMetadata> = {
+  "zh-TW": {
+    title: "Nightasaur — 陪你學習、創作與現實成長的 AI Spirit",
+    description: "讓 AI Spirit 陪你在真實世界一起成長，從學習、創作、職業技能到日常工作，建立專屬於你的成長歷程。",
+  },
+  "zh-CN": {
+    title: "Nightasaur — 陪你学习、创作与现实成长的 AI Spirit",
+    description: "让 AI Spirit 陪你在真实世界一起成长，从学习、创作、职业技能到日常工作，建立专属于你的成长历程。",
+  },
+  "en-US": {
+    title: "Nightasaur — AI Spirit for Learning, Creation and Real-World Growth",
+    description: "Grow in the real world with your AI Spirit across learning, creativity, professional skills, and daily work.",
+  },
+  "ja-JP": {
+    title: "Nightasaur — 学習・創作・現実の成長を支える AI Spirit",
+    description: "学習、創作、専門スキル、日々の仕事まで、AI Spirit と一緒に現実世界で成長しよう。",
+  },
+  "ko-KR": {
+    title: "Nightasaur — 학습·창작·현실 성장을 함께하는 AI Spirit",
+    description: "학습과 창작부터 직무 기술과 일상 업무까지, AI Spirit과 함께 현실 세계에서 성장하세요.",
+  },
+};
+
 const COPY: Record<string, HomeCopy> = {
   "zh-TW": {
     hero: "讓 AI Spirit 陪你在真實世界一起成長。",

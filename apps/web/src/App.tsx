@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { authAPI } from "./api/client";
 import Navbar from "./components/Navbar";
 import SEO from "./components/SEO";
-import Home from "./pages/Home";
+import Home, { HOME_METADATA } from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -23,7 +23,7 @@ import AcademyCategories from "./pages/AcademyCategories";
 import IeltsLearningHub from "./pages/IeltsLearningHub";
 import IeltsAssessment from "./pages/IeltsAssessment";
 import Assistant from "./pages/Assistant";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import AccountPage from "./pages/Account";
 import ProductPage from "./pages/products/IeltsImmersion";
 import CheckoutPage from "./pages/checkout/IeltsImmersion";
@@ -33,6 +33,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("nightasaur_token");
   if (!token) return <Navigate to="/login" />;
   return <>{children}</>;
+}
+
+function LocalizedHome() {
+  const { currentLanguage } = useLanguage();
+  const metadata = HOME_METADATA[currentLanguage] ?? HOME_METADATA["zh-TW"];
+
+  return (
+    <>
+      <SEO
+        title={metadata.title}
+        description={metadata.description}
+        canonical="https://www.nightasaur.com/"
+        locale={currentLanguage.replace("-", "_")}
+      />
+      <Home />
+    </>
+  );
 }
 
 function AppContent() {
@@ -66,7 +83,7 @@ function AppContent() {
       <Navbar user={user} setUser={setUser} />
       <main className="pt-20">
         <Routes>
-          <Route path="/" element={<><SEO title="Nightasaur — 陪你學習、創作與現實成長的 AI Spirit" canonical="https://www.nightasaur.com/" /><Home /></>} />
+          <Route path="/" element={<LocalizedHome />} />
           <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
           <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
           <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />
