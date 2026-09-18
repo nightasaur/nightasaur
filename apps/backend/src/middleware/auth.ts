@@ -6,6 +6,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: TokenPayload;
+      userId?: string;
     }
   }
 }
@@ -23,6 +24,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   try {
     const payload = verifyToken(token);
     req.user = payload;
+    req.userId = payload.userId;
     next();
   } catch {
     res.status(401).json({ error: "認證令牌無效或已過期" });
@@ -35,7 +37,9 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
     try {
-      req.user = verifyToken(token);
+      const payload = verifyToken(token);
+      req.user = payload;
+      req.userId = payload.userId;
     } catch {
       // Token 無效也沒關係
     }

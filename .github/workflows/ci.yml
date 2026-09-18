@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint & Format Check
+    name: Lint Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npm run lint 2>/dev/null || echo "Lint not configured yet"
+      - run: npm run lint
 
   build-backend:
     name: Build Backend
@@ -46,19 +46,3 @@ jobs:
       - run: npm ci
       - run: npm run build
         working-directory: apps/web
-
-  deploy-vercel:
-    name: Deploy Frontend to Vercel
-    needs: [lint, build-frontend]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: apps/web

@@ -56,7 +56,7 @@ export function generateAcademicQuestions(
   const allCategories: AcademicCategory[] = ["LITERATURE", "PHYSICS", "CHEMISTRY", "MEDICINE", "MATHEMATICS"];
   const selectedCategories = categories || allCategories;
   
-  let allQuestions: AcademicQuestion[] = [];
+  const allQuestions: AcademicQuestion[] = [];
   
   for (const category of selectedCategories) {
     const questions = QUESTIONS[category];

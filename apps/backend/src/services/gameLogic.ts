@@ -3,13 +3,17 @@ import { gameService } from "./game.js";
 import { puzzleService } from "./puzzle.js";
 import { squadService } from "./squad.js";
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export class GameLogicService {
   // 獲取完整遊戲狀態（包含小隊）
   async getFullGameState(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        spirits: {
+        Spirits: {
           where: { isActive: true },
           take: 1
         }
@@ -37,7 +41,7 @@ export class GameLogicService {
         gems: user.gems,
         coins: user.coins
       },
-      activeSpirit: user.spirits[0] || null,
+      activeSpirit: user.Spirits[0] || null,
       quests: quests.slice(0, 3),
       dailyPuzzle,
       squad: squad ? {
@@ -82,12 +86,12 @@ export class GameLogicService {
             score: Math.floor(puzzleResult.score * synergyBonus),
             reward: puzzleResult.reward
           });
-        } catch (error) {
+        } catch (error: unknown) {
           results.push({
             spiritId: member.spiritId,
             spiritName: member.spirit.name,
             success: false,
-            error: error.message
+            error: getErrorMessage(error)
           });
         }
       }
@@ -130,11 +134,11 @@ export class GameLogicService {
           xpGained: trainingResult.xpGained,
           levelUp: trainingResult.spiritLevelUp
         });
-      } catch (error) {
+      } catch (error: unknown) {
         results.push({
           spiritId: member.spiritId,
           spiritName: member.spirit.name,
-          error: error.message
+          error: getErrorMessage(error)
         });
       }
     }
@@ -146,7 +150,59 @@ export class GameLogicService {
       success: true,
       dailyTraining,
       results,
-      completedQuests: questResult.completedQuests
+      questRewards: questResult
+    };
+  }
+
+  // 執行一次可驗證的遊戲循環，不偽造對話或益智結果。
+  async completeGameCycle(userId: string, spiritId: string, action: string) {
+    const spirit = await prisma.spirit.findFirst({
+      where: { id: spiritId, userId, isActive: true }
+    });
+    if (!spirit) throw new Error("精靈不存在或不屬於此使用者");
+
+    const questRewards = await gameService.trackAction(userId, action, 1);
+    const [quests, availablePuzzles] = await Promise.all([
+      gameService.getQuests(userId),
+      puzzleService.getAvailablePuzzles(userId, spiritId).catch(() => [])
+    ]);
+
+    const rewards = [
+      ...(questRewards.xpAwarded > 0
+        ? [{ type: "XP", amount: questRewards.xpAwarded }]
+        : []),
+      ...questRewards.itemsAwarded.map(name => ({ type: "ITEM", name, amount: 1 }))
+    ];
+
+    return {
+      action,
+      spirit,
+      dialogue: null,
+      quests,
+      puzzle: availablePuzzles[0] || null,
+      rewards
+    };
+  }
+
+  async getGameOverview(userId: string) {
+    const state = await this.getFullGameState(userId);
+    const [spiritCount, completedQuestCount, completedPuzzleCount] = await Promise.all([
+      prisma.spirit.count({ where: { userId, isActive: true } }),
+      prisma.questProgress.count({ where: { userId, completed: true } }),
+      state.activeSpirit
+        ? prisma.spiritPuzzleProgress.count({
+            where: { spiritId: state.activeSpirit.id, completed: true }
+          })
+        : Promise.resolve(0)
+    ]);
+
+    return {
+      ...state,
+      stats: {
+        spiritCount,
+        completedQuestCount,
+        completedPuzzleCount
+      }
     };
   }
   
