@@ -48,6 +48,8 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
         working-directory: apps/backend
+      - run: npm run test
+        working-directory: apps/backend
       - run: npm run build
         working-directory: apps/backend
 

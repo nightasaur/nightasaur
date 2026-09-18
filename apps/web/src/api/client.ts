@@ -100,6 +100,69 @@ export const languageAPI = {
   resetSettings: () => api.post("/language/reset"),
 };
 
+export type IeltsDiagnosticQuestionType = "main-idea" | "detail" | "vocabulary" | "inference";
+
+export interface IeltsDiagnosticStartResponse {
+  sessionId: string;
+  status: "in-progress";
+  currentQuestion: number;
+  diagnostic: {
+    id: string;
+    version: string;
+    skill: "reading";
+    source: "original-ielts-style";
+    title: string;
+    instructions: string;
+    scorePolicy: {
+      type: "objective-accuracy";
+      bandEstimate: null;
+      notice: string;
+    };
+    passages: Array<{ id: string; title: string; content: string }>;
+    questions: Array<{
+      id: string;
+      passageId: string;
+      prompt: string;
+      options: string[];
+      questionType: IeltsDiagnosticQuestionType;
+    }>;
+  };
+}
+
+export interface IeltsDiagnosticAnswerResponse {
+  feedback: {
+    questionId: string;
+    answerIndex: number;
+    correct: boolean;
+    correctAnswerIndex: number;
+    explanation: string;
+  };
+  progress: {
+    answered: number;
+    total: number;
+    completed: boolean;
+  };
+  result: null | {
+    skill: "reading";
+    scoreType: "objective-accuracy";
+    correct: number;
+    total: number;
+    accuracyPercent: number;
+    bandEstimate: null;
+    notice: string;
+  };
+}
+
+export const ieltsAssessmentAPI = {
+  startDiagnostic: () =>
+    api.post<IeltsDiagnosticStartResponse>("/academy/ielts/diagnostic/start"),
+  submitAnswer: (sessionId: string, questionId: string, answerIndex: number) =>
+    api.post<IeltsDiagnosticAnswerResponse>(
+      `/academy/ielts/diagnostic/${sessionId}/answer`,
+      { questionId, answerIndex },
+    ),
+};
+
 export const userAPI = {
   register: async (userData: { email: string; username: string; password: string }) => {
     const response = await api.post('/auth/register', userData);
