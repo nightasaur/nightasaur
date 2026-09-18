@@ -53,14 +53,35 @@ def _check_ollama(base_url: str, model: str) -> dict:
     }
 
 
+def _check_windows_11() -> dict:
+    """Identify Windows 11 even when Python reports release ``10``.
+
+    Windows 11 retains the NT 10.0 version and Python commonly exposes that
+    compatibility value through ``platform.release()``.  Windows 11 starts at
+    build 22000, so use the numeric build as the fallback signal.
+    """
+    system = platform.system()
+    release = platform.release()
+    version = platform.version()
+    try:
+        build = int(version.rsplit(".", 1)[-1])
+    except (TypeError, ValueError):
+        build = None
+
+    return {
+        "ok": system == "Windows" and (
+            release == "11" or (build is not None and build >= 22000)
+        ),
+        "system": system,
+        "release": release,
+        "version": version,
+        "build": build,
+    }
+
+
 def build_report(base_url: str, model: str) -> dict:
-    windows = platform.system() == "Windows"
     checks = {
-        "windows_11": {
-            "ok": windows and platform.release() == "11",
-            "system": platform.system(),
-            "release": platform.release(),
-        },
+        "windows_11": _check_windows_11(),
         "nvidia_gpu": _check_gpu(),
         "ollama_model": _check_ollama(base_url, model),
     }
