@@ -9,6 +9,7 @@ if (process.env.CI !== "true" || url.hostname !== "127.0.0.1" ||
 }
 process.env.JWT_SECRET = randomBytes(48).toString("base64url");
 process.env.NODE_ENV = "test";
+async function main() {
 const { PrismaClient } = await import("@prisma/client");
 const { issueSession, hasSession, revokeSession } = await import("../apps/backend/src/services/sessions.js");
 const db = new PrismaClient();
@@ -25,3 +26,6 @@ try {
   assert.equal((await db.user.findUniqueOrThrow({ where: { id: user.id } })).passwordHash, "not-a-real-password-hash");
   console.log("Isolated PostgreSQL migration and session smoke test passed");
 } finally { await db.$disconnect(); }
+
+}
+main().catch(() => { console.error("PostgreSQL fixture smoke test failed"); process.exitCode = 1; });
