@@ -27,7 +27,7 @@
 | W3 | Runtime Closure + IELTS Diagnostic | grounding 修正、真實作答、隔離 Backend/DB、HTTP E2E、同候選本機複驗 | `PARTIAL`：PR #18；僅剩目前候選的 Windows/Ollama grounding 複驗 |
 | W4 | v0.5 Bounded Edit（限制式修改） | allowlist/denylist、dry-run、hash、防穿越、原子替換 | `VERIFIED / UNMERGED`：PR #19 |
 | W5 | Coding Tool Loop（程式工具循環） | inspect → preview → path/before/after hash exact-approved apply；其他 mutation fail-closed | `VERIFIED / UNMERGED`：PR #20 |
-| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `ACTIVE`：PR #21 Gate A、PR #22 Gate B 已驗證；Gate C 建立 Reading Practice 閉環 |
+| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `ACTIVE`：Gate A/B/C 已驗證；Gate D 建立前台 Learning Loop 閉環 |
 | W7 | Git Safety I（Git 安全一） | 唯讀 status/diff；範圍與敏感資料防護 | `PENDING` |
 | W8 | Git Safety II（Git 安全二） | 受限 branch/commit；禁止 force/delete/main 直寫 | `PENDING` |
 | W9 | Git Closure（Git 閉環） | PR 流程、CI 證據、rollback（回復）契約 | `PENDING` |
@@ -63,4 +63,11 @@
 - 練習必須由目前使用者已完成的 Reading Diagnostic 證據解鎖並決定焦點。
 - 作答前不下發正解或解析；提交後只回傳伺服器端客觀評分與回饋。
 - Practice 結果標示 `profileEvidence: false`，不得污染 Diagnostic Learning Profile。
+- 不新增 migration、不操作正式資料、不部署 Production、不合併 main。
+
+## W6 Gate D 施工邊界
+
+- 前台只呈現 Profile、Plan 與 Practice API 的伺服器證據，不在瀏覽器偽造結果。
+- Practice 完成後明示不列入 Diagnostic Profile，也不產生 IELTS Band。
+- 此切片不呼叫 Qwen 或其他模型，只做 React UI、API 串接與自動測試。
 - 不新增 migration、不操作正式資料、不部署 Production、不合併 main。
