@@ -11,31 +11,28 @@ describe("resolveApiBaseUrl", () => {
     ).toBe("http://localhost:4100/api");
   });
 
-  it("uses the isolated backend in a Vercel Preview", () => {
+  it("uses the explicitly configured isolated backend", () => {
     expect(
       resolveApiBaseUrl({
         isDevelopment: false,
-        deploymentEnvironment: "preview",
         previewApiUrl: "https://nightasaur-pr18-preview.example/api/",
       }),
     ).toBe("https://nightasaur-pr18-preview.example/api");
   });
 
-  it("fails closed when a Preview backend is missing", () => {
+  it("fails closed when a non-development backend is missing", () => {
     expect(() =>
       resolveApiBaseUrl({
         isDevelopment: false,
-        deploymentEnvironment: "preview",
       }),
     ).toThrow("Refusing to fall back to the Production API");
   });
 
-  it("keeps Production on the same-origin API proxy", () => {
+  it("requires an explicit opt-in for the Production same-origin proxy", () => {
     expect(
       resolveApiBaseUrl({
         isDevelopment: false,
-        deploymentEnvironment: "production",
-        previewApiUrl: "https://must-not-be-used.example/api",
+        allowProductionProxy: true,
       }),
     ).toBe("/api");
   });

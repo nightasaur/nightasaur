@@ -23,9 +23,6 @@ export default defineConfig({
     "process.env.VITE_API_URL": JSON.stringify(
       process.env.VITE_API_URL || "/api"
     ),
-    __NIGHTASAUR_DEPLOYMENT_ENV__: JSON.stringify(
-      process.env.VERCEL_ENV || ""
-    ),
   },
   build: {
     outDir: "dist",

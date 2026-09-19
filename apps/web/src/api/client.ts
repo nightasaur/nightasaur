@@ -1,16 +1,12 @@
 import axios from "axios";
 import { resolveApiBaseUrl } from "../config/apiBaseUrl";
 
-declare const __NIGHTASAUR_DEPLOYMENT_ENV__: string;
-
 const API_BASE_URL = resolveApiBaseUrl({
   isDevelopment: import.meta.env.DEV,
-  deploymentEnvironment:
-    typeof __NIGHTASAUR_DEPLOYMENT_ENV__ === "string"
-      ? __NIGHTASAUR_DEPLOYMENT_ENV__
-      : undefined,
   developmentApiUrl: import.meta.env.VITE_API_URL,
   previewApiUrl: import.meta.env.VITE_PREVIEW_API_URL,
+  allowProductionProxy:
+    import.meta.env.VITE_ALLOW_PRODUCTION_API_PROXY === "true",
 });
 
 const api = axios.create({
