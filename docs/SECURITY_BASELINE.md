@@ -63,9 +63,13 @@ safety guard, not an isolation boundary if an operator supplies an incorrect pat
 
 ## Still outside this checkpoint
 
-Persistent session revocation/logout, login throttling, complete account/data
+Login throttling, complete account/data
 rights flows, privacy notices, independent penetration testing, the full set of
 other API ownership checks, and review of image models/assets are not certified
 complete. Existing startup/deployment scripts also require a release audit.
 PR stays draft. No main merge, production deployment, database migration or
 platform publishing is authorized by this document.
+
+## Persisted session revocation
+
+Registration and login persist a SHA-256 token digest and expiry before returning a JWT. Mandatory and optional authentication require the matching unexpired session and a live active user. Logout deletes only that session; independent random JWT IDs distinguish devices. No plaintext bearer token is stored. See `SESSION_MODEL.md`. Existing JWTs without matching session digests are intentionally rejected after rollout: users must sign in again, without changing their passwords. Expired-row cleanup and account-wide revocation UI remain separate work.

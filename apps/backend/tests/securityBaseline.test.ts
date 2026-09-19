@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test, { afterEach, mock } from "node:test";
+import test, { afterEach, beforeEach, mock } from "node:test";
 import { randomBytes } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import express from "express";
@@ -20,6 +20,7 @@ function mockDb(target: any, key: string, implementation: any) {
   const original = target[key]; const replacement = mock.fn(implementation);
   target[key] = replacement; restores.push(() => { target[key] = original; }); return replacement;
 }
+beforeEach(() => { mockDb(prisma.session, "count", async () => 1); });
 afterEach(() => { restores.splice(0).reverse().forEach(restore => restore()); mock.restoreAll(); process.env.SOCIAL_PUBLISH_ENABLED = "false"; });
 const user = { id: "owner", email: "fixture@example.invalid", role: "ADMIN", isActive: true };
 const token = () => signToken({ userId: user.id, email: user.email, role: "ADMIN" });

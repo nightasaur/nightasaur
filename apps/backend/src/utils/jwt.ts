@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
 
@@ -17,13 +18,14 @@ export function signToken(payload: TokenPayload): string {
 
   return jwt.sign(payload, secret, {
     expiresIn,
+    jwtid: randomUUID(),
     algorithm: "HS256",
     issuer: "nightasaur-backend",
     audience: "nightasaur-user",
   } as jwt.SignOptions);
 }
 
-export function verifyToken(token: string): TokenPayload {
+export function verifyToken(token: string): TokenPayload & { exp: number } {
   const secret = config.jwt.secret;
 
   if (!secret) {
@@ -36,5 +38,5 @@ export function verifyToken(token: string): TokenPayload {
   if (typeof payload === "string" || typeof payload.userId !== "string" || !payload.userId ||
       typeof payload.email !== "string" || typeof payload.role !== "string" ||
       typeof payload.exp !== "number") throw new Error("Invalid token claims");
-  return payload as TokenPayload;
+  return payload as TokenPayload & { exp: number };
 }

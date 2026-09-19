@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { isRetiredPassword } from "../utils/passwordPolicy.js";
-import { signToken } from "../utils/jwt.js";
+import { issueSession, revokeSession } from "./sessions.js";
 import { PrismaClient } from "@prisma/client";
 import { spiritService } from "./spirit.js";
 
@@ -85,7 +85,7 @@ export class AuthService {
       // 不讓精靈創建失敗影響註冊流程
     }
 
-    const token = signToken({
+    const token = await issueSession(prisma, {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -129,7 +129,7 @@ export class AuthService {
       throw Object.assign(new Error("帳號已被停用"), { statusCode: 403 });
     }
 
-    const token = signToken({
+    const token = await issueSession(prisma, {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -148,8 +148,7 @@ export class AuthService {
   }
 
   async logout(token: string) {
-    // 這裡可以實現令牌黑名單或其他登出邏輯
-    // 目前只是簡單實現
+    await revokeSession(prisma, token);
   }
 
   async getProfile(userId: string) {

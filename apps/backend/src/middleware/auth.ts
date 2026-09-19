@@ -1,5 +1,6 @@
 ﻿import { Request, Response, NextFunction } from "express";
 import { verifyToken, TokenPayload } from "../utils/jwt.js";
+import { hasSession } from "../services/sessions.js";
 import prisma from "../config/prisma.js";
 
 // Extend Express Request type
@@ -24,6 +25,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
 
   try {
     const payload = verifyToken(token);
+    if (!await hasSession(prisma, token, payload.userId)) throw new Error("Session unavailable");
     const user = await prisma.user.findUnique({ where: { id: payload.userId },
       select: { id: true, email: true, role: true, isActive: true } });
     if (!user?.isActive) {
@@ -45,6 +47,7 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
     const token = authHeader.split(" ")[1];
     try {
       const payload = verifyToken(token);
+      if (!await hasSession(prisma, token, payload.userId)) throw new Error("Session unavailable");
       const user = await prisma.user.findUnique({ where: { id: payload.userId },
         select: { id: true, email: true, role: true, isActive: true } });
       if (user?.isActive) {
