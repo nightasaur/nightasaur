@@ -1,6 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../config/prisma.js";
 import { getQuestionsByCategory, getCategoryStats, AcademicCategory } from "../services/academicQuiz.js";
+import {
+  IELTS_READING_DIAGNOSTIC_ID,
+  StoredIeltsDiagnosticQuestion,
+  buildIeltsReadingDiagnostic,
+  isStoredIeltsDiagnosticQuestion,
+  toPublicIeltsReadingDiagnostic,
+} from "../services/ieltsDiagnostic.js";
 
 export class AcademyController {
   async getCourses(req: Request, res: Response, next: NextFunction) {
@@ -162,6 +169,151 @@ export class AcademyController {
         totalQuestions: data.total,
       }));
       res.json({ categories });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async startIeltsReadingDiagnostic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      const storedQuestions = buildIeltsReadingDiagnostic();
+      const session = await prisma.learningSession.create({
+        data: {
+          userId,
+          courseId: IELTS_READING_DIAGNOSTIC_ID,
+          totalQuestions: storedQuestions.length,
+          questions: JSON.stringify(storedQuestions),
+          answers: "[]",
+        },
+      });
+
+      res.status(201).json({
+        sessionId: session.id,
+        status: "in-progress",
+        currentQuestion: 0,
+        diagnostic: toPublicIeltsReadingDiagnostic(storedQuestions),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async answerIeltsReadingDiagnostic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sessionId } = req.params;
+      const { questionId, answerIndex } = req.body ?? {};
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      if (typeof questionId !== "string" || !Number.isInteger(answerIndex)) {
+        return res.status(400).json({ error: "questionId 與整數 answerIndex 為必填" });
+      }
+
+      const session = await prisma.learningSession.findUnique({ where: { id: sessionId } });
+      if (
+        !session ||
+        session.userId !== userId ||
+        session.courseId !== IELTS_READING_DIAGNOSTIC_ID
+      ) {
+        return res.status(404).json({ error: "IELTS Diagnostic 會話不存在" });
+      }
+
+      if (session.completed) {
+        return res.status(409).json({ error: "IELTS Diagnostic 已完成，不能重複作答" });
+      }
+
+      const parsedQuestions: unknown = JSON.parse(session.questions);
+      const parsedAnswers: unknown = session.answers ? JSON.parse(session.answers) : [];
+      if (
+        !Array.isArray(parsedQuestions) ||
+        !parsedQuestions.every(isStoredIeltsDiagnosticQuestion) ||
+        !Array.isArray(parsedAnswers) ||
+        parsedQuestions.length !== session.totalQuestions ||
+        parsedAnswers.length !== session.currentQuestion
+      ) {
+        return res.status(409).json({ error: "IELTS Diagnostic 會話資料無效，請重新開始" });
+      }
+
+      const questions = parsedQuestions as StoredIeltsDiagnosticQuestion[];
+      const currentIndex = parsedAnswers.length;
+      const question = questions[currentIndex];
+      if (!question) {
+        return res.status(409).json({ error: "IELTS Diagnostic 作答進度無效，請重新開始" });
+      }
+
+      if (question.id !== questionId) {
+        return res.status(409).json({
+          error: "請依序作答",
+          expectedQuestionId: question.id,
+        });
+      }
+
+      if (answerIndex < 0 || answerIndex >= question.options.length) {
+        return res.status(400).json({ error: "answerIndex 超出選項範圍" });
+      }
+
+      const isCorrect = answerIndex === question.answer;
+      const completed = currentIndex + 1 === questions.length;
+      const answers = [
+        ...parsedAnswers,
+        { questionId: question.id, answerIndex, correct: isCorrect },
+      ];
+
+      const updateResult = await prisma.learningSession.updateMany({
+        where: {
+          id: session.id,
+          userId,
+          courseId: IELTS_READING_DIAGNOSTIC_ID,
+          currentQuestion: currentIndex,
+          completed: false,
+        },
+        data: {
+          answers: JSON.stringify(answers),
+          currentQuestion: currentIndex + 1,
+          correctCount: { increment: isCorrect ? 1 : 0 },
+          completed,
+          completedAt: completed ? new Date() : null,
+        },
+      });
+      if (updateResult.count !== 1) {
+        return res.status(409).json({ error: "作答狀態已更新，請勿重複提交" });
+      }
+
+      const updatedSession = await prisma.learningSession.findUnique({ where: { id: session.id } });
+      if (!updatedSession) {
+        return res.status(409).json({ error: "IELTS Diagnostic 會話已不存在" });
+      }
+
+      res.json({
+        feedback: {
+          questionId: question.id,
+          answerIndex,
+          correct: isCorrect,
+          correctAnswerIndex: question.answer,
+          explanation: question.explanation,
+        },
+        progress: {
+          answered: updatedSession.currentQuestion,
+          total: updatedSession.totalQuestions,
+          completed: updatedSession.completed,
+        },
+        result: completed
+          ? {
+              skill: "reading",
+              scoreType: "objective-accuracy",
+              correct: updatedSession.correctCount,
+              total: updatedSession.totalQuestions,
+              accuracyPercent: Math.round(
+                (updatedSession.correctCount / updatedSession.totalQuestions) * 100,
+              ),
+              bandEstimate: null,
+              notice: "這是原創 IELTS-style 閱讀基線，不是官方 IELTS 測驗或 Band 預估。",
+            }
+          : null,
+      });
     } catch (err) {
       next(err);
     }

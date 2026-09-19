@@ -1,16 +1,13 @@
 import axios from "axios";
+import { resolveApiBaseUrl } from "../config/apiBaseUrl";
 
-// Production always uses the same-origin /api proxy so the browser does not depend
-// on a stale VITE_API_URL or cross-origin CORS configuration.
-const getApiBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    return import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-  }
-
-  return '/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = resolveApiBaseUrl({
+  isDevelopment: import.meta.env.DEV,
+  developmentApiUrl: import.meta.env.VITE_API_URL,
+  previewApiUrl: import.meta.env.VITE_PREVIEW_API_URL,
+  allowProductionProxy:
+    import.meta.env.VITE_ALLOW_PRODUCTION_API_PROXY === "true",
+});
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -98,6 +95,69 @@ export const languageAPI = {
     api.get("/language/interface-translations", { params: { language } }),
   getSettingsMenu: () => api.get("/language/settings-menu"),
   resetSettings: () => api.post("/language/reset"),
+};
+
+export type IeltsDiagnosticQuestionType = "main-idea" | "detail" | "vocabulary" | "inference";
+
+export interface IeltsDiagnosticStartResponse {
+  sessionId: string;
+  status: "in-progress";
+  currentQuestion: number;
+  diagnostic: {
+    id: string;
+    version: string;
+    skill: "reading";
+    source: "original-ielts-style";
+    title: string;
+    instructions: string;
+    scorePolicy: {
+      type: "objective-accuracy";
+      bandEstimate: null;
+      notice: string;
+    };
+    passages: Array<{ id: string; title: string; content: string }>;
+    questions: Array<{
+      id: string;
+      passageId: string;
+      prompt: string;
+      options: string[];
+      questionType: IeltsDiagnosticQuestionType;
+    }>;
+  };
+}
+
+export interface IeltsDiagnosticAnswerResponse {
+  feedback: {
+    questionId: string;
+    answerIndex: number;
+    correct: boolean;
+    correctAnswerIndex: number;
+    explanation: string;
+  };
+  progress: {
+    answered: number;
+    total: number;
+    completed: boolean;
+  };
+  result: null | {
+    skill: "reading";
+    scoreType: "objective-accuracy";
+    correct: number;
+    total: number;
+    accuracyPercent: number;
+    bandEstimate: null;
+    notice: string;
+  };
+}
+
+export const ieltsAssessmentAPI = {
+  startDiagnostic: () =>
+    api.post<IeltsDiagnosticStartResponse>("/academy/ielts/diagnostic/start"),
+  submitAnswer: (sessionId: string, questionId: string, answerIndex: number) =>
+    api.post<IeltsDiagnosticAnswerResponse>(
+      `/academy/ielts/diagnostic/${sessionId}/answer`,
+      { questionId, answerIndex },
+    ),
 };
 
 export const userAPI = {

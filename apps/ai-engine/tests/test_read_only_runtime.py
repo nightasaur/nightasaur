@@ -66,12 +66,19 @@ async def test_workspace_inspect_reads_bounded_utf8_file(tmp_path):
 @pytest.mark.asyncio
 async def test_workspace_inspect_lists_entries_without_sensitive_paths(tmp_path):
     (tmp_path / "safe.txt").write_text("ok", encoding="utf-8")
+    (tmp_path / "src").mkdir()
     (tmp_path / ".env").write_text("TOKEN=nope", encoding="utf-8")
     tool = WorkspaceInspectTool(tmp_path)
 
     result = await tool.run(action="list", path=".")
 
-    assert result["entries"] == [{"name": "safe.txt", "kind": "file"}]
+    assert result["entries"] == [
+        {"name": "safe.txt", "kind": "file"},
+        {"name": "src", "kind": "directory"},
+    ]
+    assert result["files"] == ["safe.txt"]
+    assert result["directories"] == ["src"]
+    assert ".env" not in result["files"]
 
 
 @pytest.mark.asyncio

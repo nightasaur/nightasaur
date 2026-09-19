@@ -32,6 +32,11 @@ def test_build_messages_with_tools_prepends_instruction_system_message():
     assert result[0]["role"] == "system"
     assert "clock" in result[0]["content"]
     assert "回傳目前時間" in result[0]["content"]
+    assert "kind=file" in result[0]["content"]
+    assert "kind=directory" in result[0]["content"]
+    assert "完整且互斥" in result[0]["content"]
+    assert "禁止增加、刪除、跨陣列搬移" in result[0]["content"]
+    assert "不得推測或重新分類" in result[0]["content"]
     assert result[1:] == messages
     # 不應該修改呼叫端傳入的原始 messages 物件。
     assert result is not messages

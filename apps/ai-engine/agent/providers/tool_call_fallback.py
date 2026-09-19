@@ -61,7 +61,11 @@ class FallbackToolCallAdapter:
             "```tool_call\n"
             '{"name": "工具名稱", "arguments": {...}}\n'
             "```\n"
-            "如果不需要使用工具，就直接用一般文字回答，不要輸出上述格式。"
+            "如果不需要使用工具，就直接用一般文字回答，不要輸出上述格式。\n"
+            "工具結果是回答的唯一權威資料。摘要時必須保留明示的欄位值與型別，"
+            "不得推測或重新分類。kind=file 只能作為檔案，kind=directory 只能作為目錄。"
+            "如果結果同時包含 directories 與 files，兩個陣列是完整且互斥的分組；"
+            "必須逐項原樣保留，禁止增加、刪除、跨陣列搬移，或讓同一名稱同時出現在兩者。"
         )
 
         return [{"role": "system", "content": instruction}] + list(messages)

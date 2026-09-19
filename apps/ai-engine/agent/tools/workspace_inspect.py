@@ -77,15 +77,33 @@ class WorkspaceInspectTool(Tool):
                 raise ValueError("list requires a directory")
             entries = sorted(target.iterdir(), key=lambda item: item.name.lower())
             truncated = len(entries) > self.max_entries
+            visible_entries = [
+                item
+                for item in entries[: self.max_entries]
+                if item.name.lower() not in self._SENSITIVE_PARTS
+            ]
+            typed_entries = [
+                {
+                    "name": item.name,
+                    "kind": "directory" if item.is_dir() else "file",
+                }
+                for item in visible_entries
+            ]
             return {
                 "path": target.relative_to(self.root).as_posix(),
-                "entries": [
-                    {
-                        "name": item.name,
-                        "kind": "directory" if item.is_dir() else "file",
-                    }
-                    for item in entries[: self.max_entries]
-                    if item.name.lower() not in self._SENSITIVE_PARTS
+                "entries": typed_entries,
+                # Deterministic grouped views make the file/directory boundary
+                # explicit for small local models while preserving `entries`
+                # as the canonical per-item evidence.
+                "directories": [
+                    entry["name"]
+                    for entry in typed_entries
+                    if entry["kind"] == "directory"
+                ],
+                "files": [
+                    entry["name"]
+                    for entry in typed_entries
+                    if entry["kind"] == "file"
                 ],
                 "truncated": truncated,
             }
