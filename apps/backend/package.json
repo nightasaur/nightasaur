@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "test": "tsc && node --test dist/services/ieltsDiagnostic.test.js dist/controllers/academy.ieltsDiagnostic.test.js dist/controllers/academy.ieltsProfile.test.js",
+    "test": "tsc && node --test dist/services/ieltsDiagnostic.test.js dist/controllers/academy.ieltsDiagnostic.test.js dist/controllers/academy.ieltsProfile.test.js dist/controllers/academy.ieltsDailyPlan.test.js",
     "build": "tsc",
     "start": "node dist/index.js",
     "preview:prepare": "node scripts/prepare-preview.mjs",

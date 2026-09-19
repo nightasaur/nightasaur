@@ -27,7 +27,7 @@
 | W3 | Runtime Closure + IELTS Diagnostic | grounding 修正、真實作答、隔離 Backend/DB、HTTP E2E、同候選本機複驗 | `PARTIAL`：PR #18；僅剩目前候選的 Windows/Ollama grounding 複驗 |
 | W4 | v0.5 Bounded Edit（限制式修改） | allowlist/denylist、dry-run、hash、防穿越、原子替換 | `VERIFIED / UNMERGED`：PR #19 |
 | W5 | Coding Tool Loop（程式工具循環） | inspect → preview → path/before/after hash exact-approved apply；其他 mutation fail-closed | `VERIFIED / UNMERGED`：PR #20 |
-| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `ACTIVE`：PR #21 建立 evidence-only Learning Profile 第一切片 |
+| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `ACTIVE`：PR #21 Gate A 已驗證；PR #22 建立 evidence-based Daily Plan Gate B |
 | W7 | Git Safety I（Git 安全一） | 唯讀 status/diff；範圍與敏感資料防護 | `PENDING` |
 | W8 | Git Safety II（Git 安全二） | 受限 branch/commit；禁止 force/delete/main 直寫 | `PENDING` |
 | W9 | Git Closure（Git 閉環） | PR 流程、CI 證據、rollback（回復）契約 | `PENDING` |
@@ -50,3 +50,10 @@
   與替換內容 SHA-256。
 - 不新增 shell、Git、檔案建立/刪除、資料庫或部署工具。
 - 僅在 temporary workspace（暫存工作區）驗證寫入，不操作正式資料。
+
+## W6 Gate B 施工邊界
+
+- Daily Plan 只讀取目前使用者最新、有效且已完成的 Reading Diagnostic 客觀證據。
+- 沒有證據時不派發任務；有證據時只產生兩項、共 25 分鐘的確定性 Reading 計畫。
+- 不讀取或回傳題目、答案、正解或解析；不推估官方 IELTS Band。
+- 不新增資料庫 migration、不寫入正式資料、不部署 Production、不合併 main。
