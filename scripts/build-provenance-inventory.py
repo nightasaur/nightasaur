@@ -55,7 +55,7 @@ def snapshot():
             "distributionApproved": False})
     references = [
         ("text-runtime", None, "apps/ai-engine/config.py", "DISABLED_BY_DEFAULT"),
-        ("image-checkpoint", "sd15.safetensors", "apps/ai-engine/services/comfyui.py", "SOURCE_AND_RIGHTS_REQUIRED"),
+        ("image-checkpoint", None, "apps/ai-engine/services/comfyui.py", "DISABLED_BY_DEFAULT"),
         ("training-base", "runwayml/stable-diffusion-v1-5", "apps/ai-engine/training/train_lora.py", "SOURCE_AND_RIGHTS_REQUIRED"),
         ("vae", "vae-ft-mse-840000-ema-pruned.safetensors", "apps/ai-engine/workflows/spirit_generator.json", "SOURCE_AND_RIGHTS_REQUIRED"),
         ("lora", "nightasaur_style.safetensors", "apps/ai-engine/workflows/spirit_generator.json", "TRAINING_DATA_AND_RIGHTS_REQUIRED"),

@@ -9,3 +9,6 @@ OLLAMA_MODEL = validate_model_selection(os.getenv("OLLAMA_MODEL", ""))
 COMFYUI_URL = os.getenv("COMFYUI_URL", "http://localhost:8188")
 HOST = os.getenv("AI_HOST", "0.0.0.0")
 PORT = int(os.getenv("AI_PORT", "8000"))
+
+# Empty disables image inference; selection requires separate provenance review.
+COMFYUI_CHECKPOINT = validate_model_selection(os.getenv("COMFYUI_CHECKPOINT", ""))
