@@ -294,6 +294,14 @@ export default function IeltsLearningLoop({
 
           {practiceResult && (
             <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-5">
+              {feedback && (
+                <div className="mb-4 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-100">
+                  <div className="font-bold mb-1">
+                    {feedback.correct ? "練習答對了" : "練習答錯了"}
+                  </div>
+                  <p>{feedback.explanation}</p>
+                </div>
+              )}
               <div className="text-2xl font-black">
                 Practice Score：{practiceResult.correct} / {practiceResult.total} ·{" "}
                 {practiceResult.accuracyPercent}%
