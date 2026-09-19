@@ -1,0 +1,150 @@
+{
+  "scope": "cpu_software_reproduction_only",
+  "model": "smollm2:1.7b",
+  "digest": "cef4a1e09247f018ca0c482ad4c2ce1474aba5e87f245dacf97f07948d05d8b4",
+  "trials": [
+    {
+      "real_tool_result_reproduced": true,
+      "fixture_unchanged": true,
+      "diagnostics": {
+        "reason": "passed",
+        "model_calls": [
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 1,
+            "expected_tool_requested": true,
+            "response_characters": 102,
+            "contains_tool_marker": false,
+            "answer_matches": false,
+            "answer_contains_challenge": false,
+            "done_reason": "stop"
+          },
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 0,
+            "expected_tool_requested": false,
+            "response_characters": 46,
+            "contains_tool_marker": false,
+            "answer_matches": true,
+            "answer_contains_challenge": true,
+            "done_reason": "stop"
+          }
+        ],
+        "tool_calls": [
+          {
+            "expected_tool": true,
+            "expected_arguments": true,
+            "ok": true
+          }
+        ]
+      },
+      "tool_call_mode": "json_schema"
+    },
+    {
+      "real_tool_result_reproduced": true,
+      "fixture_unchanged": true,
+      "diagnostics": {
+        "reason": "passed",
+        "model_calls": [
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 1,
+            "expected_tool_requested": true,
+            "response_characters": 102,
+            "contains_tool_marker": false,
+            "answer_matches": false,
+            "answer_contains_challenge": false,
+            "done_reason": "stop"
+          },
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 0,
+            "expected_tool_requested": false,
+            "response_characters": 46,
+            "contains_tool_marker": false,
+            "answer_matches": true,
+            "answer_contains_challenge": true,
+            "done_reason": "stop"
+          }
+        ],
+        "tool_calls": [
+          {
+            "expected_tool": true,
+            "expected_arguments": true,
+            "ok": true
+          }
+        ]
+      },
+      "tool_call_mode": "json_schema"
+    },
+    {
+      "real_tool_result_reproduced": true,
+      "fixture_unchanged": true,
+      "diagnostics": {
+        "reason": "passed",
+        "model_calls": [
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 1,
+            "expected_tool_requested": true,
+            "response_characters": 102,
+            "contains_tool_marker": false,
+            "answer_matches": false,
+            "answer_contains_challenge": false,
+            "done_reason": "stop"
+          },
+          {
+            "unmarked_tool_json": false,
+            "tool_call_count": 0,
+            "expected_tool_requested": false,
+            "response_characters": 46,
+            "contains_tool_marker": false,
+            "answer_matches": true,
+            "answer_contains_challenge": true,
+            "done_reason": "stop"
+          }
+        ],
+        "tool_calls": [
+          {
+            "expected_tool": true,
+            "expected_arguments": true,
+            "ok": true
+          }
+        ]
+      },
+      "tool_call_mode": "json_schema"
+    }
+  ],
+  "generated_at": "2026-09-19T17:22:11.696866+00:00",
+  "inference_window": {
+    "start": "2026-09-19T17:19:15.796169134Z",
+    "end": "2026-09-19T17:19:32.286712684Z"
+  },
+  "platform": "Linux CPU; isolated diagnostic environment",
+  "ollama_version": "0.34.0",
+  "ollama_release": "https://github.com/ollama/ollama/releases/tag/v0.34.0",
+  "ollama_linux_amd64_archive_sha256": "cf95886728959aa09910bb34de5cca1cc5a8f68003b5597197d3f2c2d57c0804",
+  "baseline_commit": "4bb762f64c1b7fdb607ab05f73a39b1b605cc84d",
+  "model_options": {
+    "temperature": 0,
+    "num_predict": 256,
+    "require_initial_tool": true
+  },
+  "windows_runtime_verified": false,
+  "full_gate_verified": false,
+  "limits": [
+    "CPU software evidence only",
+    "No actual GPU utilization evidence",
+    "Required initial tool call; not autonomous tool selection",
+    "Synthetic data only; no production release or model-quality certification"
+  ],
+  "source_sha256": {
+    "apps/ai-engine/agent/__init__.py": "076e12ab8af3ad2242a396e651bd17eb9f1dd67e8b995054468c9c71381b672b",
+    "apps/ai-engine/agent/core.py": "f87dcc81da67914b289e5fb338974fd93c0fcbe05727f7498ca95402df5b5d22",
+    "apps/ai-engine/agent/providers/ollama_provider.py": "4361bef3107bbc926a8d46c194399a54da74dbd0496c3fa5a70cea06140740d2",
+    "apps/ai-engine/agent/providers/structured_tool_call.py": "42a12270e92b329923be942d29b154a49133738e0fcc4e07b68d0e7076370fd7",
+    "apps/ai-engine/agent/execution_policy.py": "0b23e2534bcb32d0eab80802b0f063c8dcd04cb4c6c491ae68ea815e99c1a6e1",
+    "apps/ai-engine/agent/tools/workspace_inspect.py": "367724f5c12c84e1650cbb1a7e0f52539716e1ce96d8dcbc5bf6ab52586b549c",
+    "apps/ai-engine/scripts/verify_local_runtime.py": "8517565d4736c99cdcc751d5a5abf6b7362ccc70df3377adad619e39eae4255c"
+  }
+}

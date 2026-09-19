@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, fix/legal-security-open-source-baseline]
 
 jobs:
   test-ai-engine:
