@@ -8,11 +8,17 @@ vi.mock("../api/client", () => ({
   ieltsAssessmentAPI: {
     startDiagnostic: vi.fn(),
     submitAnswer: vi.fn(),
+    getProfile: vi.fn(),
+    getDailyPlan: vi.fn(),
+    startPractice: vi.fn(),
+    submitPracticeAnswer: vi.fn(),
   },
 }));
 
 const startDiagnosticMock = vi.mocked(ieltsAssessmentAPI.startDiagnostic);
 const submitAnswerMock = vi.mocked(ieltsAssessmentAPI.submitAnswer);
+const getProfileMock = vi.mocked(ieltsAssessmentAPI.getProfile);
+const getDailyPlanMock = vi.mocked(ieltsAssessmentAPI.getDailyPlan);
 
 const startResponse = {
   sessionId: "session-reading-1",
@@ -59,6 +65,39 @@ const startResponse = {
 beforeEach(() => {
   vi.clearAllMocks();
   startDiagnosticMock.mockResolvedValue({ data: startResponse } as never);
+  getProfileMock.mockResolvedValue({
+    data: {
+      profileVersion: "ielts-learning-profile-v1",
+      evidencePolicy: "completed-diagnostic-sessions-only",
+      skills: Object.fromEntries(
+        ["reading", "listening", "writing", "speaking"].map((skill) => [
+          skill,
+          {
+            status: "not-assessed",
+            evidenceCount: 0,
+            latestEvidence: null,
+            bestAccuracyPercent: null,
+            bandEstimate: null,
+          },
+        ]),
+      ),
+      notice: "No diagnostic evidence.",
+    },
+  } as never);
+  getDailyPlanMock.mockResolvedValue({
+    data: {
+      planVersion: "ielts-daily-plan-v1",
+      status: "diagnostic-required",
+      evidencePolicy: "latest-completed-diagnostic-only",
+      scope: ["reading"],
+      generatedFrom: null,
+      focusLevel: null,
+      totalMinutes: 0,
+      tasks: [],
+      bandEstimate: null,
+      notice: "Complete the diagnostic first.",
+    },
+  } as never);
 });
 
 afterEach(() => {

@@ -154,12 +154,128 @@ export interface IeltsDiagnosticAnswerResponse {
   };
 }
 
+export type IeltsReadingFocusLevel =
+  | "foundation"
+  | "consolidation"
+  | "maintenance";
+
+export interface IeltsObjectiveEvidence {
+  sessionId: string;
+  scoreType: "objective-accuracy";
+  correct: number;
+  total: number;
+  accuracyPercent: number;
+  completedAt: string | null;
+}
+
+interface IeltsSkillProfile {
+  status: "evidence-ready" | "not-assessed";
+  evidenceCount: number;
+  latestEvidence: IeltsObjectiveEvidence | null;
+  bestAccuracyPercent: number | null;
+  bandEstimate: null;
+}
+
+export interface IeltsLearningProfileResponse {
+  profileVersion: "ielts-learning-profile-v1";
+  evidencePolicy: "completed-diagnostic-sessions-only";
+  skills: {
+    reading: IeltsSkillProfile;
+    listening: IeltsSkillProfile;
+    writing: IeltsSkillProfile;
+    speaking: IeltsSkillProfile;
+  };
+  notice: string;
+}
+
+export interface IeltsDailyPlanResponse {
+  planVersion: "ielts-daily-plan-v1";
+  status: "diagnostic-required" | "ready";
+  evidencePolicy: "latest-completed-diagnostic-only";
+  scope: ["reading"];
+  generatedFrom: IeltsObjectiveEvidence | null;
+  focusLevel: IeltsReadingFocusLevel | null;
+  totalMinutes: number;
+  tasks: Array<{
+    id: string;
+    type: "review" | "practice";
+    skill: "reading";
+    minutes: number;
+    targetQuestionCount?: number;
+    sourceSessionId?: string;
+    focus?: IeltsReadingFocusLevel;
+  }>;
+  bandEstimate: null;
+  notice: string;
+}
+
+export interface IeltsPracticeStartResponse {
+  sessionId: string;
+  status: "in-progress";
+  currentQuestion: number;
+  generatedFrom: IeltsObjectiveEvidence;
+  practice: {
+    id: string;
+    version: "reading-practice-v1";
+    skill: "reading";
+    source: "original-ielts-style";
+    focusLevel: IeltsReadingFocusLevel;
+    title: string;
+    instructions: string;
+    scorePolicy: {
+      type: "practice-accuracy";
+      profileEvidence: false;
+      bandEstimate: null;
+      notice: string;
+    };
+    passages: Array<{ id: string; title: string; content: string }>;
+    questions: Array<{
+      id: string;
+      passageId: string;
+      prompt: string;
+      options: string[];
+      questionType: IeltsDiagnosticQuestionType;
+    }>;
+  };
+}
+
+export interface IeltsPracticeAnswerResponse {
+  feedback: IeltsDiagnosticAnswerResponse["feedback"];
+  progress: IeltsDiagnosticAnswerResponse["progress"];
+  result: null | {
+    skill: "reading";
+    scoreType: "practice-accuracy";
+    focusLevel: IeltsReadingFocusLevel;
+    correct: number;
+    total: number;
+    accuracyPercent: number;
+    profileEvidence: false;
+    bandEstimate: null;
+    notice: string;
+  };
+}
+
 export const ieltsAssessmentAPI = {
   startDiagnostic: () =>
     api.post<IeltsDiagnosticStartResponse>("/academy/ielts/diagnostic/start"),
   submitAnswer: (sessionId: string, questionId: string, answerIndex: number) =>
     api.post<IeltsDiagnosticAnswerResponse>(
       `/academy/ielts/diagnostic/${sessionId}/answer`,
+      { questionId, answerIndex },
+    ),
+  getProfile: () =>
+    api.get<IeltsLearningProfileResponse>("/academy/ielts/profile"),
+  getDailyPlan: () =>
+    api.get<IeltsDailyPlanResponse>("/academy/ielts/daily-plan"),
+  startPractice: () =>
+    api.post<IeltsPracticeStartResponse>("/academy/ielts/practice/start"),
+  submitPracticeAnswer: (
+    sessionId: string,
+    questionId: string,
+    answerIndex: number,
+  ) =>
+    api.post<IeltsPracticeAnswerResponse>(
+      `/academy/ielts/practice/${sessionId}/answer`,
       { questionId, answerIndex },
     ),
 };
