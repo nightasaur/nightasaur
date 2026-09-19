@@ -20,7 +20,9 @@ async def test_generate_success_returns_stripped_content(patch_ollama_httpx_clie
     patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "  哈囉！  "}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(
+        base_url="http://ollama.local", model="qwen2.5:3b"
+    )
 
     result = await provider.generate([{"role": "user", "content": "hi"}])
 
@@ -235,6 +237,55 @@ async def test_generate_with_tools_renders_tool_history_as_text_messages(
     assert "workspace_inspect" in outgoing[-2]["content"]
     assert outgoing[-1]["role"] == "user"
     assert '"entries"' in outgoing[-1]["content"]
+
+
+@pytest.mark.asyncio
+async def test_workspace_inspect_result_reinforces_mutually_exclusive_groups(
+    patch_ollama_httpx_client,
+):
+    """The fallback repeats grouped workspace evidence next to the tool result.
+
+    Small local models must not infer the ``files`` array from every entry name
+    after already copying directory names into ``directories``.
+    """
+    calls = patch_ollama_httpx_client(
+        post_result=FakeHttpxResponse(200, {"message": {"content": "summary"}})
+    )
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    tools = [ToolSpec(name="workspace_inspect", description="Inspect workspace")]
+    messages = [
+        {"role": "user", "content": "list apps/web"},
+        {
+            "role": "tool",
+            "tool_call_id": "call-1",
+            "name": "workspace_inspect",
+            "content": {
+                "path": "apps/web",
+                "entries": [
+                    {"name": "index.html", "kind": "file"},
+                    {"name": "public", "kind": "directory"},
+                    {"name": "src", "kind": "directory"},
+                ],
+                "directories": ["public", "src"],
+                "files": ["index.html"],
+                "truncated": False,
+            },
+        },
+    ]
+
+    result = await provider.generate(messages, tools=tools)
+
+    assert result.content == "summary"
+    _, _, payload = calls[0]
+    rendered_result = payload["messages"][-1]["content"]
+    assert "Authoritative workspace classification" in rendered_result
+    assert (
+        '{"directories": ["public", "src"], "files": ["index.html"]}'
+        in rendered_result
+    )
+    assert "exhaustive and mutually exclusive" in rendered_result
+    assert "never put a directory in files" in rendered_result
+    assert "never put a file in directories" in rendered_result
 
 
 @pytest.mark.asyncio
