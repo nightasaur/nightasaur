@@ -13,7 +13,7 @@
 
 ### 1. 創建測試服務器
 創建了 `test-login-server.ts`，這是一個超簡單的登入系統：
-- ✅ 硬編碼管理員帳號：`admin@nightasaur.com` / `admin123`
+- ✅ 硬編碼管理員帳號：`admin@nightasaur.com` / `RETIRED-CREDENTIAL-DO-NOT-USE`
 - ✅ 完整的登入/註冊API
 - ✅ 健康檢查端點
 - ✅ 完整的HTML界面
@@ -44,7 +44,7 @@ npx tsx test-login-server.ts
 
 ### 訪問登入界面
 - 網址：http://localhost:3002
-- 管理員帳號：admin@nightasaur.com / admin123
+- 管理員帳號：admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 
 ### 運行系統測試
 ```bash
@@ -78,7 +78,7 @@ node test-login-system.js
 3. 檢查依賴包是否安裝
 
 ### 如果登入失敗
-1. 確認使用正確的帳號：admin@nightasaur.com / admin123
+1. 確認使用正確的帳號：admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 2. 檢查服務器是否正在運行
 3. 查看瀏覽器控制台錯誤信息
 
@@ -98,7 +98,7 @@ node test-login-system.js
 ## 聯繫支持
 - 支援信箱：service@nightasaur.com
 - 服務器地址：http://localhost:3002
-- 管理員帳號：admin@nightasaur.com / admin123
+- 管理員帳號：admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 
 ---
 

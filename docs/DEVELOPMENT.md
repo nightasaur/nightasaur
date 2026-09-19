@@ -254,7 +254,7 @@ curl -X POST http://localhost:3002/api/auth/register \
 # 登入
 curl -X POST http://localhost:3002/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@nightasaur.com","password":"demo1234"}'
+  -d '{"email":"demo@nightasaur.com","password":"RETIRED-CREDENTIAL-DO-NOT-USE"}'
 ```
 
 ---

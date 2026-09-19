@@ -30,7 +30,7 @@
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```
@@ -46,7 +46,7 @@
 
 2. **密碼欄位**
    - 類型: password
-   - 預設值: `admin123`
+   - 預設值: `RETIRED-CREDENTIAL-DO-NOT-USE`
    - 必填: 是
    - 驗證: 最少6字符
 
@@ -84,7 +84,7 @@ npx tsx auth-server.ts
 
 ### **3. 測試帳號**
 ```
-管理員: admin@nightasaur.com / admin123
+管理員: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 測試用戶: test@nightasaur.com / test123
 支援信箱: service@nightasaur.com
 ```
@@ -328,7 +328,7 @@ cd apps/backend && npx tsx auth-server.ts
 
 # 3. 使用管理員帳號
 # 電子郵件: admin@nightasaur.com
-# 密碼: admin123
+# 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 # 支援: service@nightasaur.com
 ```
 

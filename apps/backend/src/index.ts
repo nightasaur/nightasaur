@@ -14,12 +14,13 @@ import squadRoutes from "./routes/squad.js";
 import arLocationRoutes from "./routes/arLocation.js";
 import languageRoutes from "./routes/language.js";
 import academyRoutes from "./routes/academy.js";
+import assistantRoutes from "./routes/assistant.js";
 
 const app = express();
 
 // 中間件配置
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // 健康檢查路由
@@ -45,6 +46,7 @@ app.use("/api/squads", squadRoutes);
 app.use("/api/ar", arLocationRoutes);
 app.use("/api/language", languageRoutes);
 app.use("/api/academy", academyRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // 錯誤處理中間件
 app.use(errorHandler);

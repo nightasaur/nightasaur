@@ -91,7 +91,7 @@ npx tsx auth-server.ts
 ### 3. 測試帳號
 ```
 電子郵件: admin@nightasaur.com
-密碼: admin123
+密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 支援信箱: service@nightasaur.com
 ```
 

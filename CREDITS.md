@@ -1,4 +1,7 @@
-# CREDITS
+# CREDITS — declarations require review
+
+The historical tables below are unverified attribution leads, not permission to copy or commercial clearance. Consult [the versioned inventory](docs/PROVENANCE.md). In particular, GPL obligations are not satisfied merely by credit; model restrictions and proprietary assets require separate review. No third-party work inherits this repository's MIT license.
+
 
 ## Special Thanks
 

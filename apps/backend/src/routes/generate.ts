@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.js";
+import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
+import prisma from "../config/prisma.js";
 import { imageGenService } from "../services/imagegen.js";
 
 const router = Router();
@@ -8,6 +9,10 @@ router.use(authMiddleware);
 // POST /api/generate/spirit/:id - 觸發精靈圖像生成
 router.post("/spirit/:id", async (req, res, next) => {
   try {
+    const owned = await prisma.spirit.findFirst({ where: {
+      id: req.params.id, userId: req.user!.userId, isActive: true,
+    } });
+    if (!owned) { res.status(404).json({ error: "精靈不存在" }); return; }
     await imageGenService.generateSpiritImage(req.params.id);
     res.json({ ok: true, message: "生成任務已觸發" });
   } catch (err) {
@@ -16,7 +21,7 @@ router.post("/spirit/:id", async (req, res, next) => {
 });
 
 // POST /api/generate/process - 觸發批次生成
-router.post("/process", async (_req, res, next) => {
+router.post("/process", adminMiddleware, async (_req, res, next) => {
   try {
     const result = await imageGenService.processPendingTasks();
     res.json({ ok: true, ...result });

@@ -17,6 +17,9 @@ export function signToken(payload: TokenPayload): string {
 
   return jwt.sign(payload, secret, {
     expiresIn,
+    algorithm: "HS256",
+    issuer: "nightasaur-backend",
+    audience: "nightasaur-user",
   } as jwt.SignOptions);
 }
 
@@ -27,5 +30,11 @@ export function verifyToken(token: string): TokenPayload {
     throw new Error("JWT secret is not configured");
   }
 
-  return jwt.verify(token, secret) as TokenPayload;
+  const payload = jwt.verify(token, secret, {
+    algorithms: ["HS256"], issuer: "nightasaur-backend", audience: "nightasaur-user",
+  });
+  if (typeof payload === "string" || typeof payload.userId !== "string" || !payload.userId ||
+      typeof payload.email !== "string" || typeof payload.role !== "string" ||
+      typeof payload.exp !== "number") throw new Error("Invalid token claims");
+  return payload as TokenPayload;
 }

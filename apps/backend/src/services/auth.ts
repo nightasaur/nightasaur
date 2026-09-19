@@ -1,74 +1,11 @@
 import bcrypt from "bcryptjs";
+import { isRetiredPassword } from "../utils/passwordPolicy.js";
 import { signToken } from "../utils/jwt.js";
 import { PrismaClient } from "@prisma/client";
 import { spiritService } from "./spirit.js";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
-
-// 預設管理員帳號資料
-const DEFAULT_ADMIN = {
-  email: "admin@nightasaur.com",
-  username: "Nightasaur管理員",
-  password: "admin123!",
-  role: "ADMIN" as const,
-};
-
-// 預設示範帳號資料
-const DEFAULT_DEMO = {
-  email: "demo@nightasaur.com",
-  username: "精靈訓練家",
-  password: "demo1234",
-  role: "USER" as const,
-};
-
-// 確保預設帳號存在
-async function ensureDefaultUsers() {
-  try {
-    // 檢查並創建管理員帳號
-    let adminUser = await prisma.user.findFirst({ where: { email: DEFAULT_ADMIN.email } });
-    if (!adminUser) {
-      const adminHash = await bcrypt.hash(DEFAULT_ADMIN.password, SALT_ROUNDS);
-      adminUser = await prisma.user.create({
-        data: {
-          email: DEFAULT_ADMIN.email,
-          username: DEFAULT_ADMIN.username,
-          passwordHash: adminHash,
-          role: DEFAULT_ADMIN.role,
-          isActive: true,
-          bio: "Nightasaur 系統管理員"
-        }
-      });
-      console.log(`✅ 管理員帳號已創建: ${DEFAULT_ADMIN.email}`);
-    }
-
-    // 檢查並創建示範帳號
-    let demoUser = await prisma.user.findFirst({ where: { email: DEFAULT_DEMO.email } });
-    if (!demoUser) {
-      const demoHash = await bcrypt.hash(DEFAULT_DEMO.password, SALT_ROUNDS);
-      demoUser = await prisma.user.create({
-        data: {
-          email: DEFAULT_DEMO.email,
-          username: DEFAULT_DEMO.username,
-          passwordHash: demoHash,
-          role: DEFAULT_DEMO.role,
-          isActive: true,
-          bio: "示範用戶，擁有3隻精靈"
-        }
-      });
-      console.log(`✅ 示範帳號已創建: ${DEFAULT_DEMO.email}`);
-    }
-
-    console.log("✅ 預設帳號已確保存在");
-    console.log(`   Admin: ${DEFAULT_ADMIN.email} / ${DEFAULT_ADMIN.password}`);
-    console.log(`   Demo: ${DEFAULT_DEMO.email} / ${DEFAULT_DEMO.password}`);
-  } catch (error) {
-    console.error("❌ 確保預設帳號時發生錯誤:", error);
-  }
-}
-
-// 初始化時確保預設帳號存在
-ensureDefaultUsers().catch(console.error);
 
 // 元素列表
 const ELEMENTS = ["FIRE", "WATER", "LIGHT", "SHADOW", "STAR", "ILLUSION", "MOON", "NATURE", "THUNDER", "ICE"];
@@ -100,6 +37,7 @@ function generateSpiritName(element: string, username: string) {
 
 export class AuthService {
   async register(email: string, username: string, password: string) {
+    if (isRetiredPassword(password)) throw Object.assign(new Error("請選擇未公開使用的密碼"), { statusCode: 400 });
     // 檢查是否已存在
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -172,6 +110,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
+    if (isRetiredPassword(password)) throw Object.assign(new Error("Email 或密碼錯誤"), { statusCode: 401 });
     // 查找使用者
     const user = await prisma.user.findFirst({
       where: { email }

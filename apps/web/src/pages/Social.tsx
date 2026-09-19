@@ -69,12 +69,12 @@ export default function Social() {
             value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
 
           <button className="btn-primary" type="submit" disabled={posting}>
-            {posting ? "發布中..." : `發布到 ${form.platform}`}
+            {posting ? "儲存中..." : `儲存 ${form.platform} 草稿`}
           </button>
         </form>
       </div>
 
-      <h2 className="text-xl font-bold mb-4">發布記錄</h2>
+      <h2 className="text-xl font-bold mb-4">貼文記錄</h2>
       {posts.length === 0 ? (
         <div className="glass-card text-center py-8 text-white/40">尚無貼文</div>
       ) : (
@@ -89,7 +89,7 @@ export default function Social() {
                     : post.status === "DRAFT" ? "bg-yellow-500/20 text-yellow-400"
                     : "bg-red-500/20 text-red-400"
                   }`}>
-                    {post.status === "PUBLISHED" ? "已發布" : post.status === "DRAFT" ? "草稿" : "失敗"}
+                    {post.status === "PUBLISHED" ? "已發布" : post.status === "DRAFT" ? "草稿" : post.status === "SCHEDULED" ? "待排程" : post.status === "PUBLISHING" ? "發布中" : "待確認"}
                   </span>
                 </div>
                 <span className="text-xs text-white/30">{new Date(post.createdAt).toLocaleString("zh-TW")}</span>

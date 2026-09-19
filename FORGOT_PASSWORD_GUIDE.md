@@ -21,7 +21,7 @@ npx tsx auth-server.ts
 - 支援信箱: service@nightasaur.com
 
 ### 3. 默認帳號
-- 管理員: admin@nightasaur.com / admin123
+- 管理員: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 - 測試用戶: test@nightasaur.com / test123
 
 ## 🔧 功能特色

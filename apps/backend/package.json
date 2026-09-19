@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "test": "node --import tsx --import ./tests/setup.ts --test tests/*.test.ts",
     "start": "node dist/index.js",
     "catalog:import": "node --import tsx prisma/importOpenSourceCatalog.ts",
     "db:migrate": "prisma migrate dev",

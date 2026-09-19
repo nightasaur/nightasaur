@@ -23,7 +23,7 @@ if (Test-Path node_modules) {
 Write-Host ""
 Write-Host "啟動登入測試服務器..." -ForegroundColor Cyan
 Write-Host "服務器: http://localhost:3002" -ForegroundColor Green
-Write-Host "管理員帳號: admin@nightasaur.com / admin123" -ForegroundColor Green
+Write-Host "管理員帳號: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE" -ForegroundColor Green
 Write-Host "支援信箱: service@nightasaur.com" -ForegroundColor Green
 Write-Host ""
 

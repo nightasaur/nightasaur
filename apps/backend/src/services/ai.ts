@@ -1,4 +1,5 @@
 import axios from "axios";
+import { aiRequestOptions } from "./aiClient.js";
 import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
 import { gameService } from "./game.js";
@@ -68,7 +69,7 @@ export class DialogueService {
             }))
           ).slice(-16), // 保留最近16條
         },
-        { timeout: 30000 }
+        aiRequestOptions(30000)
       );
       return res.data.response || "思考中...";
     } catch (err: any) {
@@ -105,7 +106,7 @@ export class DialogueService {
     try {
       const res = await axios.post(`${config.ai.engineUrl}/api/dialogue/story`, {
         prompt: buildStoryPrompt(spirit.name, spirit.element, spirit.personality),
-      }, { timeout: 60000 });
+      }, aiRequestOptions(60000));
       const story = res.data.story;
       if (story) {
         await prisma.spirit.update({ where: { id: spiritId }, data: { backstory: story } });

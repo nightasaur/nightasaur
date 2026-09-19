@@ -23,7 +23,7 @@ if not exist node_modules (
 echo.
 echo 啟動登入測試服務器...
 echo 服務器將在 http://localhost:3002 運行
-echo 管理員帳號: admin@nightasaur.com / admin123
+echo 管理員帳號: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 echo.
 
 npx tsx test-login-server.ts

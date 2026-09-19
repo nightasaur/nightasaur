@@ -36,7 +36,7 @@ export class SocialController {
 
   async publishPost(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await socialService.publishPost(req.params.id);
+      const result = await socialService.publishPost(req.params.id, req.user!.userId);
       res.json(result);
     } catch (err) {
       next(err);

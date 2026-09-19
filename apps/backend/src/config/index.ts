@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { requireSecret } from "./secrets.js";
 dotenv.config();
 
 export const config = {
@@ -7,8 +8,8 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
 
   jwt: {
-    secret: process.env.JWT_SECRET || "dev-secret-change-me",
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    secret: requireSecret("JWT_SECRET", process.env.JWT_SECRET),
+    expiresIn: "1h",
   },
 
   database: {
@@ -24,6 +25,7 @@ export const config = {
   },
 
   ai: {
+    apiKey: process.env.AI_ENGINE_API_KEY || "",
     engineUrl: process.env.AI_ENGINE_URL || "http://localhost:8000",
     comfyUIUrl: process.env.COMFYUI_URL || "http://localhost:8188",
     ollamaUrl: process.env.OLLAMA_URL || "http://localhost:11434",

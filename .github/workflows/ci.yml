@@ -21,6 +21,8 @@ jobs:
             apps/ai-engine/requirements-dev.txt
       - run: pip install -r requirements.txt -r requirements-dev.txt
         working-directory: apps/ai-engine
+      - run: python ../../scripts/build-provenance-inventory.py --check
+        working-directory: apps/ai-engine
       - run: python -m pytest -q
         working-directory: apps/ai-engine
 
