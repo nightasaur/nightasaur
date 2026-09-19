@@ -2,11 +2,24 @@
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
+import pytest
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "verify_local_runtime.py"
 SPEC = importlib.util.spec_from_file_location("verify_local_runtime", SCRIPT)
 probe = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(probe)
+
+
+def test_bare_and_prefixed_sha256_are_equivalent():
+    digest = "a1" * 32
+    assert probe.normalize_digest(digest) == probe.normalize_digest("sha256:" + digest)
+    assert probe.normalize_digest("b2" * 32) != probe.normalize_digest(digest)
+
+
+@pytest.mark.parametrize("value", [None, "", "a1" * 6, "sha256:" + "z" * 64])
+def test_missing_truncated_and_invalid_digests_are_rejected(value):
+    with pytest.raises(ValueError):
+        probe.normalize_digest(value)
 
 
 def result(content, trace):

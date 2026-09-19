@@ -30,6 +30,16 @@ ROOT = Path(__file__).resolve().parents[3]
 BASE_URL = "http://127.0.0.1:11434"
 
 
+def normalize_digest(value):
+    """Ollama tags may return a bare SHA-256 or an algorithm-prefixed value."""
+    if not isinstance(value, str):
+        raise ValueError("reviewed_ollama_digest_required")
+    digest = value.removeprefix("sha256:")
+    if not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise ValueError("reviewed_ollama_digest_required")
+    return "sha256:" + digest
+
+
 def git(*args):
     return subprocess.run(
         ["git", "-C", str(ROOT), *args], check=True, capture_output=True,
@@ -61,8 +71,7 @@ async def run(args):
     model = validate_model_selection(args.model)
     if not model or not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         raise ValueError("explicit_model_and_full_commit_required")
-    if not re.fullmatch(r"sha256:[0-9a-f]{64}", args.digest):
-        raise ValueError("reviewed_ollama_digest_required")
+    reviewed_digest = normalize_digest(args.digest)
     if git("rev-parse", "HEAD") != args.commit or git("status", "--porcelain"):
         raise ValueError("checkout_must_match_candidate_and_be_clean")
     checks = build_report(BASE_URL, model)["checks"]
@@ -76,7 +85,7 @@ async def run(args):
     with urlopen(BASE_URL + "/api/tags", timeout=5) as response:
         tags = json.load(response)
     found = [m for m in tags.get("models", []) if m.get("name") == model]
-    if len(found) != 1 or found[0].get("digest") != args.digest:
+    if len(found) != 1 or normalize_digest(found[0].get("digest")) != reviewed_digest:
         raise ValueError("model_digest_mismatch")
     from agent import AgentInput, build_read_only_agent_core
     with tempfile.TemporaryDirectory(prefix="nightasaur-runtime-") as directory:
@@ -94,7 +103,7 @@ async def run(args):
             )), timeout=180)
         unchanged = before == snapshot(workspace)
         candidate_unchanged = git("rev-parse", "HEAD") == args.commit and not git("status", "--porcelain")
-        return {"checks": checks, "model": model, "digest": args.digest,
+        return {"checks": checks, "model": model, "digest": reviewed_digest,
                 "real_tool_result_reproduced": accepts(output, nonce),
                 "fixture_unchanged": unchanged,
                 "candidate_unchanged": candidate_unchanged,
