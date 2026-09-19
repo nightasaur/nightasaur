@@ -17,6 +17,10 @@ import academyRoutes from "./routes/academy.js";
 import assistantRoutes from "./routes/assistant.js";
 
 const app = express();
+if (!Number.isSafeInteger(config.trustProxyHops) || config.trustProxyHops < 0) {
+  throw new Error("TRUST_PROXY_HOPS must be a non-negative integer");
+}
+app.set("trust proxy", config.trustProxyHops);
 
 // 中間件配置
 app.use(cors({ origin: config.corsOrigin, credentials: true }));

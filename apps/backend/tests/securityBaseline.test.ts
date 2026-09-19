@@ -12,7 +12,14 @@ import { signToken, verifyToken } from "../src/utils/jwt.js";
 import { socialRouter } from "../src/routes/social.js";
 import generateRouter from "../src/routes/generate.js";
 import assistantRouter from "../src/routes/assistant.js";
+import arLocationRouter from "../src/routes/arLocation.js";
+import languageRouter from "../src/routes/language.js";
+import puzzleRouter from "../src/routes/puzzle.js";
+import gameRouter from "../src/routes/game.js";
+import gameLogicRouter from "../src/routes/gameLogic.js";
+import squadRouter from "../src/routes/squad.js";
 import { socialService } from "../src/services/social.js";
+import { spiritService } from "../src/services/spirit.js";
 import { aiRequestOptions } from "../src/services/aiClient.js";
 
 const restores: Array<() => void> = [];
@@ -23,12 +30,18 @@ function mockDb(target: any, key: string, implementation: any) {
 beforeEach(() => { mockDb(prisma.session, "count", async () => 1); });
 afterEach(() => { restores.splice(0).reverse().forEach(restore => restore()); mock.restoreAll(); process.env.SOCIAL_PUBLISH_ENABLED = "false"; });
 const user = { id: "owner", email: "fixture@example.invalid", role: "ADMIN", isActive: true };
-const token = () => signToken({ userId: user.id, email: user.email, role: "ADMIN" });
+const session = { id: "session" };
+const token = () => signToken({ userId: user.id, email: user.email, role: "ADMIN", sessionId: session.id });
 const post = { id: "post", userId: "owner", status: "DRAFT", content: '__NIGHTASAUR_SOCIAL_V1__:{"content":"unit","platform":"FACEBOOK"}' };
+
+beforeEach(() => { mockDb(prisma.session, "findFirst", async () => session); });
 
 async function http(path: string, init: RequestInit = {}) {
   const app = express();
   app.use(express.json()); app.use("/social", socialRouter); app.use("/assistant", assistantRouter); app.use("/generate", generateRouter);
+  app.use("/ar", arLocationRouter); app.use("/language", languageRouter); app.use("/puzzles", puzzleRouter); app.use("/game", gameRouter);
+  app.use("/game-logic", gameLogicRouter); app.use("/squads", squadRouter);
+  app.use((_req, res) => res.status(404).json({ error: "not found" }));
   app.use((err: any, _req: any, res: any, _next: any) => res.status(err.statusCode || 500).json({ error: "test" }));
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>(resolve => server.once("listening", resolve));
@@ -57,6 +70,7 @@ test("JWT verifies correct claims and rejects foreign audience, algorithm, expir
   const signed = token(); assert.equal(verifyToken(signed).userId, "owner");
   const decoded = jwt.decode(signed) as jwt.JwtPayload;
   assert.equal(decoded.exp! - decoded.iat!, 3600);
+  assert.equal(decoded.jti, session.id);
   for (const options of [{ audience: "other" }, { algorithm: "HS384" as const }, { expiresIn: -1 }]) {
     const wrong = jwt.sign({ userId: "owner", email: user.email, role: "ADMIN" }, config.jwt.secret,
       { algorithm: "HS256", issuer: "nightasaur-backend", audience: "nightasaur-user", expiresIn: 60, ...options });
@@ -77,6 +91,45 @@ test("live account status and role override stale admin token", async () => {
   assert.equal((await http("/social/post/publish", { method: "POST", headers: { Authorization: `Bearer ${token()}` } })).status, 403);
   lookup.mock.mockImplementation(async () => ({ ...user, isActive: false }));
   assert.equal((await http("/social", { headers: { Authorization: `Bearer ${token()}` } })).status, 401);
+});
+
+test("revoked or unknown session rejects an otherwise valid JWT", async () => {
+  mockDb(prisma.user, "findUnique", async () => user);
+  mockDb(prisma.session, "findFirst", async () => null);
+  assert.equal((await http("/social", { headers: { Authorization: `Bearer ${token()}` } })).status, 401);
+});
+
+test("admin endpoints enforce live ADMIN role before controller execution", async () => {
+  mockDb(prisma.user, "findUnique", async () => ({ ...user, role: "USER" }));
+  const headers = { Authorization: `Bearer ${token()}` };
+  for (const [path, method] of [
+    ["/ar/admin/generate-spawns", "POST"],
+    ["/language/admin/statistics", "GET"],
+    ["/language/admin/translation", "POST"],
+    ["/puzzles/admin/test-puzzle", "POST"],
+  ]) {
+    assert.equal((await http(path, { method, headers })).status, 403);
+  }
+});
+
+test("clients cannot submit or force quest progress and rewards", async () => {
+  mockDb(prisma.user, "findUnique", async () => user);
+  const headers = { Authorization: `Bearer ${token()}` };
+  for (const path of ["/game/track", "/game/quests/quest/complete", "/game/quests/quest/claim"]) {
+    assert.equal((await http(path, { method: "POST", headers })).status, 404);
+  }
+  for (const path of ["/squads/train", "/squads/training/daily", "/squads/challenge/puzzle"]) {
+    assert.equal((await http(path, { method: "POST", headers })).status, 404);
+  }
+});
+
+test("spirit detail lookup is scoped to the authenticated owner", async () => {
+  const lookup = mockDb(prisma.spirit, "findFirst", async (args: any) => {
+    assert.deepEqual(args.where, { id: "other-spirit", userId: "owner", isActive: true });
+    return null;
+  });
+  await assert.rejects(spiritService.getSpiritById("other-spirit", "owner"), { statusCode: 404 });
+  assert.equal(lookup.mock.callCount(), 1);
 });
 
 test("cross-owner publish rejects before platform calls or updates", async () => {

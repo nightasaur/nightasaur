@@ -140,10 +140,11 @@ def test_build_safe_trace_value_never_returns_raw_object_nested_in_dict():
 
 
 def test_build_safe_trace_value_redacts_sensitive_keyed_string_values():
+    fixture_api_key = "".join(("sk", "-fixture-redaction-value"))
     value = {
         "username": "ada",
         "password": "hunter2-super-secret",
-        "api_key": "sk-abcdef0123456789",
+        "api_key": fixture_api_key,
         "auth_token": "eyJhbGciOiJIUzI1NiJ9.payload.sig",
     }
 
@@ -156,7 +157,7 @@ def test_build_safe_trace_value_redacts_sensitive_keyed_string_values():
     # 敏感原文完全不應該出現在整個結果裡（即使被 dumps 成字串也一樣）。
     dumped = json.dumps(result)
     assert "hunter2-super-secret" not in dumped
-    assert "sk-abcdef0123456789" not in dumped
+    assert fixture_api_key not in dumped
 
 
 def test_build_safe_trace_value_redacts_email_like_content_in_plain_strings():

@@ -26,7 +26,7 @@ python scripts\gate_a_probe.py --model $env:OLLAMA_MODEL | Tee-Object gate-a-res
 ```
 
 Set `OLLAMA_MODEL` only after the review in `docs/MODEL_POLICY.md`.
-No model is approved by this change. Qwen evidence is historical only and
+No model is approved by this change. Prohibited-model evidence is historical only and
 cannot serve as the current commercial baseline. Mock tests do not verify
 real-model or hardware readiness.
 

@@ -2855,12 +2855,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --- END ---
 
 
-## pytest 8.2.2 (pypi)
+## pytest 9.1.1 (pypi)
 
-Source: https://pypi.org/project/pytest/8.2.2/
+Source: https://pypi.org/project/pytest/9.1.1/
 
 
---- BEGIN pytest-8.2.2.dist-info/LICENSE ---
+--- BEGIN pytest-9.1.1.dist-info/licenses/LICENSE ---
 The MIT License (MIT)
 
 Copyright (c) 2004 Holger Krekel and others
@@ -2886,12 +2886,12 @@ SOFTWARE.
 --- END ---
 
 
-## pytest-asyncio 0.23.7 (pypi)
+## pytest-asyncio 1.4.0 (pypi)
 
-Source: https://pypi.org/project/pytest-asyncio/0.23.7/
+Source: https://pypi.org/project/pytest-asyncio/1.4.0/
 
 
---- BEGIN pytest_asyncio-0.23.7.dist-info/LICENSE ---
+--- BEGIN pytest_asyncio-1.4.0.dist-info/licenses/LICENSE ---
 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -3097,12 +3097,12 @@ Apache License
 --- END ---
 
 
-## fastapi 0.111.0 (pypi)
+## fastapi 0.141.1 (pypi)
 
-Source: https://pypi.org/project/fastapi/0.111.0/
+Source: https://pypi.org/project/fastapi/0.141.1/
 
 
---- BEGIN fastapi-0.111.0.dist-info/licenses/LICENSE ---
+--- BEGIN fastapi-0.141.1.dist-info/licenses/LICENSE ---
 The MIT License (MIT)
 
 Copyright (c) 2018 Sebastián Ramírez
@@ -3187,12 +3187,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 --- END ---
 
 
-## python-dotenv 1.0.1 (pypi)
+## python-dotenv 1.2.3 (pypi)
 
-Source: https://pypi.org/project/python-dotenv/1.0.1/
+Source: https://pypi.org/project/python-dotenv/1.2.3/
 
 
---- BEGIN python_dotenv-1.0.1.dist-info/LICENSE ---
+--- BEGIN python_dotenv-1.2.3.dist-info/licenses/LICENSE ---
 Copyright (c) 2014, Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv)
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3224,12 +3224,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --- END ---
 
 
-## pydantic 2.7.0 (pypi)
+## pydantic 2.13.5 (pypi)
 
-Source: https://pypi.org/project/pydantic/2.7.0/
+Source: https://pypi.org/project/pydantic/2.13.5/
 
 
---- BEGIN pydantic-2.7.0.dist-info/licenses/LICENSE ---
+--- BEGIN pydantic-2.13.5.dist-info/licenses/LICENSE ---
 The MIT License (MIT)
 
 Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.

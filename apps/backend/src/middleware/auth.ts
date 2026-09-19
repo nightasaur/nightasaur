@@ -25,14 +25,16 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
 
   try {
     const payload = verifyToken(token);
-    if (!await hasSession(prisma, token, payload.userId)) throw new Error("Session unavailable");
-    const user = await prisma.user.findUnique({ where: { id: payload.userId },
-      select: { id: true, email: true, role: true, isActive: true } });
-    if (!user?.isActive) {
+    const [user, sessionExists] = await Promise.all([
+      prisma.user.findUnique({ where: { id: payload.userId },
+        select: { id: true, email: true, role: true, isActive: true } }),
+      hasSession(prisma, token, payload.userId),
+    ]);
+    if (!user?.isActive || !sessionExists) {
       res.status(401).json({ error: "帳號不可用" });
       return;
     }
-    req.user = { userId: user.id, email: user.email, role: user.role };
+    req.user = { userId: user.id, email: user.email, role: user.role, sessionId: payload.sessionId };
     req.userId = payload.userId;
     next();
   } catch {
@@ -47,11 +49,13 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
     const token = authHeader.split(" ")[1];
     try {
       const payload = verifyToken(token);
-      if (!await hasSession(prisma, token, payload.userId)) throw new Error("Session unavailable");
-      const user = await prisma.user.findUnique({ where: { id: payload.userId },
-        select: { id: true, email: true, role: true, isActive: true } });
-      if (user?.isActive) {
-        req.user = { userId: user.id, email: user.email, role: user.role };
+      const [user, sessionExists] = await Promise.all([
+        prisma.user.findUnique({ where: { id: payload.userId },
+          select: { id: true, email: true, role: true, isActive: true } }),
+        hasSession(prisma, token, payload.userId),
+      ]);
+      if (user?.isActive && sessionExists) {
+        req.user = { userId: user.id, email: user.email, role: user.role, sessionId: payload.sessionId };
         req.userId = user.id;
       }
     } catch {

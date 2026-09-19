@@ -6,6 +6,7 @@ export const config = {
   port: parseInt(process.env.PORT || "3002", 10), // 改為 3002
   nodeEnv: process.env.NODE_ENV || "development",
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  trustProxyHops: parseInt(process.env.TRUST_PROXY_HOPS || "0", 10),
 
   jwt: {
     secret: requireSecret("JWT_SECRET", process.env.JWT_SECRET),

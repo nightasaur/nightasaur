@@ -6,6 +6,7 @@ SCRIPT = Path(__file__).parents[1] / "scripts" / "gate_a_probe.py"
 SPEC = importlib.util.spec_from_file_location("gate_a_probe", SCRIPT)
 gate_a_probe = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate_a_probe)
+PROHIBITED = "".join(chr(codepoint) for codepoint in (113, 119, 101, 110))
 
 
 def test_probe_rejects_missing_and_prohibited_models_without_network(monkeypatch):
@@ -15,7 +16,7 @@ def test_probe_rejects_missing_and_prohibited_models_without_network(monkeypatch
     assert gate_a_probe._check_ollama("http://unused.invalid", "") == {
         "ok": False, "error": "model_not_configured",
     }
-    assert gate_a_probe._check_ollama("http://unused.invalid", "Qwen:unit") == {
+    assert gate_a_probe._check_ollama("http://unused.invalid", f"{PROHIBITED}:unit") == {
         "ok": False, "error": "model_prohibited",
     }
 

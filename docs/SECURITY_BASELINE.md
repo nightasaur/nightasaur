@@ -9,7 +9,9 @@
 - Backend startup requires an explicit independently generated JWT secret of at
   least 32 bytes. Placeholder/weak values are rejected in every environment.
   User tokens are HS256, scoped to issuer/audience and expire in one hour.
-  Protected requests read current account active status and role from the DB.
+  Every token is bound to a hashed, expiring DB session. Logout deletes that
+  session, and protected requests require both the live session and current
+  account active status/role. Login and registration have per-process throttles.
 - Social routes require authentication. Creating a post only saves a draft or
   scheduled record; it cannot publish. Shared platform account publishing requires
   a current active administrator who owns the post, plus explicit
@@ -33,6 +35,11 @@
   has been removed. Public health is liveness only and exposes no provider details.
   Wildcard CORS is removed. This shared key is a service credential, not user auth.
 - Dependency/model/asset evidence is recorded separately in PROVENANCE.md.
+- Reward mutations are server-authoritative: public quest progress/claim routes
+  are retired, the game-cycle action is display-only, puzzle solutions are not
+  returned, repeat puzzle completion cannot award twice, and owned items are
+  consumed atomically. Client-authored squad training/challenge reward routes
+  remain closed until verifiable events and cooldowns are implemented.
 
 ## Required before deployment — not performed by this PR
 
@@ -66,13 +73,16 @@ safety guard, not an isolation boundary if an operator supplies an incorrect pat
 Distributed/edge login throttling, complete account/data
 rights flows, privacy notices, independent penetration testing, the full set of
 other API ownership checks, and review of image models/assets are not certified
-complete. Existing startup/deployment scripts also require a release audit.
+complete. The authentication limiter intentionally uses the TCP peer address;
+Set the exact trusted proxy hop count and add a shared limiter before public
+multi-replica traffic. Existing startup/deployment scripts also require a
+release audit.
 PR stays draft. No main merge, production deployment, database migration or
 platform publishing is authorized by this document.
 
 ## Persisted session revocation
 
-Registration and login persist a SHA-256 token digest and expiry before returning a JWT. Mandatory and optional authentication require the matching unexpired session and a live active user. Logout deletes only that session; independent random JWT IDs distinguish devices. No plaintext bearer token is stored. See `SESSION_MODEL.md`. Existing JWTs without matching session digests are intentionally rejected after rollout: users must sign in again, without changing their passwords. Expired-row cleanup and account-wide revocation UI remain separate work.
+Registration and login persist a SHA-256 token digest and expiry before returning a JWT. Mandatory and optional authentication require the matching unexpired session and a live active user. Logout deletes only that session; independent random JWT IDs distinguish devices. No plaintext bearer token is stored. See `SESSION_MODEL.md`. Existing JWTs without matching session digests are intentionally rejected after rollout: users must sign in again, without changing their passwords. Expired rows are cleaned during login and each account is capped at 20 sessions; account-wide revocation UI remains separate work.
 
 ## Local authentication admission control
 

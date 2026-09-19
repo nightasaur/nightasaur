@@ -3,6 +3,7 @@ import { dialogueService } from "../services/ai.js";
 import { socialService } from "../services/social.js";
 import { dialogueSchema, socialPostSchema } from "../utils/validators.js";
 import prisma from "../config/prisma.js";
+import { routeParam } from "../utils/request.js";
 
 export class DialogueController {
   async chat(req: Request, res: Response, next: NextFunction) {
@@ -36,7 +37,7 @@ export class SocialController {
 
   async publishPost(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await socialService.publishPost(req.params.id, req.user!.userId);
+      const result = await socialService.publishPost(routeParam(req, "id"), req.user!.userId);
       res.json(result);
     } catch (err) {
       next(err);

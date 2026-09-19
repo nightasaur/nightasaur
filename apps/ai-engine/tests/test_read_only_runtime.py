@@ -67,6 +67,7 @@ async def test_workspace_inspect_reads_bounded_utf8_file(tmp_path):
 async def test_workspace_inspect_lists_entries_without_sensitive_paths(tmp_path):
     (tmp_path / "safe.txt").write_text("ok", encoding="utf-8")
     (tmp_path / ".env").write_text("TOKEN=nope", encoding="utf-8")
+    (tmp_path / ".env.production").write_text("TOKEN=nope", encoding="utf-8")
     tool = WorkspaceInspectTool(tmp_path)
 
     result = await tool.run(action="list", path=".")
@@ -75,7 +76,7 @@ async def test_workspace_inspect_lists_entries_without_sensitive_paths(tmp_path)
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("path", ["../outside.txt", "/etc/passwd", ".env"])
+@pytest.mark.parametrize("path", ["../outside.txt", "/etc/passwd", ".env", ".env.local", ".npmrc"])
 async def test_workspace_inspect_rejects_escape_absolute_and_sensitive_paths(
     tmp_path, path
 ):
@@ -95,8 +96,23 @@ async def test_workspace_inspect_rejects_symlink_escape(tmp_path):
         pytest.skip("symlink creation is unavailable on this platform")
 
     tool = WorkspaceInspectTool(tmp_path)
-    with pytest.raises(ValueError, match="escapes"):
+    with pytest.raises(ValueError, match="symbolic links"):
         await tool.run(action="read", path="link.txt")
+
+
+@pytest.mark.asyncio
+async def test_workspace_inspect_rejects_internal_symlink_to_sensitive_file(tmp_path):
+    secret = tmp_path / ".env.production"
+    secret.write_text("TOKEN=nope", encoding="utf-8")
+    link = tmp_path / "safe-looking.txt"
+    try:
+        link.symlink_to(secret)
+    except OSError:
+        pytest.skip("symlink creation is unavailable on this platform")
+
+    tool = WorkspaceInspectTool(tmp_path)
+    with pytest.raises(ValueError, match="symbolic links"):
+        await tool.run(action="read", path="safe-looking.txt")
 
 
 @pytest.mark.asyncio

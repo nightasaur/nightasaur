@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { authController } from "../controllers/auth.js";
 import { authMiddleware } from "../middleware/auth.js";
-
 import { makeAuthRateLimit } from "../middleware/authRateLimit.js";
 
 const router = Router();

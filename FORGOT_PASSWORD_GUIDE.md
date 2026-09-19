@@ -80,7 +80,7 @@ Content-Type: application/json
 
 {
   "token": "abc123...",
-  "newPassword": "newpassword123"
+  "newPassword": "<YOUR-NEW-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -159,9 +159,10 @@ npm install -D typescript tsx @types/express @types/cors @types/bcryptjs @types/
 ## 🧪 測試方法
 
 ### 運行測試
-```bash
-node test-forgot-password.js
-```
+
+舊版會對正式管理員帳號執行密碼重設的腳本已移除。任何重設流程只能以
+disposable fixture account（一次性測試帳號）在隔離資料庫測試；不得讀取、
+更改或記錄 `admin@nightasaur.com` 的既有密碼。
 
 ### 測試項目
 1. ✅ 服務器健康檢查

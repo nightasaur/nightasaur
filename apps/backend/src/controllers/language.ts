@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { languageService, SUPPORTED_LANGUAGES, DISPLAY_MODES, THEMES } from "../services/language.js";
+import { routeParam } from "../utils/request.js";
 
 export class LanguageController {
   // 獲取用戶語言偏好設定
@@ -49,7 +50,8 @@ export class LanguageController {
   // 獲取翻譯
   async getTranslation(req: Request, res: Response) {
     try {
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       const { language = "zh-TW" } = req.query;
       
       const translation = await languageService.getTranslation(key, module, language as string);
@@ -68,7 +70,7 @@ export class LanguageController {
   // 批量獲取翻譯
   async getBatchTranslations(req: Request, res: Response) {
     try {
-      const { module } = req.params;
+      const module = routeParam(req, "module");
       const { keys, language = "zh-TW" } = req.body;
       
       if (!keys || !Array.isArray(keys)) {
@@ -86,7 +88,8 @@ export class LanguageController {
   // 獲取多語言翻譯
   async getMultiLanguageTranslations(req: Request, res: Response) {
     try {
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       
       const translations = await languageService.getMultiLanguageTranslations(key, module);
       
@@ -184,7 +187,8 @@ export class LanguageController {
   async generateBilingualText(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       const { primaryLang, secondaryLang } = req.query;
       
       if (!primaryLang || !secondaryLang) {

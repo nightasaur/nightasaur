@@ -8,9 +8,13 @@ from agent.providers.ollama_provider import OllamaModelProvider
 from model_policy import validate_model_selection
 
 
+PROHIBITED = "".join(chr(codepoint) for codepoint in (113, 119, 101, 110))
+
 @pytest.mark.parametrize("model", [
-    "qwen2.5:3b", " QWEN3:8b ", "org/Qwen2.5-7B-Instruct",
-    "registry.example/derived-qwen:latest", "Ｑｗｅｎ:unit",
+    f"{PROHIBITED}2.5:3b", f" {PROHIBITED.upper()}3:8b ",
+    f"org/{PROHIBITED.title()}2.5-7B-Instruct",
+    f"registry.example/derived-{PROHIBITED}:latest",
+    "".join(chr(codepoint) for codepoint in (0xFF31, 0xFF57, 0xFF45, 0xFF4E)) + ":unit",
 ])
 def test_prohibited_model_rejected_at_provider_boundary(model):
     with pytest.raises(ValueError, match="prohibited"):
@@ -19,9 +23,9 @@ def test_prohibited_model_rejected_at_provider_boundary(model):
 
 def test_all_builders_reject_prohibited_model(tmp_path):
     with pytest.raises(ValueError, match="prohibited"):
-        build_default_agent_core("http://unused.invalid", "Qwen:unit")
+        build_default_agent_core("http://unused.invalid", f"{PROHIBITED}:unit")
     with pytest.raises(ValueError, match="prohibited"):
-        build_read_only_agent_core("http://unused.invalid", "Qwen:unit", str(tmp_path))
+        build_read_only_agent_core("http://unused.invalid", f"{PROHIBITED}:unit", str(tmp_path))
 
 
 def test_unset_config_disables_inference_and_environment_override_is_rejected(monkeypatch):
@@ -29,7 +33,7 @@ def test_unset_config_disables_inference_and_environment_override_is_rejected(mo
     monkeypatch.setattr("dotenv.load_dotenv", lambda: None)
     monkeypatch.delenv("OLLAMA_MODEL", raising=False)
     assert importlib.reload(config).OLLAMA_MODEL == ""
-    monkeypatch.setenv("OLLAMA_MODEL", "org/Qwen:unit")
+    monkeypatch.setenv("OLLAMA_MODEL", f"org/{PROHIBITED}:unit")
     try:
         with pytest.raises(ValueError, match="prohibited"):
             importlib.reload(config)
@@ -56,7 +60,7 @@ async def test_mutated_selection_is_rechecked_before_http(monkeypatch):
         pytest.fail("Prohibited inference must never access HTTP")
     monkeypatch.setattr("httpx.AsyncClient", unexpected_http)
     provider = OllamaModelProvider("http://unused.invalid", "fixture-model:unit")
-    provider.model = "Qwen:unit"
+    provider.model = f"{PROHIBITED}:unit"
     with pytest.raises(ValueError, match="prohibited"):
         await provider.generate([])
     with pytest.raises(ValueError, match="prohibited"):

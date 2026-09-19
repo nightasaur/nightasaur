@@ -103,7 +103,7 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "username": "username",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -195,9 +195,9 @@ Content-Type: application/json
 ## 🧪 測試方法
 
 ### 自動測試
-```bash
-node quick-test.js
-```
+
+舊版會變更正式管理員密碼的腳本已移除。保留既有密碼；任何驗證只可使用
+隔離 fixture account，且不得把憑證寫入程式、日誌或 PR。
 
 ### 手動測試流程
 1. 訪問登入頁面

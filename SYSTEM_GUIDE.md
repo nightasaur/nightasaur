@@ -59,7 +59,7 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "username": "player1",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -70,7 +70,7 @@ Content-Type: application/json
 
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 

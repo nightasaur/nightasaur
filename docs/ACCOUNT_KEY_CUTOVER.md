@@ -2,11 +2,24 @@
 
 Status: PREPARED / NOT EXECUTED. This PR does not authorize production database access, deployment, or main merge. No production accounts have been inspected, disabled, or verified safe. No secret values were retrieved or rotated.
 
+The designated formal administrator identity is `admin@nightasaur.com`. This
+baseline must preserve that account's existing, individually controlled
+password: it does not read, print, hash, replace or reset that password. Before
+any separately authorized production cutover, resolve the exact account ID
+privately, verify control by a successful private sign-in, and confirm the live
+record is active with the `ADMIN` role. No seed, migration or startup path may
+create or promote this production account automatically.
+
 ## Preconditions and responsible operator
 
 The release owner must name the environment, deployed commit, service IDs, maintenance window, rollback owner, and exact scope of approved changes. Review inherited/shared variable **names and references**, without printing values. A service-level variable list alone cannot prove that a runtime secret is absent. Review existing staged cloud changes separately; never apply unrelated staged changes as part of this cutover.
 
-An authorized account owner must supply exact target user IDs and a separate recovery administrator through a private operations channel, not a public issue. Verify the recovery administrator can actually sign in using an individually issued credential and has a secured recovery method. An active ADMIN database flag alone does not prove access. Do not auto-create or promote a recovery account.
+An authorized account owner must supply exact target user IDs and the exact ID
+for the designated administrator through a private operations channel, not a
+public issue. Verify the administrator can actually sign in using the existing
+individually issued credential and has a secured recovery method. An active
+ADMIN database flag alone does not prove access. Do not auto-create, promote or
+change the password of the administrator account.
 
 ## Ordered procedure (requires separate production authorization)
 

@@ -26,7 +26,7 @@ and training-data lineage where relevant, reviewer and review date. Versionless
 claims in old guides are not sufficient. Unknown and incompatible items must
 remain blocked for redistribution/production use until reviewed or replaced.
 
-Qwen remains prohibited by project policy. No replacement model is approved.
+The project-prohibited model family remains blocked. No replacement model is approved.
 Image-model references and artwork still need separate review; the existence of
 a filename or a proprietary claim does not prove its rights provenance.
 

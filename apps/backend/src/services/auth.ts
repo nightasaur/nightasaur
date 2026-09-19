@@ -1,10 +1,9 @@
 import bcrypt from "bcryptjs";
 import { isRetiredPassword } from "../utils/passwordPolicy.js";
 import { issueSession, revokeSession } from "./sessions.js";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../config/prisma.js";
 import { spiritService } from "./spirit.js";
 
-const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
 
 // 元素列表

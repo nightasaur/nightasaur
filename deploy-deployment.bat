@@ -66,7 +66,7 @@ echo 步驟 6: 部署後端
 echo   railway up --service nightasaur-backend -d apps/backend
 echo.
 echo 步驟 7: 設定環境變數
-echo   railway env set JWT_SECRET=your-secret-key-here
+echo   Set JWT_SECRET through the approved secret manager (32+ random bytes; do not log it)
 echo   railway env set CORS_ORIGIN=https://nightasaur-web.vercel.app
 echo   railway env set AI_ENGINE_URL=https://nightasaur-ai.up.railway.app
 echo.

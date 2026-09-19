@@ -2,7 +2,7 @@
 
 Evidence collected 2026-09-19 from installed artifacts matching the repository's pinned versions. This is a technical evidence checkpoint, not whole-product commercial clearance.
 
-`data/compliance/packages.json` retains the original declarations: 1,692 records, including lockfile locations rather than unique products. `license-evidence.json` examines the 36 records with missing or non-common declarations: 28 have license/notice files, six platform packages are not installed, and two have no matching root license file. Each collected file has a SHA-256 digest. Hashes support comparison, not authentication of an upstream author or fulfillment of distribution obligations.
+`data/compliance/packages.json` retains the original declarations: 1,676 records, including lockfile locations rather than unique products. `license-evidence.json` examines the 36 records with missing or non-common declarations: 28 have license/notice files, six platform packages are not installed, and two have no matching root license file. Each collected file has a SHA-256 digest. Hashes support comparison, not authentication of an upstream author or fulfillment of distribution obligations.
 
 Reproduce offline after installing the exact lockfile and pinned Python requirements:
 
@@ -37,7 +37,7 @@ All 15 NOASSERTION records have installed license files. Keep the upstream lock 
 | readline 1.3.0, generic BSD | No collected root license text: establish exact BSD terms from version-specific source or remove/replace dependency | Before distributing this dependency |
 | argparse Python-2.0 | Review its included license history and preserve required notices | Delivered dependency |
 | Python transitive/native packages | Produce a complete pinned/hashes lock and wheel/native-library evidence; 44 observed test-environment packages are not a production SBOM | Actual production image |
-| Five model references | Exact source revision, weight digest, model license, commercial/redistribution rights, training-data restrictions; disabled text provider is not a licensed model selection | Before enabling a model; Qwen prohibited |
+| Five model references | Exact source revision, weight digest, model license, commercial/redistribution rights, training-data restrictions; disabled text provider is not a licensed model selection | Before enabling a model; project-prohibited family remains blocked |
 | Eleven tracked visual assets | Creator/source, permission or assignment, commercial/redistribution rights; repository presence is not proof | Before distributing assets |
 | Containers and infrastructure | Pin image digests and collect OS/native dependency SBOM, licenses and notices | Actual released images |
 
@@ -51,6 +51,6 @@ For each shipped component, the release owner records exact version/digest, sour
 
 Run `python scripts/export-license-notices.py --output-dir /tmp/nightasaur-notices` in the same installed environment used for evidence collection. The exporter validates the inventory digest, exact installed versions and every collected file's size and SHA-256 before writing output. Changed or missing evidence fails instead of silently exporting different terms.
 
-The committed `data/compliance/notices/THIRD_PARTY_NOTICES.txt` preserves 30 license/notice files from the 28 evidenced records. `NOTICE_COVERAGE.json` explicitly lists eight unresolved records. This is a partial evidence bundle, not notices for all 1,692 records or a production release. Regenerate after reviewed evidence changes and complete the final artifact inventory before distribution.
+The committed `data/compliance/notices/THIRD_PARTY_NOTICES.txt` preserves 30 license/notice files from the 28 evidenced records. `NOTICE_COVERAGE.json` explicitly lists eight unresolved records. This is a partial evidence bundle, not notices for all 1,676 records or a production release. Regenerate after reviewed evidence changes and complete the final artifact inventory before distribution.
 
 `python -m unittest discover -s scripts/tests` verifies text preservation, tamper rejection, inventory drift, path containment and unresolved-item reporting; CI runs this test.

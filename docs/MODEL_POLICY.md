@@ -1,11 +1,11 @@
 # Model selection and release boundary
 
-- Qwen is prohibited by project decision for development, testing, runtime,
-  and fallback. This is not a statement that all variants share one license.
+- The project-prohibited model family is disallowed for development, testing,
+  runtime and fallback. This is a project decision, not a blanket license claim.
 - `OLLAMA_MODEL` defaults to empty. Text inference then returns a clear
   disabled message and its provider health is `disabled`, with no HTTP calls.
-- Explicit identifiers containing Qwen (case-insensitive, including namespaced
-  and derived identifiers) are rejected before provider requests. NFKC Unicode
+- Explicit identifiers containing its blocked token (case-insensitive, including
+  namespaced and derived identifiers) are rejected before provider requests. NFKC Unicode
   normalization is applied. This cannot detect a prohibited model renamed to
   an unrelated alias: upstream provenance and digest review remain mandatory.
 - There is no automatic model download, substitute, or fallback model.

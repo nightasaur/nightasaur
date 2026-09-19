@@ -1,6 +1,6 @@
 {
   "scope": "Missing or non-common declarations only; installed artifacts, not upstream authentication or legal clearance",
-  "inventorySha256": "91873da9180b9e72e00e20719802b6bf28b84b7469be5bc3aa56cb89b804ad7d",
+  "inventorySha256": "9479f70112d07c48bd0efe06c57d87072146805e0332c33572938b85455c112a",
   "summary": {
     "LICENSE_FILE_FOUND": 28,
     "NOT_INSTALLED": 6,
@@ -484,14 +484,14 @@
     {
       "ecosystem": "pypi",
       "name": "pytest",
-      "version": "8.2.2",
+      "version": "9.1.1",
       "declaredLicense": "NOASSERTION",
-      "source": "https://pypi.org/project/pytest/8.2.2/",
+      "source": "https://pypi.org/project/pytest/9.1.1/",
       "reviewStatus": "NOT_APPROVED",
       "installedLicenseMetadata": "MIT",
       "files": [
         {
-          "path": "pytest-8.2.2.dist-info/LICENSE",
+          "path": "pytest-9.1.1.dist-info/licenses/LICENSE",
           "sha256": "ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b",
           "bytes": 1091
         }
@@ -501,14 +501,14 @@
     {
       "ecosystem": "pypi",
       "name": "pytest-asyncio",
-      "version": "0.23.7",
+      "version": "1.4.0",
       "declaredLicense": "NOASSERTION",
-      "source": "https://pypi.org/project/pytest-asyncio/0.23.7/",
+      "source": "https://pypi.org/project/pytest-asyncio/1.4.0/",
       "reviewStatus": "NOT_APPROVED",
-      "installedLicenseMetadata": "Apache 2.0",
+      "installedLicenseMetadata": "Apache-2.0",
       "files": [
         {
-          "path": "pytest_asyncio-0.23.7.dist-info/LICENSE",
+          "path": "pytest_asyncio-1.4.0.dist-info/licenses/LICENSE",
           "sha256": "a8ad31b1c3f40dca5a84119351b8fa8ddc868edd77fad8a8ebf6d8f2d16fa4ae",
           "bytes": 11324
         }
@@ -518,14 +518,14 @@
     {
       "ecosystem": "pypi",
       "name": "fastapi",
-      "version": "0.111.0",
+      "version": "0.141.1",
       "declaredLicense": "NOASSERTION",
-      "source": "https://pypi.org/project/fastapi/0.111.0/",
+      "source": "https://pypi.org/project/fastapi/0.141.1/",
       "reviewStatus": "NOT_APPROVED",
-      "installedLicenseMetadata": null,
+      "installedLicenseMetadata": "MIT",
       "files": [
         {
-          "path": "fastapi-0.111.0.dist-info/licenses/LICENSE",
+          "path": "fastapi-0.141.1.dist-info/licenses/LICENSE",
           "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
           "bytes": 1086
         }
@@ -569,14 +569,14 @@
     {
       "ecosystem": "pypi",
       "name": "python-dotenv",
-      "version": "1.0.1",
+      "version": "1.2.3",
       "declaredLicense": "NOASSERTION",
-      "source": "https://pypi.org/project/python-dotenv/1.0.1/",
+      "source": "https://pypi.org/project/python-dotenv/1.2.3/",
       "reviewStatus": "NOT_APPROVED",
       "installedLicenseMetadata": "BSD-3-Clause",
       "files": [
         {
-          "path": "python_dotenv-1.0.1.dist-info/LICENSE",
+          "path": "python_dotenv-1.2.3.dist-info/licenses/LICENSE",
           "sha256": "80619b7049f08c81683ad0e01f08f257a840652dd71ee83146d36658c7d2c2b9",
           "bytes": 1556
         }
@@ -586,14 +586,14 @@
     {
       "ecosystem": "pypi",
       "name": "pydantic",
-      "version": "2.7.0",
+      "version": "2.13.5",
       "declaredLicense": "NOASSERTION",
-      "source": "https://pypi.org/project/pydantic/2.7.0/",
+      "source": "https://pypi.org/project/pydantic/2.13.5/",
       "reviewStatus": "NOT_APPROVED",
       "installedLicenseMetadata": "MIT",
       "files": [
         {
-          "path": "pydantic-2.7.0.dist-info/licenses/LICENSE",
+          "path": "pydantic-2.13.5.dist-info/licenses/LICENSE",
           "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3",
           "bytes": 1129
         }

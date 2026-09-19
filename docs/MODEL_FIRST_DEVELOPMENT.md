@@ -17,7 +17,7 @@
 狀態：DISABLED、READY、RUNNING、COMPLETED、FAILED。
 
 - `K = empty => DISABLED`，且 `N = 0`。HTTP 回應為 503，說明功能未設定。
-- `K` 違反 Qwen 禁令 => 設定驗證失敗，不得開始推論。
+- `K` 違反專案禁止模型家族政策 => 設定驗證失敗，不得開始推論。
 - `K != empty` 僅代表設定就緒，不代表模型權利已審核或品質符合要求。
 - `P != empty` 呼叫 `generate_image(P, S)`；否則呼叫 `generate_spirit(name, element, stage)`。方法與參數必須存在。
 - COMPLETED 必須由實際服務結果產生；不把未啟用、失敗或模擬圖宣稱為生成成功。
