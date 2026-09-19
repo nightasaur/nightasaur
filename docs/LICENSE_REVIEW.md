@@ -46,3 +46,11 @@ Open-source licenses can permit commercial use while imposing conditions; incomp
 ## Acceptance record required before clearance
 
 For each shipped component, the release owner records exact version/digest, source, chosen license, copied LICENSE/NOTICE location, modifications and any required source offer. Asset/model owners supply rights evidence privately where contracts contain sensitive details; only publish authorized attribution. Generate a final notices bundle and SBOM from the actual release artifact, review remaining exceptions, and attach approval to that release revision. No component is marked APPROVED by this checkpoint.
+
+## Reproducible partial notices bundle
+
+Run `python scripts/export-license-notices.py --output-dir /tmp/nightasaur-notices` in the same installed environment used for evidence collection. The exporter validates the inventory digest, exact installed versions and every collected file's size and SHA-256 before writing output. Changed or missing evidence fails instead of silently exporting different terms.
+
+The committed `data/compliance/notices/THIRD_PARTY_NOTICES.txt` preserves 30 license/notice files from the 28 evidenced records. `NOTICE_COVERAGE.json` explicitly lists eight unresolved records. This is a partial evidence bundle, not notices for all 1,692 records or a production release. Regenerate after reviewed evidence changes and complete the final artifact inventory before distribution.
+
+`python -m unittest discover -s scripts/tests` verifies text preservation, tamper rejection, inventory drift, path containment and unresolved-item reporting; CI runs this test.
