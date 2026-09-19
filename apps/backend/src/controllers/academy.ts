@@ -8,6 +8,15 @@ import {
   isStoredIeltsDiagnosticQuestion,
   toPublicIeltsReadingDiagnostic,
 } from "../services/ieltsDiagnostic.js";
+import {
+  IeltsReadingFocusLevel,
+  StoredIeltsPracticeQuestion,
+  buildIeltsReadingPractice,
+  getIeltsReadingPracticeCourseId,
+  isStoredIeltsPracticeQuestion,
+  parseIeltsReadingPracticeCourseId,
+  toPublicIeltsReadingPractice,
+} from "../services/ieltsPractice.js";
 
 interface IeltsReadingEvidence {
   sessionId: string;
@@ -53,6 +62,14 @@ async function getCompletedIeltsReadingEvidence(
       ),
       completedAt: session.completedAt?.toISOString() ?? null,
     }));
+}
+
+function getIeltsReadingFocusLevel(
+  accuracyPercent: number,
+): IeltsReadingFocusLevel {
+  if (accuracyPercent < 70) return "foundation";
+  if (accuracyPercent < 90) return "consolidation";
+  return "maintenance";
 }
 
 export class AcademyController {
@@ -432,12 +449,9 @@ export class AcademyController {
         });
       }
 
-      const focusLevel =
-        latestEvidence.accuracyPercent < 70
-          ? "foundation"
-          : latestEvidence.accuracyPercent < 90
-            ? "consolidation"
-            : "maintenance";
+      const focusLevel = getIeltsReadingFocusLevel(
+        latestEvidence.accuracyPercent,
+      );
 
       return res.json({
         planVersion: "ielts-daily-plan-v1",
@@ -467,6 +481,180 @@ export class AcademyController {
         bandEstimate: null,
         notice:
           "This deterministic plan uses objective diagnostic accuracy only. It is not an official IELTS Band estimate.",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async startIeltsReadingPractice(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      const evidence = await getCompletedIeltsReadingEvidence(userId);
+      const latestEvidence = evidence[0] ?? null;
+      if (!latestEvidence) {
+        return res.status(409).json({
+          error: "請先完成 IELTS Reading Diagnostic",
+          code: "diagnostic-required",
+        });
+      }
+
+      const focusLevel = getIeltsReadingFocusLevel(
+        latestEvidence.accuracyPercent,
+      );
+      const storedQuestions = buildIeltsReadingPractice(focusLevel);
+      const courseId = getIeltsReadingPracticeCourseId(focusLevel);
+      const session = await prisma.learningSession.create({
+        data: {
+          userId,
+          courseId,
+          totalQuestions: storedQuestions.length,
+          questions: JSON.stringify(storedQuestions),
+          answers: "[]",
+        },
+      });
+
+      return res.status(201).json({
+        sessionId: session.id,
+        status: "in-progress",
+        currentQuestion: 0,
+        generatedFrom: latestEvidence,
+        practice: toPublicIeltsReadingPractice(focusLevel, storedQuestions),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async answerIeltsReadingPractice(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sessionId } = req.params;
+      const { questionId, answerIndex } = req.body ?? {};
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      if (typeof questionId !== "string" || !Number.isInteger(answerIndex)) {
+        return res.status(400).json({ error: "questionId 與整數 answerIndex 為必填" });
+      }
+
+      const session = await prisma.learningSession.findUnique({
+        where: { id: sessionId },
+      });
+      const focusLevel = session
+        ? parseIeltsReadingPracticeCourseId(session.courseId)
+        : null;
+      if (!session || session.userId !== userId || !focusLevel) {
+        return res.status(404).json({ error: "IELTS Practice 會話不存在" });
+      }
+
+      if (session.completed) {
+        return res.status(409).json({ error: "IELTS Practice 已完成，不能重複作答" });
+      }
+
+      const parsedQuestions: unknown = JSON.parse(session.questions);
+      const parsedAnswers: unknown = session.answers
+        ? JSON.parse(session.answers)
+        : [];
+      if (
+        !Array.isArray(parsedQuestions) ||
+        !parsedQuestions.every(isStoredIeltsPracticeQuestion) ||
+        !Array.isArray(parsedAnswers) ||
+        parsedQuestions.length !== session.totalQuestions ||
+        parsedAnswers.length !== session.currentQuestion
+      ) {
+        return res.status(409).json({
+          error: "IELTS Practice 會話資料無效，請重新開始",
+        });
+      }
+
+      const questions = parsedQuestions as StoredIeltsPracticeQuestion[];
+      const currentIndex = parsedAnswers.length;
+      const question = questions[currentIndex];
+      if (!question) {
+        return res.status(409).json({
+          error: "IELTS Practice 作答進度無效，請重新開始",
+        });
+      }
+
+      if (question.id !== questionId) {
+        return res.status(409).json({
+          error: "請依序作答",
+          expectedQuestionId: question.id,
+        });
+      }
+
+      if (answerIndex < 0 || answerIndex >= question.options.length) {
+        return res.status(400).json({ error: "answerIndex 超出選項範圍" });
+      }
+
+      const isCorrect = answerIndex === question.answer;
+      const completed = currentIndex + 1 === questions.length;
+      const answers = [
+        ...parsedAnswers,
+        { questionId: question.id, answerIndex, correct: isCorrect },
+      ];
+
+      const updateResult = await prisma.learningSession.updateMany({
+        where: {
+          id: session.id,
+          userId,
+          courseId: session.courseId,
+          currentQuestion: currentIndex,
+          completed: false,
+        },
+        data: {
+          answers: JSON.stringify(answers),
+          currentQuestion: currentIndex + 1,
+          correctCount: { increment: isCorrect ? 1 : 0 },
+          completed,
+          completedAt: completed ? new Date() : null,
+        },
+      });
+      if (updateResult.count !== 1) {
+        return res.status(409).json({
+          error: "作答狀態已更新，請勿重複提交",
+        });
+      }
+
+      const updatedSession = await prisma.learningSession.findUnique({
+        where: { id: session.id },
+      });
+      if (!updatedSession) {
+        return res.status(409).json({ error: "IELTS Practice 會話已不存在" });
+      }
+
+      return res.json({
+        feedback: {
+          questionId: question.id,
+          answerIndex,
+          correct: isCorrect,
+          correctAnswerIndex: question.answer,
+          explanation: question.explanation,
+        },
+        progress: {
+          answered: updatedSession.currentQuestion,
+          total: updatedSession.totalQuestions,
+          completed: updatedSession.completed,
+        },
+        result: completed
+          ? {
+              skill: "reading",
+              scoreType: "practice-accuracy",
+              focusLevel,
+              correct: updatedSession.correctCount,
+              total: updatedSession.totalQuestions,
+              accuracyPercent: Math.round(
+                (updatedSession.correctCount / updatedSession.totalQuestions) *
+                  100,
+              ),
+              profileEvidence: false,
+              bandEstimate: null,
+              notice:
+                "This practice result is objective feedback only. It does not replace diagnostic evidence or estimate an official IELTS Band.",
+            }
+          : null,
       });
     } catch (err) {
       next(err);
