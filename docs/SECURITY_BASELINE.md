@@ -63,7 +63,7 @@ safety guard, not an isolation boundary if an operator supplies an incorrect pat
 
 ## Still outside this checkpoint
 
-Login throttling, complete account/data
+Distributed/edge login throttling, complete account/data
 rights flows, privacy notices, independent penetration testing, the full set of
 other API ownership checks, and review of image models/assets are not certified
 complete. Existing startup/deployment scripts also require a release audit.
@@ -73,3 +73,7 @@ platform publishing is authorized by this document.
 ## Persisted session revocation
 
 Registration and login persist a SHA-256 token digest and expiry before returning a JWT. Mandatory and optional authentication require the matching unexpired session and a live active user. Logout deletes only that session; independent random JWT IDs distinguish devices. No plaintext bearer token is stored. See `SESSION_MODEL.md`. Existing JWTs without matching session digests are intentionally rejected after rollout: users must sign in again, without changing their passwords. Expired-row cleanup and account-wide revocation UI remain separate work.
+
+## Local authentication admission control
+
+Login and registration now share a bounded, per-process fixed-window limiter (60 attempts per TCP peer and 10 per peer/email pair per 10 minutes). Denied requests do not reach authentication controllers. HMAC identifiers avoid retaining raw source addresses/email in the limiter. See `AUTH_RATE_MODEL.md` for capacity, proxy/NAT, window-boundary and multi-replica limitations. This is not verified production ingress protection; reverse-proxy behavior and shared limits remain deployment gates.
