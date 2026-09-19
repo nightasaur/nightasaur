@@ -299,7 +299,7 @@ Token 取得方式：呼叫 `POST /auth/login`。
   "status": "ok",
   "service": "Nightasaur AI Engine",
   "version": "3.0.0",
-  "ollama": { "status": "ok", "model": "qwen2.5:3b", "model_available": true },
+  "ollama": { "status": "disabled", "model": null, "model_available": false },
   "comfyui": { "status": "ok" }
 }
 ```

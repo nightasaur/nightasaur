@@ -8,6 +8,18 @@ gate_a_probe = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate_a_probe)
 
 
+def test_probe_rejects_missing_and_prohibited_models_without_network(monkeypatch):
+    def unexpected_http(*args, **kwargs):
+        raise AssertionError("No HTTP allowed for disabled/prohibited model")
+    monkeypatch.setattr(gate_a_probe, "urlopen", unexpected_http)
+    assert gate_a_probe._check_ollama("http://unused.invalid", "") == {
+        "ok": False, "error": "model_not_configured",
+    }
+    assert gate_a_probe._check_ollama("http://unused.invalid", "Qwen:unit") == {
+        "ok": False, "error": "model_prohibited",
+    }
+
+
 def test_build_report_requires_every_gate_check(monkeypatch):
     monkeypatch.setattr(gate_a_probe.platform, "system", lambda: "Windows")
     monkeypatch.setattr(gate_a_probe.platform, "release", lambda: "11")
@@ -17,7 +29,7 @@ def test_build_report_requires_every_gate_check(monkeypatch):
         gate_a_probe, "_check_ollama", lambda *_: {"ok": True}
     )
 
-    report = gate_a_probe.build_report("http://127.0.0.1:11434", "qwen2.5:3b")
+    report = gate_a_probe.build_report("http://127.0.0.1:11434", "fixture-model:unit")
 
     assert report["verified"] is True
     assert report["mode"] == "read-only"
@@ -32,7 +44,7 @@ def test_build_report_fails_closed_outside_windows_11(monkeypatch):
         gate_a_probe, "_check_ollama", lambda *_: {"ok": True}
     )
 
-    report = gate_a_probe.build_report("http://127.0.0.1:11434", "qwen2.5:3b")
+    report = gate_a_probe.build_report("http://127.0.0.1:11434", "fixture-model:unit")
 
     assert report["verified"] is False
     assert report["checks"]["windows_11"]["ok"] is False

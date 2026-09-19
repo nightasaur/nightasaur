@@ -88,7 +88,7 @@ echo   railway up --service nightasaur-ai -d apps/ai-engine
 echo.
 echo 設定 Ollama 連線:
 echo   railway env set OLLAMA_URL=http://your-vps-ip:11434
-echo   railway env set OLLAMA_MODEL=qwen2.5:3b
+echo   Text inference disabled by default. Review docs/MODEL_POLICY.md first.
 echo.
 echo 完成後的 AI Engine 網址：
 echo   https://nightasaur-ai.up.railway.app

@@ -284,7 +284,7 @@ async def test_backward_compatibility_full_stack():
     from agent import build_default_agent_core
     
     # This is what services/llm.py and services/assistant_llm.py do
-    core = build_default_agent_core(base_url="http://localhost:11434", model="qwen2.5:3b")
+    core = build_default_agent_core(base_url="http://localhost:11434", model="fixture-model:unit")
     
     # Create input WITHOUT runtime_context (v0.2 style)
     agent_input = AgentInput(

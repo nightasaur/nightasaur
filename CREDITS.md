@@ -11,7 +11,7 @@ Nightasaur stands on the shoulders of giants. We gratefully acknowledge the foll
 | Name | License | Usage | Can Copy? |
 |------|---------|-------|-----------|
 | [Ollama](https://ollama.com) | **MIT** ✅ | Local LLM runner | ✅ Yes |
-| [Qwen 2.5 (3B)](https://github.com/QwenLM/Qwen) | **Apache 2.0** ✅ | Default language model | ✅ Yes |
+| Text inference model | No model selected or approved by this change | Disabled by default; Qwen prohibited by project policy | Requires exact-version provenance and license review |
 | [Stable Diffusion SD 1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5) | **CreativeML Open RAIL-M** ⚠️ | Image generation base model | ⚠️ Attribution required |
 | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) | **GPL 3.0** ⚠️ | AI image generation pipeline | ⚠️ Must credit |
 

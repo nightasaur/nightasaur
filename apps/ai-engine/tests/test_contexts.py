@@ -146,7 +146,7 @@ def test_contexts_json_safe():
     
     provider = ProviderContext(
         providers=(
-            ProviderDescriptor(kind="model", provider_id="ollama-qwen"),
+            ProviderDescriptor(kind="model", provider_id="ollama-fixture"),
         ),
         metadata={"environment": "development"}
     )

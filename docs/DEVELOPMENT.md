@@ -120,7 +120,7 @@ npm run dev:ai
 **Ollama（選擇性）：**
 ```bash
 ollama serve
-ollama pull qwen2.5:3b   # 下載繁體中文模型
+# 不自動下載模型；先完成 docs/MODEL_POLICY.md 的來源與授權審核。
 ```
 
 ### 一鍵啟動全部

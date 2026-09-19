@@ -108,7 +108,7 @@ vercel --prod
 cd c:\Nightasaur\apps\ai-engine
 railway up --service nightasaur-ai -d .
 
-railway env set OLLAMA_MODEL=qwen2.5:3b
+# Text inference remains disabled until exact model provenance/license review.
 railway env set HOST=0.0.0.0
 railway env set PORT=8000
 ```
