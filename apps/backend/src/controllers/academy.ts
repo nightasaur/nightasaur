@@ -318,6 +318,82 @@ export class AcademyController {
       next(err);
     }
   }
+
+  async getIeltsLearningProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      const sessions = await prisma.learningSession.findMany({
+        where: {
+          userId,
+          courseId: IELTS_READING_DIAGNOSTIC_ID,
+          completed: true,
+        },
+        select: {
+          id: true,
+          correctCount: true,
+          totalQuestions: true,
+          completedAt: true,
+        },
+        orderBy: [{ completedAt: "desc" }, { createdAt: "desc" }],
+      });
+
+      const evidence = sessions
+        .filter(
+          (session) =>
+            session.totalQuestions > 0 &&
+            session.correctCount >= 0 &&
+            session.correctCount <= session.totalQuestions,
+        )
+        .map((session) => ({
+          sessionId: session.id,
+          scoreType: "objective-accuracy" as const,
+          correct: session.correctCount,
+          total: session.totalQuestions,
+          accuracyPercent: Math.round(
+            (session.correctCount / session.totalQuestions) * 100,
+          ),
+          completedAt: session.completedAt?.toISOString() ?? null,
+        }));
+
+      const unassessedSkill = {
+        status: "not-assessed" as const,
+        evidenceCount: 0,
+        latestEvidence: null,
+        bestAccuracyPercent: null,
+        bandEstimate: null,
+      };
+      const latestReadingEvidence = evidence[0] ?? null;
+
+      res.json({
+        profileVersion: "ielts-learning-profile-v1",
+        evidencePolicy: "completed-diagnostic-sessions-only",
+        skills: {
+          reading: {
+            status: latestReadingEvidence
+              ? ("evidence-ready" as const)
+              : ("not-assessed" as const),
+            evidenceCount: evidence.length,
+            latestEvidence: latestReadingEvidence,
+            bestAccuracyPercent:
+              evidence.length > 0
+                ? Math.max(...evidence.map((item) => item.accuracyPercent))
+                : null,
+            bandEstimate: null,
+          },
+          listening: { ...unassessedSkill },
+          writing: { ...unassessedSkill },
+          speaking: { ...unassessedSkill },
+        },
+        notice:
+          "This profile contains objective evidence from completed original IELTS-style diagnostics only. It is not an official IELTS test or Band estimate.",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
 }
 
 export const academyController = new AcademyController();
