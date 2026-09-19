@@ -614,3 +614,59 @@ model ARCapture {
 
   @@map("ar_captures")
 }
+
+// Registry for third-party open resources. Registration is not legal approval:
+// only records with ingestionStatus=CONTENT_APPROVED may have content chunks.
+model OpenSourceResource {
+  id                    String                   @id @default(cuid())
+  canonicalId           String                   @unique
+  name                  String
+  kind                  String
+  role                  String                   @default("AUXILIARY_OPEN_SOURCE")
+  sourceUrl             String
+  version               String?
+  licenseExpression     String                   @default("NOASSERTION")
+  licenseUrl            String?
+  attribution           String?
+  contentSha256         String?
+  contentIncluded       Boolean                  @default(false)
+  policyReviewStatus    String                   @default("REVIEW_REQUIRED")
+  legalReviewStatus     String                   @default("NOT_REVIEWED")
+  ingestionStatus       String                   @default("METADATA_ONLY")
+  decisionReason        String
+  attributionRequired   Boolean                  @default(false)
+  shareAlikeRequired    Boolean                  @default(false)
+  commercialUseAllowed  Boolean                  @default(false)
+  redistributionAllowed Boolean                  @default(false)
+  modificationAllowed   Boolean                  @default(false)
+  containsPersonalData  Boolean                  @default(false)
+  containsSensitiveData Boolean                  @default(false)
+  containsChildData     Boolean                  @default(false)
+  isAuthoritative       Boolean                  @default(false)
+  provenanceJson        String                   @default("{}")
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  chunks                OpenSourceContentChunk[]
+
+  @@index([kind, ingestionStatus])
+  @@index([licenseExpression])
+  @@map("open_source_resources")
+}
+
+model OpenSourceContentChunk {
+  id              String             @id @default(cuid())
+  resourceId      String
+  sequence        Int
+  role            String             @default("AUXILIARY_OPEN_SOURCE")
+  content         String
+  contentSha256   String
+  isAuthoritative Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  resource        OpenSourceResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, sequence])
+  @@index([resourceId])
+  @@map("open_source_content_chunks")
+}
