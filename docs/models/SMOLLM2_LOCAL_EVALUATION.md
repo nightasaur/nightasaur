@@ -52,9 +52,24 @@ documented upstream; multilingual product quality is not inferred from this test
 
 ## Hardware evidence and execution status
 
-The owner supplied terminal output showing RTX 3070 Laptop GPU, 8192 MiB,
-driver 576.28, Ollama 0.34.0, and a successful local model-list request with no
-non-prohibited model available. This is owner-supplied environment evidence,
-not a real-model smoke result. Windows 11 detection, installation digest,
-AgentCore tool execution, exact final answer and unchanged-workspace checks
-remain to be captured by `verify_local_runtime.py` on the actual laptop.
+The owner supplied a real smoke report generated at
+`2026-09-19T16:29:26.563231+00:00` for candidate
+`4bb762f64c1b7fdb607ab05f73a39b1b605cc84d`:
+
+- Windows build 26200, RTX 3070 Laptop GPU, 8192 MiB, driver 576.28.
+- Ollama 0.34.0; model pull completed and the reviewed manifest digest matched.
+- Environment, fixture integrity and candidate integrity checks passed.
+- `real_tool_result_reproduced: false`, `runtime_verified: false`, process exit 1.
+
+This establishes installation and environment prerequisites, not a passed local
+Runtime or actual GPU utilization. The report omitted call-level diagnostics, so
+its precise inference failure cannot be reconstructed from that output alone.
+The next candidate requires a new Windows run; do not reuse the old failure as
+success or the earlier prohibited-model result as current evidence.
+
+The subsequent CPU software reproduction uses the same package and a schema-
+constrained required-tool request. Three fresh synthetic reads passed in the
+final implementation. See `docs/evidence/2026-09-19-smollm2-cpu-runtime.json`.
+This narrower tool-loop evidence does not establish general model quality,
+autonomous planning, Chinese-language quality, GPU acceleration or production
+readiness; the candidate must still be rerun on the owner's laptop.

@@ -279,3 +279,76 @@ async def test_generate_with_tools_malformed_marker_falls_back_to_plain_content(
 
     assert result.tool_calls == []
     assert result.content == malformed_response
+
+
+@pytest.mark.asyncio
+async def test_tool_response_keeps_generation_metadata(patch_ollama_httpx_client):
+    payload = {"message": {"content": '```tool_call\n{"name":"clock","arguments":{}}\n```'},
+               "done_reason": "stop", "eval_count": 15}
+    patch_ollama_httpx_client(post_result=FakeHttpxResponse(200, payload))
+    provider = OllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit")
+    response = await provider.generate([{"role": "user", "content": "time"}], tools=[ToolSpec("clock")])
+    assert response.tool_calls[0].name == "clock"
+    assert response.raw == payload
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("exception,code", [
+    (httpx.ConnectError("password=private-value"), "connection_error"),
+    (httpx.ReadTimeout("password=private-value"), "request_timeout"),
+    (ValueError("password=private-value"), "generation_error"),
+])
+async def test_failure_has_safe_error_code(patch_ollama_httpx_client, capsys, exception, code):
+    patch_ollama_httpx_client(post_exception=exception)
+    response = await OllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit").generate([])
+    assert response.raw == {"error_code": code}
+    assert "private-value" not in capsys.readouterr().out
+
+
+@pytest.mark.asyncio
+async def test_http_failure_keeps_status_without_logging_response_body(patch_ollama_httpx_client, capsys):
+    patch_ollama_httpx_client(post_result=FakeHttpxResponse(503, text="password=private-value"))
+    response = await OllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit").generate([])
+    assert response.raw == {"error_code": "http_error", "http_status": 503}
+    assert "private-value" not in capsys.readouterr().out
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("endpoint", ["http://127.0.0.1:11434", "http://localhost:11434", "http://[::1]:11434"])
+async def test_loopback_inference_works_with_unsupported_environment_proxy(monkeypatch, endpoint):
+    # Use the real httpx client initialization: mocking AsyncClient itself would
+    # hide the httpx 0.27 ALL_PROXY parsing failure this regression covers.
+    monkeypatch.setenv("ALL_PROXY", "socks5h://127.0.0.1:1")
+    monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:1")
+    monkeypatch.setenv("NO_PROXY", "")
+    async def send(client, request, **kwargs):
+        assert str(request.url) == endpoint + "/api/chat"
+        assert client._trust_env is False
+        return httpx.Response(200, json={"message": {"content": "local-success"}}, request=request)
+    monkeypatch.setattr(httpx.AsyncClient, "send", send)
+    response = await OllamaModelProvider(endpoint, "fixture-model:unit").generate([])
+    assert response.content == "local-success"
+    assert not response.raw.get("error_code")
+
+
+@pytest.mark.asyncio
+async def test_structured_mode_without_tools_preserves_plain_chat(patch_ollama_httpx_client):
+    calls = patch_ollama_httpx_client(post_result=FakeHttpxResponse(200, {"message": {"content": "plain reply"}}))
+    provider = OllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit", tool_call_mode="json_schema")
+    messages = [{"role": "user", "content": "hello"}]
+    response = await provider.generate(messages, tools=[])
+    assert response.content == "plain reply"
+    assert calls[0][2]["messages"] == messages
+    assert "format" not in calls[0][2]
+
+
+@pytest.mark.asyncio
+async def test_required_initial_call_applies_to_current_turn_not_old_history(patch_ollama_httpx_client):
+    calls = patch_ollama_httpx_client(post_result=FakeHttpxResponse(200, {"message": {"content": '{"answer":"unused"}'}}))
+    provider = OllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit", tool_call_mode="json_schema")
+    await provider.generate([
+        {"role": "user", "content": "previous request"},
+        {"role": "tool", "content": {"content": "old result"}},
+        {"role": "user", "content": "new request"},
+    ], tools=[ToolSpec("clock")], require_initial_tool=True)
+    assert calls[0][2]["format"]["required"] == ["tool_call"]

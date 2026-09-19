@@ -63,8 +63,137 @@ def accepts(output, nonce):
     reads = [t for t in trace if t.get("name") == "workspace_inspect"
              and t.get("ok") is True
              and t.get("arguments") == {"action": "read", "path": "challenge.txt"}]
-    return bool(reads) and all(t.get("name") == "workspace_inspect"
-                               and t.get("ok") is True for t in trace) and output.content.strip() == nonce
+    return (
+        bool(reads)
+        and all(t.get("name") == "workspace_inspect" and t.get("ok") is True for t in trace)
+        and isinstance(output.content, str)
+        and output.content.strip() == nonce
+    )
+
+
+EXPECTED_ARGUMENTS = {"action": "read", "path": "challenge.txt"}
+PROVIDER_ERRORS = {
+    "model_disabled", "http_error", "connection_error", "request_timeout", "generation_error",
+}
+
+
+def response_summary(response, nonce):
+    """Project responses into bounded metadata; never emit model text or paths."""
+    raw = response.raw if isinstance(response.raw, dict) else {}
+    text = response.content if isinstance(response.content, str) else ""
+    raw_message = raw.get("message")
+    raw_text = raw_message.get("content", "") if isinstance(raw_message, dict) else text
+    if not isinstance(raw_text, str):
+        raw_text = ""
+    try:
+        unmarked = json.loads(raw_text)
+    except (ValueError, TypeError):
+        unmarked = None
+    summary = {
+        "unmarked_tool_json": isinstance(unmarked, dict) and "name" in unmarked and "arguments" in unmarked,
+        "tool_call_count": len(response.tool_calls),
+        "expected_tool_requested": any(
+            call.name == "workspace_inspect" and call.arguments == EXPECTED_ARGUMENTS
+            for call in response.tool_calls
+        ),
+        "response_characters": len(raw_text),
+        "contains_tool_marker": "```tool_call" in raw_text,
+        "answer_matches": text.strip() == nonce,
+        "answer_contains_challenge": nonce in text,
+    }
+    if raw.get("error_code"):
+        code = raw["error_code"]
+        summary["error_code"] = code if isinstance(code, str) and code in PROVIDER_ERRORS else "unknown_provider_error"
+    status = raw.get("http_status")
+    if type(status) is int and 100 <= status <= 599:
+        summary["http_status"] = status
+    reason = raw.get("done_reason")
+    if isinstance(reason, str) and reason in {"stop", "length", "load", "unload"}:
+        summary["done_reason"] = reason
+    return summary
+
+
+class ObservedProvider:
+    """Observe the real provider without injecting/replacing model responses."""
+
+    def __init__(self, delegate, nonce):
+        self.delegate = delegate
+        self.nonce = nonce
+        self.calls = []
+
+    async def generate(self, *args, **kwargs):
+        response = await self.delegate.generate(*args, **kwargs)
+        self.calls.append(response_summary(response, self.nonce))
+        return response
+
+    async def health_check(self):
+        return await self.delegate.health_check()
+
+    def supports_native_tool_calls(self):
+        return self.delegate.supports_native_tool_calls()
+
+
+def diagnose(output, nonce, calls):
+    trace = output.metadata.get("tool_trace", [])
+    if any(call.get("error_code") for call in calls):
+        reason = "provider_error"
+    elif any(item.get("event") == "max_iterations_reached" for item in trace):
+        reason = "tool_iteration_limit"
+    elif not trace:
+        reason = "no_tool_call"
+    elif any(item.get("ok") is not True for item in trace):
+        reason = "tool_failed_or_denied"
+    elif not any(item.get("name") == "workspace_inspect"
+                 and item.get("arguments") == EXPECTED_ARGUMENTS for item in trace):
+        reason = "expected_read_missing"
+    elif not accepts(output, nonce):
+        reason = "final_answer_mismatch"
+    else:
+        reason = "passed"
+    return {
+        "reason": reason,
+        "model_calls": calls,
+        "tool_calls": [{
+            "expected_tool": item.get("name") == "workspace_inspect",
+            "expected_arguments": item.get("arguments") == EXPECTED_ARGUMENTS,
+            "ok": item.get("ok") is True,
+        } for item in trace[:4]],
+    }
+
+
+async def exercise_runtime(base_url, model):
+    """Synthetic tool loop only; the caller must enforce hardware/release gates."""
+    from agent import AgentInput, build_read_only_agent_core
+    with tempfile.TemporaryDirectory(prefix="nightasaur-runtime-") as directory:
+        workspace = Path(directory)
+        nonce = secrets.token_hex(16)
+        (workspace / "challenge.txt").write_text(nonce, encoding="utf-8")
+        before = snapshot(workspace)
+        core = build_read_only_agent_core(base_url, model, str(workspace))
+        observer = ObservedProvider(core.model_provider, nonce)
+        core.model_provider = observer
+        try:
+            # Provider logs must not corrupt JSON or reveal private responses.
+            with contextlib.redirect_stdout(io.StringIO()):
+                output = await asyncio.wait_for(core.run(AgentInput(
+                    message="Read challenge.txt using workspace_inspect action read. Return only its exact contents.",
+                    model_options={"temperature": 0, "num_predict": 256, "require_initial_tool": True},
+                    max_tool_iterations=3,
+                )), timeout=180)
+            reproduced = accepts(output, nonce)
+            diagnostics = diagnose(output, nonce, observer.calls)
+        except Exception as exc:
+            reproduced = False
+            diagnostics = {
+                "reason": "runtime_timeout" if isinstance(exc, TimeoutError) else "runtime_error",
+                "error_type": type(exc).__name__, "model_calls": observer.calls,
+            }
+        return {
+            "real_tool_result_reproduced": reproduced,
+            "fixture_unchanged": before == snapshot(workspace),
+            "diagnostics": diagnostics,
+            "tool_call_mode": "json_schema",
+        }
 
 
 async def run(args):
@@ -87,27 +216,12 @@ async def run(args):
     found = [m for m in tags.get("models", []) if m.get("name") == model]
     if len(found) != 1 or normalize_digest(found[0].get("digest")) != reviewed_digest:
         raise ValueError("model_digest_mismatch")
-    from agent import AgentInput, build_read_only_agent_core
-    with tempfile.TemporaryDirectory(prefix="nightasaur-runtime-") as directory:
-        workspace = Path(directory)
-        nonce = secrets.token_hex(16)
-        (workspace / "challenge.txt").write_text(nonce, encoding="utf-8")
-        before = snapshot(workspace)
-        core = build_read_only_agent_core(BASE_URL, model, str(workspace))
-        # Provider diagnostics must not corrupt JSON or reveal local responses.
-        with contextlib.redirect_stdout(io.StringIO()):
-            output = await asyncio.wait_for(core.run(AgentInput(
-                message="Read challenge.txt using workspace_inspect action read. Return only its exact contents.",
-                model_options={"temperature": 0, "num_predict": 256},
-                max_tool_iterations=3,
-            )), timeout=180)
-        unchanged = before == snapshot(workspace)
-        candidate_unchanged = git("rev-parse", "HEAD") == args.commit and not git("status", "--porcelain")
-        return {"checks": checks, "model": model, "digest": reviewed_digest,
-                "real_tool_result_reproduced": accepts(output, nonce),
-                "fixture_unchanged": unchanged,
-                "candidate_unchanged": candidate_unchanged,
-                "runtime_verified": accepts(output, nonce) and unchanged and candidate_unchanged}
+    result = await exercise_runtime(BASE_URL, model)
+    candidate_unchanged = git("rev-parse", "HEAD") == args.commit and not git("status", "--porcelain")
+    return {"checks": checks, "model": model, "digest": reviewed_digest, **result,
+            "candidate_unchanged": candidate_unchanged,
+            "runtime_verified": result["real_tool_result_reproduced"]
+            and result["fixture_unchanged"] and candidate_unchanged}
 
 
 def main():
@@ -120,9 +234,16 @@ def main():
         report = asyncio.run(run(args))
     except Exception as exc:
         report = {"runtime_verified": False, "error_type": type(exc).__name__}
+        known_errors = {
+            "reviewed_ollama_digest_required", "explicit_model_and_full_commit_required",
+            "checkout_must_match_candidate_and_be_clean", "model_digest_mismatch",
+            "unexpected_symlink",
+        }
+        if str(exc) in known_errors:
+            report["error_code"] = str(exc)
     report.update(candidate=args.commit, generated_at=datetime.now(timezone.utc).isoformat(),
                   verified=False, scope="real_local_runtime_smoke",
-                  remaining=["same_commit_ci", "model_provenance_review", "full_gate_review"])
+                  external_reviews_not_evaluated=["same_commit_ci", "model_provenance_review", "full_gate_review"])
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if report["runtime_verified"] else 1
 
