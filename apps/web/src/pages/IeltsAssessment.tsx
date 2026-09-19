@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ieltsAssessmentAPI } from "../api/client";
 import type { IeltsDiagnosticAnswerResponse, IeltsDiagnosticStartResponse } from "../api/client";
+import IeltsLearningLoop from "./IeltsLearningLoop";
 
 type SkillId = "listening" | "reading" | "writing" | "speaking";
 
@@ -431,6 +432,14 @@ export default function IeltsAssessment() {
           W3 只建立真實 Reading 作答與客觀結果基線。Daily Plan、Writing / Speaking rubric 與 AI Feedback 仍依主線 Gate 推進，不提前宣稱完成。
         </div>
       </section>
+
+      <IeltsLearningLoop
+        refreshKey={
+          result
+            ? `${result.correct}:${result.total}:${result.accuracyPercent}`
+            : "initial"
+        }
+      />
     </div>
   );
 }
