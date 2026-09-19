@@ -30,6 +30,10 @@ router.get("/ielts/daily-plan", (req, res, next) => academyController.getIeltsDa
 router.post("/ielts/diagnostic/start", (req, res, next) => academyController.startIeltsReadingDiagnostic(req, res, next));
 router.post("/ielts/diagnostic/:sessionId/answer", (req, res, next) => academyController.answerIeltsReadingDiagnostic(req, res, next));
 
+// IELTS Reading Practice（閱讀練習）：由最新診斷證據決定焦點，每題回傳客觀回饋。
+router.post("/ielts/practice/start", (req, res, next) => academyController.startIeltsReadingPractice(req, res, next));
+router.post("/ielts/practice/:sessionId/answer", (req, res, next) => academyController.answerIeltsReadingPractice(req, res, next));
+
 // 開始學習課程
 router.post("/courses/:courseId/start", (req, res, next) => academyController.startCourse(req, res, next));
 
