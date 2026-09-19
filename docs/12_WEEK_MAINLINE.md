@@ -1,6 +1,6 @@
 # Nightasaur 12 週主線（整合基準）
 
-> 基準日期：2026-09-18
+> 基準日期：2026-09-19
 > 主線原則：IELTS 真實學習閉環 × Nightasaur3070 Agent Runtime（執行環境）。
 > 可以在 Draft PR（草稿合併請求）中堆疊施工，但只能依 Gate（驗收閘門）順序
 > 合併；未驗證階段不得進 Production（正式環境）或操作正式資料庫。
@@ -26,8 +26,8 @@
 | W2 | Local Runtime Gate A（本機執行環境） | RTX 3070 + Ollama + 唯讀 Tool Loop 不改工作區 | `VERIFIED / MERGED`：PR #17 |
 | W3 | Runtime Closure + IELTS Diagnostic | grounding 修正、真實作答、隔離 Backend/DB、HTTP E2E、同候選本機複驗 | `PARTIAL`：PR #18；僅剩目前候選的 Windows/Ollama grounding 複驗 |
 | W4 | v0.5 Bounded Edit（限制式修改） | allowlist/denylist、dry-run、hash、防穿越、原子替換 | `VERIFIED / UNMERGED`：PR #19 |
-| W5 | Coding Tool Loop（程式工具循環） | inspect → preview → path/before/after hash exact-approved apply；其他 mutation fail-closed | `ACTIVE`：v0.6 候選施工中 |
-| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `PENDING` |
+| W5 | Coding Tool Loop（程式工具循環） | inspect → preview → path/before/after hash exact-approved apply；其他 mutation fail-closed | `VERIFIED / UNMERGED`：PR #20 |
+| W6 | IELTS Learning Loop（學習循環） | 診斷 → 每日任務 → 練習 → 回饋 → Learning Profile 證據 | `ACTIVE`：PR #21 建立 evidence-only Learning Profile 第一切片 |
 | W7 | Git Safety I（Git 安全一） | 唯讀 status/diff；範圍與敏感資料防護 | `PENDING` |
 | W8 | Git Safety II（Git 安全二） | 受限 branch/commit；禁止 force/delete/main 直寫 | `PENDING` |
 | W9 | Git Closure（Git 閉環） | PR 流程、CI 證據、rollback（回復）契約 | `PENDING` |
