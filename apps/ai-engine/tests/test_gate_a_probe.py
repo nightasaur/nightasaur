@@ -32,7 +32,9 @@ def test_build_report_requires_every_gate_check(monkeypatch):
 
     report = gate_a_probe.build_report("http://127.0.0.1:11434", "fixture-model:unit")
 
-    assert report["verified"] is True
+    assert report["environment_ready"] is True
+    assert report["verified"] is False
+    assert report["status"] == "ENVIRONMENT_ONLY"
     assert report["mode"] == "read-only"
 
 

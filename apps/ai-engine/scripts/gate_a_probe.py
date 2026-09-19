@@ -99,7 +99,10 @@ def build_report(base_url: str, model: str) -> dict:
         "gate": "Nightasaur3070-v0.4-Gate-A",
         "mode": "read-only",
         "checks": checks,
-        "verified": all(item["ok"] for item in checks.values()),
+        "environment_ready": all(item["ok"] for item in checks.values()),
+        "verified": False,
+        "status": "ENVIRONMENT_ONLY",
+        "remaining": ["same_commit_ci", "reviewed_model_digest", "real_agent_run"],
     }
 
 
@@ -110,7 +113,7 @@ def main() -> int:
     args = parser.parse_args()
     report = build_report(args.ollama_url, args.model)
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0 if report["verified"] else 1
+    return 0 if report["environment_ready"] else 1
 
 
 if __name__ == "__main__":
