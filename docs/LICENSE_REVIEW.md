@@ -2,7 +2,7 @@
 
 Evidence collected 2026-09-19 from installed artifacts matching the repository's pinned versions. This is a technical evidence checkpoint, not whole-product commercial clearance.
 
-`data/compliance/packages.json` retains the original declarations: 1,676 records, including lockfile locations rather than unique products. `license-evidence.json` examines the 36 records with missing or non-common declarations: 28 have license/notice files, six platform packages are not installed, and two have no matching root license file. Each collected file has a SHA-256 digest. Hashes support comparison, not authentication of an upstream author or fulfillment of distribution obligations.
+`data/compliance/packages.json` retains the original declarations: 1,677 records, including lockfile locations rather than unique products. `license-evidence.json` examines the 37 records with missing or non-common declarations: 29 have license/notice files, six platform packages are not installed, and two have no matching root license file. Each collected file has a SHA-256 digest. Hashes support comparison, not authentication of an upstream author or fulfillment of distribution obligations.
 
 Reproduce offline after installing the exact lockfile and pinned Python requirements:
 
@@ -51,6 +51,6 @@ For each shipped component, the release owner records exact version/digest, sour
 
 Run `python scripts/export-license-notices.py --output-dir /tmp/nightasaur-notices` in the same installed environment used for evidence collection. The exporter validates the inventory digest, exact installed versions and every collected file's size and SHA-256 before writing output. Changed or missing evidence fails instead of silently exporting different terms.
 
-The committed `data/compliance/notices/THIRD_PARTY_NOTICES.txt` preserves 30 license/notice files from the 28 evidenced records. `NOTICE_COVERAGE.json` explicitly lists eight unresolved records. This is a partial evidence bundle, not notices for all 1,676 records or a production release. Regenerate after reviewed evidence changes and complete the final artifact inventory before distribution.
+The committed `data/compliance/notices/THIRD_PARTY_NOTICES.txt` preserves 31 license/notice files from the 29 evidenced records. `NOTICE_COVERAGE.json` explicitly lists eight unresolved records. This is a partial evidence bundle, not notices for all 1,677 records or a production release. Regenerate after reviewed evidence changes and complete the final artifact inventory before distribution.
 
 `python -m unittest discover -s scripts/tests` verifies text preservation, tamper rejection, inventory drift, path containment and unresolved-item reporting; CI runs this test.

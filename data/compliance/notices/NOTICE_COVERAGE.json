@@ -1,7 +1,7 @@
 {
   "scope": "partial-collected-evidence",
   "approved": false,
-  "licenseFiles": 30,
+  "licenseFiles": 31,
   "unresolved": [
     {
       "component": "lightningcss-darwin-arm64 1.19.0 (npm)",

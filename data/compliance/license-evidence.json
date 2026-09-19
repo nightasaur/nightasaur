@@ -1,8 +1,8 @@
 {
   "scope": "Missing or non-common declarations only; installed artifacts, not upstream authentication or legal clearance",
-  "inventorySha256": "9479f70112d07c48bd0efe06c57d87072146805e0332c33572938b85455c112a",
+  "inventorySha256": "d3d40776dce33f707676875548d810bcbb26799ff208275fa49bf57332c1390b",
   "summary": {
-    "LICENSE_FILE_FOUND": 28,
+    "LICENSE_FILE_FOUND": 29,
     "NOT_INSTALLED": 6,
     "NO_LICENSE_FILE": 2
   },
@@ -528,6 +528,23 @@
           "path": "fastapi-0.141.1.dist-info/licenses/LICENSE",
           "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
           "bytes": 1086
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "python-multipart",
+      "version": "0.0.32",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/python-multipart/0.0.32/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "Apache-2.0",
+      "files": [
+        {
+          "path": "python_multipart-0.0.32.dist-info/licenses/LICENSE.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358
         }
       ],
       "evidenceStatus": "LICENSE_FILE_FOUND"
