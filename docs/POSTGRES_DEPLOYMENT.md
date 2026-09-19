@@ -4,7 +4,7 @@ The owner authorized production connection verification, compatible schema prepa
 
 ## Separate providers and migration histories
 
-SQLite remains the local test provider. `scripts/sync-postgres-schema.mjs` derives `apps/backend/prisma/postgresql/schema.prisma` from the canonical data model, changing only the provider. `--check` prevents divergence. PostgreSQL has its own migration history; never apply SQLite migrations to it.
+SQLite remains the local test provider. `scripts/sync-postgres-schema.mjs` derives `apps/backend/prisma/postgresql/schema.prisma` from the canonical data model, changing the provider and preserving the observed production table name `QuestProgress` (SQLite uses `quest_progress`). `--check` prevents divergence. PostgreSQL has its own migration history; never apply SQLite migrations to it.
 
 `Dockerfile.production` explicitly generates the PostgreSQL client. The normal Dockerfile remains SQLite-compatible. Neither startup command creates, resets or migrates tables.
 
@@ -24,3 +24,7 @@ No `db push --accept-data-loss`, `migrate reset`, blind baseline or implicit see
 Verify the exact Git commit/source, PostgreSQL DATABASE_URL reference, JWT_SECRET, CORS_ORIGIN and appropriate backend service port. Provision secrets in the secret manager, never in repository files or logs. Set the AI endpoint/key only for a configured private AI service; absent AI capabilities remain disabled. Keep SOCIAL_PUBLISH_ENABLED=false. Use one backend replica until shared admission control and trusted-proxy topology are validated.
 
 Inspect and separate all pre-existing staged environment changes before releasing this service. Select `Dockerfile.production`, remove legacy start/pre-deploy schema-sync commands, and health-check the deployed service. A generic health response does not prove DB connectivity: validate session-backed authorization and metadata compatibility separately. Keep the old service available for rollback; do not roll back to exposed credentials.
+
+## Observed existing production baseline
+
+Authenticated inspection confirmed 16 existing application tables, including legacy `QuestProgress`. Preserve that table name rather than dropping/recreating it. The reviewed diff adds its nullable `completedAt` column, three language preference booleans with defaults, a quest requirement field with default, and 20 missing tables plus their indexes/foreign keys. No account/password update is required. Production backup archive was created and its table of contents validated; this is not a restore drill. Apply only the freshly reviewed incremental SQL in one transaction with bounded lock/statement timeouts, then compare actual schema to the target before baselining migration history.

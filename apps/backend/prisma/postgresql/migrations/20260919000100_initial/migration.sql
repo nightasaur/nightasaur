@@ -184,7 +184,7 @@ CREATE TABLE "quests" (
 );
 
 -- CreateTable
-CREATE TABLE "quest_progress" (
+CREATE TABLE "QuestProgress" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "questId" TEXT NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE "quest_progress" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "quest_progress_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "QuestProgress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -617,7 +617,7 @@ CREATE UNIQUE INDEX "items_name_key" ON "items"("name");
 CREATE UNIQUE INDEX "user_items_userId_itemId_key" ON "user_items"("userId", "itemId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "quest_progress_userId_questId_key" ON "quest_progress"("userId", "questId");
+CREATE UNIQUE INDEX "QuestProgress_userId_questId_key" ON "QuestProgress"("userId", "questId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "spirit_upgrades_spiritId_upgradeType_key" ON "spirit_upgrades"("spiritId", "upgradeType");
@@ -689,10 +689,10 @@ ALTER TABLE "user_items" ADD CONSTRAINT "user_items_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "user_items" ADD CONSTRAINT "user_items_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "quest_progress" ADD CONSTRAINT "quest_progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "QuestProgress" ADD CONSTRAINT "QuestProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "quest_progress" ADD CONSTRAINT "quest_progress_questId_fkey" FOREIGN KEY ("questId") REFERENCES "quests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "QuestProgress" ADD CONSTRAINT "QuestProgress_questId_fkey" FOREIGN KEY ("questId") REFERENCES "quests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "spirit_upgrades" ADD CONSTRAINT "spirit_upgrades_spiritId_fkey" FOREIGN KEY ("spiritId") REFERENCES "spirits"("id") ON DELETE CASCADE ON UPDATE CASCADE;

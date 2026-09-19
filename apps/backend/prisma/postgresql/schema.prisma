@@ -243,7 +243,7 @@ model QuestProgress {
   quest       Quest     @relation(fields: [questId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questId])
-  @@map("quest_progress")
+  @@map("QuestProgress")
 }
 
 model SpiritUpgrade {
