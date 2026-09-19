@@ -20,6 +20,9 @@ router.get("/categories", (req, res, next) => academyController.getCategories(re
 // 分類題庫
 router.get("/questions/category/:category", (req, res, next) => academyController.getCategoryQuestions(req, res, next));
 
+// IELTS Learning Profile（學習檔案）：只回傳已完成診斷的客觀證據。
+router.get("/ielts/profile", (req, res, next) => academyController.getIeltsLearningProfile(req, res, next));
+
 // IELTS Reading Diagnostic（閱讀診斷）：作答前不向前台下發正解。
 router.post("/ielts/diagnostic/start", (req, res, next) => academyController.startIeltsReadingDiagnostic(req, res, next));
 router.post("/ielts/diagnostic/:sessionId/answer", (req, res, next) => academyController.answerIeltsReadingDiagnostic(req, res, next));
