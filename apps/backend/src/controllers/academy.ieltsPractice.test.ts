@@ -60,7 +60,7 @@ test("practice start fails closed until valid diagnostic evidence exists", async
   learningSession.findMany = (async () => []) as typeof learningSession.findMany;
   learningSession.create = (async () => {
     throw new Error("create must not run without diagnostic evidence");
-  }) as typeof learningSession.create;
+  }) as unknown as typeof learningSession.create;
 
   const request = { user: { userId: "user-1" } } as Request;
   const { response, recorder } = createResponseRecorder();
