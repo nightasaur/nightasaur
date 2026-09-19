@@ -10,7 +10,13 @@ commit:
 3. `WorkspaceInspectTool` remains bounded to its configured workspace.
 4. A Windows 11 host can see the NVIDIA GPU through `nvidia-smi`.
 5. Ollama responds locally and contains `qwen2.5:3b`.
-6. A real read-only AgentCore run completes without modifying the workspace.
+6. A real read-only AgentCore run invokes `workspace_inspect` exactly once with
+   the expected bounded arguments.
+7. When the tool returns `directories` and `files`, the model preserves both
+   arrays as exhaustive, mutually exclusive classifications: directory names
+   never appear in `files`, and file names never appear in `directories`.
+8. The AgentCore run completes without modifying the candidate or source
+   workspace.
 
 CI success alone is not Gate A verification. The Windows 11 / RTX 3070 /
 Ollama evidence must be captured from the target laptop after the PR candidate
