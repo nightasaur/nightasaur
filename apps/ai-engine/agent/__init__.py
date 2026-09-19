@@ -12,6 +12,8 @@ v0.3 新增：
 - capability：能力描述系統
 - contexts：運行時上下文資料結構
 """
+from collections.abc import Iterable
+
 from agent.capability import Capability, CapabilitySet
 from agent.contexts import (
     AgentIdentity,
@@ -21,12 +23,17 @@ from agent.contexts import (
     RuntimeContext,
 )
 from agent.core import DEFAULT_MAX_TOOL_ITERATIONS, AgentCore
-from agent.execution_policy import ReadOnlyExecutionPolicy
+from agent.execution_policy import (
+    CodingExecutionPolicy,
+    ReadOnlyExecutionPolicy,
+    WorkspaceWriteApproval,
+)
 from agent.memory.in_memory import EphemeralMemoryProvider
 from agent.providers.ollama_provider import OllamaModelProvider
 from agent.schemas import AgentInput, AgentOutput
 from agent.tools.registry import ToolRegistry
 from agent.tools.workspace_inspect import WorkspaceInspectTool
+from agent.tools.workspace_patch import WorkspacePatchTool
 
 __all__ = [
     "AgentCore",
@@ -34,6 +41,7 @@ __all__ = [
     "AgentOutput",
     "build_default_agent_core",
     "build_read_only_agent_core",
+    "build_coding_agent_core",
     # v0.3 exports
     "Capability",
     "CapabilitySet",
@@ -42,7 +50,9 @@ __all__ = [
     "ProviderContext",
     "ProviderDescriptor",
     "RuntimeContext",
+    "CodingExecutionPolicy",
     "ReadOnlyExecutionPolicy",
+    "WorkspaceWriteApproval",
 ]
 
 
@@ -79,5 +89,41 @@ def build_read_only_agent_core(
         tool_registry=registry,
         memory_provider=EphemeralMemoryProvider(),
         execution_policy=ReadOnlyExecutionPolicy(),
+        max_tool_iterations=DEFAULT_MAX_TOOL_ITERATIONS,
+    )
+
+
+def build_coding_agent_core(
+    base_url: str,
+    model: str,
+    workspace_root: str,
+    *,
+    allowed_write_paths: Iterable[str],
+    approved_writes: Iterable[WorkspaceWriteApproval] | None = None,
+    denied_write_paths: Iterable[str] | None = None,
+) -> AgentCore:
+    """Build the opt-in v0.6 bounded coding Tool Loop.
+
+    The default and read-only builders remain unchanged.  This builder exposes
+    workspace inspection plus restricted text replacement only.  A patch is a
+    preview by default; applying it requires an exact path-to-source-hash
+    approval supplied by trusted caller code through ``approved_writes``.
+    """
+
+    allowed_paths = tuple(allowed_write_paths)
+    registry = ToolRegistry()
+    registry.register(WorkspaceInspectTool(workspace_root))
+    registry.register(
+        WorkspacePatchTool(
+            workspace_root,
+            allowed_paths=allowed_paths,
+            denied_paths=denied_write_paths,
+        )
+    )
+    return AgentCore(
+        model_provider=OllamaModelProvider(base_url=base_url, model=model),
+        tool_registry=registry,
+        memory_provider=EphemeralMemoryProvider(),
+        execution_policy=CodingExecutionPolicy(approved_writes=approved_writes),
         max_tool_iterations=DEFAULT_MAX_TOOL_ITERATIONS,
     )
