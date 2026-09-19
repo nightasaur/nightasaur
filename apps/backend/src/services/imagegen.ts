@@ -1,4 +1,5 @@
 import axios from "axios";
+import { aiRequestOptions } from "./aiClient.js";
 import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
 
@@ -28,7 +29,7 @@ export class ImageGenService {
           stage: spirit.stage,
           personality: spirit.personality || "friendly",
         },
-        { timeout: 300000 }
+        aiRequestOptions(300000)
       );
 
       const data = res.data;

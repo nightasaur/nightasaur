@@ -32,7 +32,7 @@ Token 取得方式：呼叫 `POST /auth/login`。
 {
   "email": "demo@nightasaur.com",
   "username": "訓練家小明",
-  "password": "demo1234"
+  "password": "RETIRED-CREDENTIAL-DO-NOT-USE"
 }
 ```
 
@@ -50,7 +50,7 @@ Token 取得方式：呼叫 `POST /auth/login`。
 
 **Request:**
 ```json
-{ "email": "demo@nightasaur.com", "password": "demo1234" }
+{ "email": "demo@nightasaur.com", "password": "RETIRED-CREDENTIAL-DO-NOT-USE" }
 ```
 
 **Response (200):**
@@ -298,9 +298,7 @@ Token 取得方式：呼叫 `POST /auth/login`。
 {
   "status": "ok",
   "service": "Nightasaur AI Engine",
-  "version": "3.0.0",
-  "ollama": { "status": "ok", "model": "qwen2.5:3b", "model_available": true },
-  "comfyui": { "status": "ok" }
+  "version": "3.0.0"
 }
 ```
 

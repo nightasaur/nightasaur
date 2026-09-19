@@ -1,0 +1,638 @@
+{
+  "scope": "Missing or non-common declarations only; installed artifacts, not upstream authentication or legal clearance",
+  "inventorySha256": "d3d40776dce33f707676875548d810bcbb26799ff208275fa49bf57332c1390b",
+  "summary": {
+    "LICENSE_FILE_FOUND": 29,
+    "NOT_INSTALLED": 6,
+    "NO_LICENSE_FILE": 2
+  },
+  "entries": [
+    {
+      "ecosystem": "npm",
+      "name": "type-fest",
+      "version": "0.3.1",
+      "declaredLicense": "(MIT OR CC0-1.0)",
+      "source": "https://registry.npmjs.org/type-fest/-/type-fest-0.3.1.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/image-utils/node_modules/type-fest",
+      "installedLicenseMetadata": "(MIT OR CC0-1.0)",
+      "files": [
+        {
+          "path": "license",
+          "sha256": "48da2f39e100d4085767e94966b43f4fa95ff6a0698fba57ed460914e35f94a0",
+          "bytes": 1109
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss/-/lightningcss-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss",
+      "installedLicenseMetadata": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
+          "bytes": 15648
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-darwin-arm64",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-darwin-arm64",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-darwin-x64",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-darwin-x64",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-linux-arm-gnueabihf",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-linux-arm-gnueabihf",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-linux-arm64-gnu",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-linux-arm64-gnu",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-linux-arm64-musl",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-linux-arm64-musl",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-linux-x64-gnu",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-linux-x64-gnu",
+      "installedLicenseMetadata": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
+          "bytes": 15648
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-linux-x64-musl",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-linux-x64-musl",
+      "installedLicenseMetadata": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
+          "bytes": 15648
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lightningcss-win32-x64-msvc",
+      "version": "1.19.0",
+      "declaredLicense": "MPL-2.0",
+      "source": "https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.19.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@expo/metro-config/node_modules/lightningcss-win32-x64-msvc",
+      "evidenceStatus": "NOT_INSTALLED",
+      "files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@fontsource-variable/geist",
+      "version": "5.3.0",
+      "declaredLicense": "OFL-1.1",
+      "source": "https://registry.npmjs.org/@fontsource-variable/geist/-/geist-5.3.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@fontsource-variable/geist",
+      "installedLicenseMetadata": "OFL-1.1",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "71609cbb5c78b5870d712eab73a31d76622635c6ed034ab5cee3b9ecbda8685f",
+          "bytes": 4486
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@segment/loosely-validate-event",
+      "version": "2.0.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/@segment/loosely-validate-event/-/loosely-validate-event-2.0.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/@segment/loosely-validate-event",
+      "installedLicenseMetadata": null,
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "3c389d429fee7dd4b1af5a6d3a3a216af42684d5232af1e1e1dfad37f193e575",
+          "bytes": 1091
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "type-fest",
+      "version": "0.21.3",
+      "declaredLicense": "(MIT OR CC0-1.0)",
+      "source": "https://registry.npmjs.org/type-fest/-/type-fest-0.21.3.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/ansi-escapes/node_modules/type-fest",
+      "installedLicenseMetadata": "(MIT OR CC0-1.0)",
+      "files": [
+        {
+          "path": "license",
+          "sha256": "64a93ffc0a06a2266dbb57ed7ebe3b56ba66ab337b6347fabdbf86c76819fbae",
+          "bytes": 1116
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "argparse",
+      "version": "2.0.1",
+      "declaredLicense": "Python-2.0",
+      "source": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/argparse",
+      "installedLicenseMetadata": "Python-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "de4d1f2d2ad5ad0cfd1657a106476b31cb5db5ef9d1ff842b237c0c81f0c8a23",
+          "bytes": 12775
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "busboy",
+      "version": "1.6.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/busboy/-/busboy-1.6.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/busboy",
+      "installedLicenseMetadata": [
+        {
+          "type": "MIT",
+          "url": "http://github.com/mscdex/busboy/raw/master/LICENSE"
+        }
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "d06b5d27bbbbe22c36b1fd88406b1208876e2d37d795f5b8eaed951a459a3111",
+          "bytes": 1067
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "caniuse-lite",
+      "version": "1.0.30001810",
+      "declaredLicense": "CC-BY-4.0",
+      "source": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001810.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/caniuse-lite",
+      "installedLicenseMetadata": "CC-BY-4.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "fd3a263fe19ed8faa9068b43abaebafc02c77897b0c6fc09abc04bb592e5f16e",
+          "bytes": 18651
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fb-dotslash",
+      "version": "0.5.8",
+      "declaredLicense": "(MIT OR Apache-2.0)",
+      "source": "https://registry.npmjs.org/fb-dotslash/-/fb-dotslash-0.5.8.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/fb-dotslash",
+      "installedLicenseMetadata": "(MIT OR Apache-2.0)",
+      "files": [],
+      "evidenceStatus": "NO_LICENSE_FILE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "node-forge",
+      "version": "1.4.0",
+      "declaredLicense": "(BSD-3-Clause OR GPL-2.0)",
+      "source": "https://registry.npmjs.org/node-forge/-/node-forge-1.4.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/node-forge",
+      "installedLicenseMetadata": "(BSD-3-Clause OR GPL-2.0)",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "f63ff0e4e239244aa79280da2dd4811a0469e5e201caf5cbc0d97c3a1dff8e82",
+          "bytes": 17972
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "qrcode-terminal",
+      "version": "0.11.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/qrcode-terminal/-/qrcode-terminal-0.11.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/qrcode-terminal",
+      "installedLicenseMetadata": [
+        {
+          "type": "Apache 2.0"
+        }
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "b3c7a2fadb2515b8106eae58439a4b9c0581a4eaa88d6a265701f8d4dd7dadb8",
+          "bytes": 11962
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "rc",
+      "version": "1.2.8",
+      "declaredLicense": "(BSD-2-Clause OR MIT OR Apache-2.0)",
+      "source": "https://registry.npmjs.org/rc/-/rc-1.2.8.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/rc",
+      "installedLicenseMetadata": "(BSD-2-Clause OR MIT OR Apache-2.0)",
+      "files": [
+        {
+          "path": "LICENSE.APACHE2",
+          "sha256": "e8734448285a2dd773d40136ed5d5e8163a70701dd540cdc796cfca232f67d55",
+          "bytes": 586
+        },
+        {
+          "path": "LICENSE.BSD",
+          "sha256": "65e7e4d223688c601f42959defde380f8c4aa677fa4706da3b4a53f129bd78a3",
+          "bytes": 1516
+        },
+        {
+          "path": "LICENSE.MIT",
+          "sha256": "d72dea1a8cdf3f4dfa2f594253d0c5b37baefc76e806f5ecb0e426393edcd505",
+          "bytes": 1088
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "readline",
+      "version": "1.3.0",
+      "declaredLicense": "BSD",
+      "source": "https://registry.npmjs.org/readline/-/readline-1.3.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/readline",
+      "installedLicenseMetadata": "BSD",
+      "files": [],
+      "evidenceStatus": "NO_LICENSE_FILE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "requireg",
+      "version": "0.2.2",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/requireg/-/requireg-0.2.2.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/requireg",
+      "installedLicenseMetadata": "MIT",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "0f4d543677a34508625894e424fda9e3fd227530f1a5a743a2f8206d2da3bd6f",
+          "bytes": 1074
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "spawn-command",
+      "version": "0.0.2",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/spawn-command/-/spawn-command-0.0.2.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/spawn-command",
+      "installedLicenseMetadata": null,
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "0b0744f07404b91ad6f1690ded1f2f5da2b1a37b856ac02420353bd1dcbaad94",
+          "bytes": 1062
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "type-fest",
+      "version": "0.7.1",
+      "declaredLicense": "(MIT OR CC0-1.0)",
+      "source": "https://registry.npmjs.org/type-fest/-/type-fest-0.7.1.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/stacktrace-parser/node_modules/type-fest",
+      "installedLicenseMetadata": "(MIT OR CC0-1.0)",
+      "files": [
+        {
+          "path": "license",
+          "sha256": "48da2f39e100d4085767e94966b43f4fa95ff6a0698fba57ed460914e35f94a0",
+          "bytes": 1109
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "streamsearch",
+      "version": "1.1.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/streamsearch/-/streamsearch-1.1.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/streamsearch",
+      "installedLicenseMetadata": [
+        {
+          "type": "MIT",
+          "url": "http://github.com/mscdex/streamsearch/raw/master/LICENSE"
+        }
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "7c28463b739e2e73a49bf127d0bda427f8c55f0b37365a044c3c3f254716118b",
+          "bytes": 1085
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "type-fest",
+      "version": "0.16.0",
+      "declaredLicense": "(MIT OR CC0-1.0)",
+      "source": "https://registry.npmjs.org/type-fest/-/type-fest-0.16.0.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/tempy/node_modules/type-fest",
+      "installedLicenseMetadata": "(MIT OR CC0-1.0)",
+      "files": [
+        {
+          "path": "license",
+          "sha256": "64a93ffc0a06a2266dbb57ed7ebe3b56ba66ab337b6347fabdbf86c76819fbae",
+          "bytes": 1116
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "type-fest",
+      "version": "0.20.2",
+      "declaredLicense": "(MIT OR CC0-1.0)",
+      "source": "https://registry.npmjs.org/type-fest/-/type-fest-0.20.2.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/type-fest",
+      "installedLicenseMetadata": "(MIT OR CC0-1.0)",
+      "files": [
+        {
+          "path": "license",
+          "sha256": "64a93ffc0a06a2266dbb57ed7ebe3b56ba66ab337b6347fabdbf86c76819fbae",
+          "bytes": 1116
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "valid-url",
+      "version": "1.0.9",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://registry.npmjs.org/valid-url/-/valid-url-1.0.9.tgz",
+      "reviewStatus": "NOT_APPROVED",
+      "lockPath": "node_modules/valid-url",
+      "installedLicenseMetadata": null,
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "c48a681e53bfcd0a2b3ee2ea476e6d031fe7563f9eaa68f763bce0e3fb279a46",
+          "bytes": 1083
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pytest",
+      "version": "9.1.1",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/pytest/9.1.1/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "MIT",
+      "files": [
+        {
+          "path": "pytest-9.1.1.dist-info/licenses/LICENSE",
+          "sha256": "ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b",
+          "bytes": 1091
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pytest-asyncio",
+      "version": "1.4.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/pytest-asyncio/1.4.0/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "Apache-2.0",
+      "files": [
+        {
+          "path": "pytest_asyncio-1.4.0.dist-info/licenses/LICENSE",
+          "sha256": "a8ad31b1c3f40dca5a84119351b8fa8ddc868edd77fad8a8ebf6d8f2d16fa4ae",
+          "bytes": 11324
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "fastapi",
+      "version": "0.141.1",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/fastapi/0.141.1/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "MIT",
+      "files": [
+        {
+          "path": "fastapi-0.141.1.dist-info/licenses/LICENSE",
+          "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
+          "bytes": 1086
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "python-multipart",
+      "version": "0.0.32",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/python-multipart/0.0.32/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "Apache-2.0",
+      "files": [
+        {
+          "path": "python_multipart-0.0.32.dist-info/licenses/LICENSE.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "uvicorn",
+      "version": "0.29.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/uvicorn/0.29.0/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "BSD-3-Clause",
+      "files": [
+        {
+          "path": "uvicorn-0.29.0.dist-info/licenses/LICENSE.md",
+          "sha256": "efe1acf3e62fb99c288b0ec73e5a773b7268ef4320fe757ea994214e4b63c371",
+          "bytes": 1526
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "httpx",
+      "version": "0.27.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/httpx/0.27.0/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "BSD-3-Clause",
+      "files": [
+        {
+          "path": "httpx-0.27.0.dist-info/licenses/LICENSE.md",
+          "sha256": "4ec59d544f12b5f539a3a716fd321ac58ccd8030b465221f2c880200cdf28d8d",
+          "bytes": 1508
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "python-dotenv",
+      "version": "1.2.3",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/python-dotenv/1.2.3/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "BSD-3-Clause",
+      "files": [
+        {
+          "path": "python_dotenv-1.2.3.dist-info/licenses/LICENSE",
+          "sha256": "80619b7049f08c81683ad0e01f08f257a840652dd71ee83146d36658c7d2c2b9",
+          "bytes": 1556
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pydantic",
+      "version": "2.13.5",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/pydantic/2.13.5/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "MIT",
+      "files": [
+        {
+          "path": "pydantic-2.13.5.dist-info/licenses/LICENSE",
+          "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3",
+          "bytes": 1129
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "Pillow",
+      "version": "12.3.0",
+      "declaredLicense": "NOASSERTION",
+      "source": "https://pypi.org/project/Pillow/12.3.0/",
+      "reviewStatus": "NOT_APPROVED",
+      "installedLicenseMetadata": "MIT-CMU",
+      "files": [
+        {
+          "path": "pillow-12.3.0.dist-info/licenses/LICENSE",
+          "sha256": "dda12a98c1979cf3d94df1cff45d27a4cb3f04a60c76f76902ac54cac03ec0ce",
+          "bytes": 70307
+        }
+      ],
+      "evidenceStatus": "LICENSE_FILE_FOUND"
+    }
+  ]
+}

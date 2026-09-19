@@ -10,6 +10,6 @@
 [environment]
   PYTHONUNBUFFERED = "1"
   OLLAMA_URL = "http://localhost:11434"
-  OLLAMA_MODEL = "qwen2.5:3b"
+  OLLAMA_MODEL = ""
   HOST = "0.0.0.0"
   PORT = "8000"

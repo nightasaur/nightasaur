@@ -11,7 +11,7 @@
 
 ### 遊戲邏輯系統
 
-#### 1. 執行遊戲循環
+#### 1. 讀取遊戲循環狀態
 ```
 POST /api/game-logic/cycle
 ```
@@ -20,9 +20,11 @@ POST /api/game-logic/cycle
 ```json
 {
   "spiritId": "string",
-  "action": "CHAT|COMPLETE_QUEST|SOLVE_PUZZLE"
+  "action": "UI_ACTION_LABEL"
 }
 ```
+
+`action` 僅供客戶端對應畫面，不會增加任務進度或發放獎勵。任務進度只能由後端已驗證的實際事件更新。
 
 **回應**:
 ```json
@@ -50,14 +52,7 @@ POST /api/game-logic/cycle
       "items": ["string"]
     }
   },
-  "rewards": [
-    {
-      "type": "ACHIEVEMENT|LEVEL_UP|TRAINER_LEVEL_UP",
-      "name": "string",
-      "description": "string",
-      "reward": { "xp": 100, "items": ["string"] }
-    }
-  ]
+  "rewards": []
 }
 ```
 
@@ -274,30 +269,10 @@ GET /api/game/quests
 ```
 
 #### 2. 追蹤遊戲動作
-```
-POST /api/game/track
-```
 
-**請求體**:
-```json
-{
-  "action": "CHAT|COMPLETE_QUEST|SOLVE_PUZZLE",
-  "amount": 1
-}
-```
-
-**回應**:
-```json
-{
-  "completedQuests": [
-    {
-      "questId": "string",
-      "title": "string",
-      "reward": { "xp": 100, "items": ["string"] }
-    }
-  ]
-}
-```
+Quest progress is recorded only by reviewed server-side actions. There is no
+public endpoint for clients to submit arbitrary quest progress or force quest
+completion/reward claims.
 
 ## 遊戲機制
 

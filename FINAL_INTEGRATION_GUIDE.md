@@ -49,14 +49,14 @@
 3. **點擊登入按鈕**：在遊戲界面登入
 4. **使用管理員帳號**：
    - 電子郵件：`admin@nightasaur.com`
-   - 密碼：`admin123`
+   - 密碼：`RETIRED-CREDENTIAL-DO-NOT-USE`
 5. **自動跳轉**：到遊戲儀表板
 
 ### 方案2：直接登入
 1. **訪問登入頁面**：`http://localhost:3002`
 2. **輸入管理員帳號**：
    - 電子郵件：`admin@nightasaur.com`
-   - 密碼：`admin123`
+   - 密碼：`RETIRED-CREDENTIAL-DO-NOT-USE`
 3. **點擊登入**：系統會自動跳轉到遊戲界面
 4. **到達遊戲**：`http://localhost:5173/dashboard`
 
@@ -79,7 +79,7 @@
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```

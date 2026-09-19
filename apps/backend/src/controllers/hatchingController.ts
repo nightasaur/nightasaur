@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { HatchingService } from "../services/hatchingService.js";
+import { routeParam } from "../utils/request.js";
 
 export class HatchingController {
   private hatchingService = new HatchingService();
@@ -57,7 +58,7 @@ export class HatchingController {
   // 獲取孵化狀態
   async getStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const { spiritId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
 
       if (!spiritId) {
         res.status(400).json({ error: "請提供精靈ID" });

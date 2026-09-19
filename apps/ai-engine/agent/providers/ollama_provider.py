@@ -6,7 +6,7 @@
 ModelProvider。行為（timeout、錯誤訊息、health_check 回傳格式）與重構前完全
 相同，避免影響既有 /dialogue、/assistant 呼叫鏈。
 
-qwen2.5:3b（透過目前的 /api/chat 呼叫方式）沒有原生 tool-calling 能力，因此
+此 adapter 尚未啟用原生 tool-calling 協定，因此
 `supports_native_tool_calls()` 回傳 False，需要 tool call 時委派給
 agent/providers/tool_call_fallback.py 的 FallbackToolCallAdapter 處理
 prompt 組裝與輸出解析 —— 這個檔案本身不包含任何 JSON marker 解析邏輯，只
@@ -16,6 +16,7 @@ prompt 組裝與輸出解析 —— 這個檔案本身不包含任何 JSON marke
 import json
 
 import httpx
+from model_policy import validate_model_selection
 
 from agent.providers.base import ModelProvider
 from agent.providers.tool_call_fallback import FallbackToolCallAdapter
@@ -27,7 +28,7 @@ class OllamaModelProvider(ModelProvider):
 
     def __init__(self, base_url: str, model: str):
         self.base_url = base_url
-        self.model = model
+        self.model = validate_model_selection(model)
         self._tool_call_adapter = FallbackToolCallAdapter()
 
     def supports_native_tool_calls(self) -> bool:
@@ -106,6 +107,9 @@ class OllamaModelProvider(ModelProvider):
         tool-使用說明，並在拿到純文字回覆後解析是否為 tool call；`tools`
         為 None/空列表時完全跳過 adapter，維持 v0.1 的原始行為不變。
         """
+        selected_model = validate_model_selection(self.model)
+        if not selected_model:
+            return ModelResponse(content="AI 推論未啟用：尚未設定經審核的模型。")
         request_options = {
             "temperature": options.get("temperature", 0.8),
             "top_p": options.get("top_p", 0.9),
@@ -132,7 +136,7 @@ class OllamaModelProvider(ModelProvider):
                 response = await client.post(
                     f"{self.base_url}/api/chat",
                     json={
-                        "model": self.model,
+                        "model": selected_model,
                         "messages": outgoing_messages,
                         "stream": False,
                         "options": request_options,
@@ -158,6 +162,9 @@ class OllamaModelProvider(ModelProvider):
 
     async def health_check(self) -> dict:
         """檢查 Ollama 連線狀態，回傳格式與重構前的 health_check 完全相同。"""
+        selected_model = validate_model_selection(self.model)
+        if not selected_model:
+            return {"status": "disabled", "model": None, "model_available": False}
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.get(f"{self.base_url}/api/tags")

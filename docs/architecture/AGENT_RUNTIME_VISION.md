@@ -48,7 +48,7 @@ trade-off.
 
 An Agent (its identity, memory, permissions, and behavior contract) is not
 the same thing as the model that currently answers on its behalf. The model
-is a swappable execution resource. Today it may be `qwen2.5:3b` via Ollama;
+is a swappable execution resource. No inference model is selected by default;
 tomorrow it may be a cloud model, a fine-tuned local model, or a different
 provider entirely — the Agent's identity, history, and permissions must
 survive that swap unchanged. `AgentCore` already reflects this: it depends

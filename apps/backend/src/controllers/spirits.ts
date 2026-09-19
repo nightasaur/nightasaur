@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { spiritService } from "../services/spirit.js";
 import { createSpiritSchema, customizeSpiritSchema } from "../utils/validators.js";
+import { routeParam } from "../utils/request.js";
 
 export class SpiritController {
   async create(req: Request, res: Response, next: NextFunction) {
@@ -31,7 +32,7 @@ export class SpiritController {
 
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const spirit = await spiritService.getSpiritById(req.params.id);
+      const spirit = await spiritService.getSpiritById(routeParam(req, "id"), req.user!.userId);
       res.json(spirit);
     } catch (err) {
       next(err);
@@ -40,7 +41,7 @@ export class SpiritController {
 
   async evolve(req: Request, res: Response, next: NextFunction) {
     try {
-      const spirit = await spiritService.evolveSpirit(req.params.id, req.user!.userId);
+      const spirit = await spiritService.evolveSpirit(routeParam(req, "id"), req.user!.userId);
       res.json(spirit);
     } catch (err) {
       next(err);
@@ -50,7 +51,7 @@ export class SpiritController {
   async rename(req: Request, res: Response, next: NextFunction) {
     try {
       const { name } = req.body;
-      const spirit = await spiritService.renameSpirit(req.params.id, req.user!.userId, name);
+      const spirit = await spiritService.renameSpirit(routeParam(req, "id"), req.user!.userId, name);
       res.json(spirit);
     } catch (err) {
       next(err);
@@ -59,7 +60,7 @@ export class SpiritController {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await spiritService.deleteSpirit(req.params.id, req.user!.userId);
+      const result = await spiritService.deleteSpirit(routeParam(req, "id"), req.user!.userId);
       res.json(result);
     } catch (err) {
       next(err);
@@ -68,7 +69,7 @@ export class SpiritController {
 async customize(req: Request, res: Response, next: NextFunction) {
     try {
       const data = customizeSpiritSchema.parse(req.body);
-      const spirit = await spiritService.customizeSpirit(req.params.id, req.user!.userId, data);
+      const spirit = await spiritService.customizeSpirit(routeParam(req, "id"), req.user!.userId, data);
       res.json(spirit);
     } catch (err) {
       next(err);

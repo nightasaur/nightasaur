@@ -21,6 +21,9 @@ jobs:
             apps/ai-engine/requirements-dev.txt
       - run: pip install -r requirements.txt -r requirements-dev.txt
         working-directory: apps/ai-engine
+      - run: python ../../scripts/build-provenance-inventory.py --check
+        working-directory: apps/ai-engine
+      - run: python -m unittest discover -s scripts/tests
       - run: python -m pytest -q
         working-directory: apps/ai-engine
 
@@ -48,6 +51,8 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
         working-directory: apps/backend
+      - run: npm run test
+        working-directory: apps/backend
       - run: npm run build
         working-directory: apps/backend
 
@@ -65,3 +70,38 @@ jobs:
         working-directory: apps/web
       - run: npm run build
         working-directory: apps/web
+
+  test-postgres:
+    name: PostgreSQL migration and sessions
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nightasaur_ci
+          POSTGRES_PASSWORD: isolated_ci_fixture_only
+          POSTGRES_DB: nightasaur_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nightasaur_ci -d nightasaur_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nightasaur_ci:isolated_ci_fixture_only@127.0.0.1:5432/nightasaur_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node scripts/sync-postgres-schema.mjs --check
+      - run: npx prisma validate --schema apps/backend/prisma/postgresql/schema.prisma
+      - run: npx prisma generate --schema apps/backend/prisma/postgresql/schema.prisma
+      - run: npx prisma migrate deploy --schema apps/backend/prisma/postgresql/schema.prisma
+      - run: npx prisma migrate deploy --schema apps/backend/prisma/postgresql/schema.prisma
+      - run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel apps/backend/prisma/postgresql/schema.prisma --exit-code
+      - run: node --import tsx scripts/test-postgres-sessions.ts
+      - run: npm -w apps/backend run build

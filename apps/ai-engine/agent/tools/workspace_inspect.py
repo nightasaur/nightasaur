@@ -32,7 +32,12 @@ class WorkspaceInspectTool(Tool):
     _SENSITIVE_PARTS = {
         ".git",
         ".env",
+        ".netrc",
+        ".npmrc",
+        ".pypirc",
         "credentials",
+        "id_ed25519",
+        "id_rsa",
         "secrets",
         "private_keys",
     }
@@ -52,14 +57,26 @@ class WorkspaceInspectTool(Tool):
         relative = Path(raw_path)
         if relative.is_absolute():
             raise ValueError("absolute paths are not allowed")
-        if any(part.lower() in self._SENSITIVE_PARTS for part in relative.parts):
+        if any(self._is_sensitive(part) for part in relative.parts):
             raise ValueError("sensitive paths are not inspectable")
-        target = (self.root / relative).resolve(strict=True)
+        candidate = self.root
+        for part in relative.parts:
+            candidate = candidate / part
+            if candidate.is_symlink():
+                raise ValueError("symbolic links are not inspectable")
+        target = candidate.resolve(strict=True)
         try:
-            target.relative_to(self.root)
+            resolved_relative = target.relative_to(self.root)
         except ValueError as exc:
             raise ValueError("path escapes the workspace root") from exc
+        if any(self._is_sensitive(part) for part in resolved_relative.parts):
+            raise ValueError("sensitive paths are not inspectable")
         return target
+
+    @classmethod
+    def _is_sensitive(cls, part: str) -> bool:
+        lowered = part.lower()
+        return lowered in cls._SENSITIVE_PARTS or lowered.startswith(".env.")
 
     async def run(self, **kwargs):
         action = kwargs.get("action")
@@ -85,7 +102,7 @@ class WorkspaceInspectTool(Tool):
                         "kind": "directory" if item.is_dir() else "file",
                     }
                     for item in entries[: self.max_entries]
-                    if item.name.lower() not in self._SENSITIVE_PARTS
+                    if not self._is_sensitive(item.name) and not item.is_symlink()
                 ],
                 "truncated": truncated,
             }

@@ -20,7 +20,7 @@ async def test_generate_success_returns_stripped_content(patch_ollama_httpx_clie
     patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "  哈囉！  "}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.generate([{"role": "user", "content": "hi"}])
 
@@ -32,7 +32,7 @@ async def test_generate_sends_expected_request_payload(patch_ollama_httpx_client
     calls = patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "ok"}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     messages = [{"role": "system", "content": "sys"}, {"role": "user", "content": "hi"}]
 
     await provider.generate(messages, temperature=0.1, top_p=0.5, num_predict=32)
@@ -42,7 +42,7 @@ async def test_generate_sends_expected_request_payload(patch_ollama_httpx_client
     assert method == "post"
     assert url == "http://ollama.local/api/chat"
     assert payload == {
-        "model": "qwen2.5:3b",
+        "model": "fixture-model:unit",
         "messages": messages,
         "stream": False,
         "options": {"temperature": 0.1, "top_p": 0.5, "num_predict": 32},
@@ -52,7 +52,7 @@ async def test_generate_sends_expected_request_payload(patch_ollama_httpx_client
 @pytest.mark.asyncio
 async def test_generate_non_200_returns_default_fallback_message(patch_ollama_httpx_client):
     patch_ollama_httpx_client(post_result=FakeHttpxResponse(500, text="boom"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.generate([{"role": "user", "content": "hi"}])
 
@@ -65,7 +65,7 @@ async def test_generate_non_200_uses_custom_fallback_message(patch_ollama_httpx_
     fallback_message 會被實際使用（AgentInput.model_options 契約）。
     """
     patch_ollama_httpx_client(post_result=FakeHttpxResponse(500, text="boom"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.generate(
         [{"role": "user", "content": "hi"}],
@@ -78,7 +78,7 @@ async def test_generate_non_200_uses_custom_fallback_message(patch_ollama_httpx_
 @pytest.mark.asyncio
 async def test_generate_connect_error_returns_offline_message(patch_ollama_httpx_client):
     patch_ollama_httpx_client(post_exception=httpx.ConnectError("cannot connect"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.generate([{"role": "user", "content": "hi"}])
 
@@ -88,7 +88,7 @@ async def test_generate_connect_error_returns_offline_message(patch_ollama_httpx
 @pytest.mark.asyncio
 async def test_generate_generic_exception_returns_error_message(patch_ollama_httpx_client):
     patch_ollama_httpx_client(post_exception=RuntimeError("unexpected"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.generate([{"role": "user", "content": "hi"}])
 
@@ -99,18 +99,18 @@ async def test_generate_generic_exception_returns_error_message(patch_ollama_htt
 async def test_health_check_success_reports_model_available(patch_ollama_httpx_client):
     patch_ollama_httpx_client(
         get_result=FakeHttpxResponse(
-            200, {"models": [{"name": "qwen2.5:3b"}, {"name": "llama3"}]}
+            200, {"models": [{"name": "fixture-model:unit"}, {"name": "llama3"}]}
         )
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.health_check()
 
     assert result == {
         "status": "ok",
-        "model": "qwen2.5:3b",
+        "model": "fixture-model:unit",
         "model_available": True,
-        "available_models": ["qwen2.5:3b", "llama3"],
+        "available_models": ["fixture-model:unit", "llama3"],
     }
 
 
@@ -119,7 +119,7 @@ async def test_health_check_success_reports_model_not_available(patch_ollama_htt
     patch_ollama_httpx_client(
         get_result=FakeHttpxResponse(200, {"models": [{"name": "llama3"}]})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.health_check()
 
@@ -129,7 +129,7 @@ async def test_health_check_success_reports_model_not_available(patch_ollama_htt
 @pytest.mark.asyncio
 async def test_health_check_non_200_returns_error_status(patch_ollama_httpx_client):
     patch_ollama_httpx_client(get_result=FakeHttpxResponse(503, text="unavailable"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.health_check()
 
@@ -139,7 +139,7 @@ async def test_health_check_non_200_returns_error_status(patch_ollama_httpx_clie
 @pytest.mark.asyncio
 async def test_health_check_exception_returns_offline_status(patch_ollama_httpx_client):
     patch_ollama_httpx_client(get_exception=RuntimeError("network down"))
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
 
     result = await provider.health_check()
 
@@ -155,7 +155,7 @@ async def test_generate_without_tools_never_injects_fallback_prompt(patch_ollama
     calls = patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "一般回覆"}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     messages = [{"role": "user", "content": "hi"}]
 
     result = await provider.generate(messages, tools=[])
@@ -176,7 +176,7 @@ async def test_generate_with_tools_injects_fallback_instruction_message(
     calls = patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "一般回覆，不需要工具"}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     messages = [{"role": "user", "content": "現在幾點？"}]
     tools = [ToolSpec(name="clock", description="回傳目前時間", parameters={})]
 
@@ -202,7 +202,7 @@ async def test_generate_with_tools_renders_tool_history_as_text_messages(
     calls = patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": "summary"}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     tools = [ToolSpec(name="workspace_inspect", description="Inspect workspace")]
     messages = [
         {"role": "user", "content": "list the workspace"},
@@ -246,7 +246,7 @@ async def test_generate_with_tools_parses_valid_tool_call_marker(patch_ollama_ht
     patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": marker_response}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     tools = [ToolSpec(name="clock", description="回傳目前時間", parameters={})]
 
     result = await provider.generate(
@@ -270,7 +270,7 @@ async def test_generate_with_tools_malformed_marker_falls_back_to_plain_content(
     patch_ollama_httpx_client(
         post_result=FakeHttpxResponse(200, {"message": {"content": malformed_response}})
     )
-    provider = OllamaModelProvider(base_url="http://ollama.local", model="qwen2.5:3b")
+    provider = OllamaModelProvider(base_url="http://ollama.local", model="fixture-model:unit")
     tools = [ToolSpec(name="clock", description="回傳目前時間", parameters={})]
 
     result = await provider.generate(

@@ -3,7 +3,7 @@
 
 """FallbackToolCallAdapter —— prompt-based tool-calling fallback。
 
-給沒有原生 function-calling 能力的模型（例如目前的 Ollama qwen2.5:3b）使用：
+給未啟用原生 function-calling 協定的模型 adapter 使用：
 把 tool 規格轉成一段 system prompt 附加指示，要求模型「需要工具時」用一個
 嚴格、明確的 JSON marker 格式回覆；再從模型的純文字輸出中解析出這個 marker。
 

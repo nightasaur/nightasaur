@@ -133,7 +133,7 @@ src/
 
 ### 技術棧
 - **框架**: FastAPI (Python 3.11+)
-- **LLM**: Ollama (qwen2.5:3b)
+- **LLM**: 可替換的 Ollama adapter；未指定模型時停用文字推論
 - **生圖**: ComfyUI (dreamshaper_8)
 - **非同步**: httpx + uvicorn
 
@@ -221,7 +221,7 @@ User ────has───> Spirit
     → POST /api/dialogue/chat (AI Engine)
       → LLMService.generate_dialogue()
         → Ollama API /api/chat
-          → qwen2.5:3b 模型
+          → 明確設定且完成來源／授權審核的模型（無預設模型）
   ← 精靈回覆文字
 ← 顯示在聊天介面
 ```

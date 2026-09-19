@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../config/prisma.js";
 import { getQuestionsByCategory, getCategoryStats, AcademicCategory } from "../services/academicQuiz.js";
+import { routeParam } from "../utils/request.js";
 
 export class AcademyController {
   async getCourses(req: Request, res: Response, next: NextFunction) {
@@ -20,7 +21,7 @@ export class AcademyController {
 
   async getCategoryQuestions(req: Request, res: Response, next: NextFunction) {
     try {
-      const { category } = req.params;
+      const category = routeParam(req, "category");
       const validCats: AcademicCategory[] = ["LITERATURE", "PHYSICS", "CHEMISTRY", "MEDICINE", "MATHEMATICS"];
       if (!validCats.includes(category as AcademicCategory)) {
         return res.status(400).json({ error: "無效的分類" });
@@ -34,7 +35,7 @@ export class AcademyController {
 
   async startCourse(req: Request, res: Response, next: NextFunction) {
     try {
-      const { courseId } = req.params;
+      const courseId = routeParam(req, "courseId");
       const userId = req.user?.userId;
       if (!userId) return res.status(401).json({ error: "請先登入" });
 
@@ -74,7 +75,7 @@ export class AcademyController {
 
   async answerQuestion(req: Request, res: Response, next: NextFunction) {
     try {
-      const { sessionId } = req.params;
+      const sessionId = routeParam(req, "sessionId");
       const { answerIndex } = req.body;
       const userId = req.user?.userId;
       if (!userId) return res.status(401).json({ error: "請先登入" });

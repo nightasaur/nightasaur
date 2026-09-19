@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 interface VoiceSession {
   id: string;
@@ -12,7 +12,7 @@ export class VoiceService {
   private sessions: Map<string, VoiceSession> = new Map();
 
   async createSession(userId: string): Promise<string> {
-    const sessionId = uuidv4();
+    const sessionId = randomUUID();
     
     const session: VoiceSession = {
       id: sessionId,

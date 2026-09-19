@@ -1,5 +1,5 @@
 """圖片生成路由"""
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from services.comfyui import comfyui_service
@@ -27,12 +27,14 @@ class GenerateResponse(BaseModel):
 async def generate_image(req: GenerateRequest):
     """生成精靈圖片"""
     if req.prompt:
-        result = await comfyui_service.generate_spirit_image(prompt=req.prompt, seed=req.seed)
+        result = await comfyui_service.generate_image(prompt=req.prompt, seed=req.seed)
     else:
         result = await comfyui_service.generate_spirit(
             name=req.name, element=req.element,
-            stage=req.stage, personality=req.personality,
+            stage=req.stage,
         )
+    if result.get("status") == "disabled":
+        raise HTTPException(status_code=503, detail=result["msg"])
     return result
 
 
