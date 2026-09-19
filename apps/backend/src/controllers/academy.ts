@@ -9,6 +9,52 @@ import {
   toPublicIeltsReadingDiagnostic,
 } from "../services/ieltsDiagnostic.js";
 
+interface IeltsReadingEvidence {
+  sessionId: string;
+  scoreType: "objective-accuracy";
+  correct: number;
+  total: number;
+  accuracyPercent: number;
+  completedAt: string | null;
+}
+
+async function getCompletedIeltsReadingEvidence(
+  userId: string,
+): Promise<IeltsReadingEvidence[]> {
+  const sessions = await prisma.learningSession.findMany({
+    where: {
+      userId,
+      courseId: IELTS_READING_DIAGNOSTIC_ID,
+      completed: true,
+    },
+    select: {
+      id: true,
+      correctCount: true,
+      totalQuestions: true,
+      completedAt: true,
+    },
+    orderBy: [{ completedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  return sessions
+    .filter(
+      (session) =>
+        session.totalQuestions > 0 &&
+        session.correctCount >= 0 &&
+        session.correctCount <= session.totalQuestions,
+    )
+    .map((session) => ({
+      sessionId: session.id,
+      scoreType: "objective-accuracy" as const,
+      correct: session.correctCount,
+      total: session.totalQuestions,
+      accuracyPercent: Math.round(
+        (session.correctCount / session.totalQuestions) * 100,
+      ),
+      completedAt: session.completedAt?.toISOString() ?? null,
+    }));
+}
+
 export class AcademyController {
   async getCourses(req: Request, res: Response, next: NextFunction) {
     try {
@@ -324,38 +370,7 @@ export class AcademyController {
       const userId = req.user?.userId;
       if (!userId) return res.status(401).json({ error: "請先登入" });
 
-      const sessions = await prisma.learningSession.findMany({
-        where: {
-          userId,
-          courseId: IELTS_READING_DIAGNOSTIC_ID,
-          completed: true,
-        },
-        select: {
-          id: true,
-          correctCount: true,
-          totalQuestions: true,
-          completedAt: true,
-        },
-        orderBy: [{ completedAt: "desc" }, { createdAt: "desc" }],
-      });
-
-      const evidence = sessions
-        .filter(
-          (session) =>
-            session.totalQuestions > 0 &&
-            session.correctCount >= 0 &&
-            session.correctCount <= session.totalQuestions,
-        )
-        .map((session) => ({
-          sessionId: session.id,
-          scoreType: "objective-accuracy" as const,
-          correct: session.correctCount,
-          total: session.totalQuestions,
-          accuracyPercent: Math.round(
-            (session.correctCount / session.totalQuestions) * 100,
-          ),
-          completedAt: session.completedAt?.toISOString() ?? null,
-        }));
+      const evidence = await getCompletedIeltsReadingEvidence(userId);
 
       const unassessedSkill = {
         status: "not-assessed" as const,
@@ -388,6 +403,70 @@ export class AcademyController {
         },
         notice:
           "This profile contains objective evidence from completed original IELTS-style diagnostics only. It is not an official IELTS test or Band estimate.",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getIeltsDailyPlan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: "請先登入" });
+
+      const evidence = await getCompletedIeltsReadingEvidence(userId);
+      const latestEvidence = evidence[0] ?? null;
+      if (!latestEvidence) {
+        return res.json({
+          planVersion: "ielts-daily-plan-v1",
+          status: "diagnostic-required",
+          evidencePolicy: "latest-completed-diagnostic-only",
+          scope: ["reading"],
+          generatedFrom: null,
+          focusLevel: null,
+          totalMinutes: 0,
+          tasks: [],
+          bandEstimate: null,
+          notice:
+            "Complete the original IELTS-style Reading Diagnostic before a daily plan is assigned. This is not an official IELTS Band estimate.",
+        });
+      }
+
+      const focusLevel =
+        latestEvidence.accuracyPercent < 70
+          ? "foundation"
+          : latestEvidence.accuracyPercent < 90
+            ? "consolidation"
+            : "maintenance";
+
+      return res.json({
+        planVersion: "ielts-daily-plan-v1",
+        status: "ready",
+        evidencePolicy: "latest-completed-diagnostic-only",
+        scope: ["reading"],
+        generatedFrom: latestEvidence,
+        focusLevel,
+        totalMinutes: 25,
+        tasks: [
+          {
+            id: "reading-evidence-review",
+            type: "review",
+            skill: "reading",
+            minutes: 10,
+            targetQuestionCount: latestEvidence.total,
+            sourceSessionId: latestEvidence.sessionId,
+          },
+          {
+            id: "reading-targeted-practice",
+            type: "practice",
+            skill: "reading",
+            minutes: 15,
+            focus: focusLevel,
+          },
+        ],
+        bandEstimate: null,
+        notice:
+          "This deterministic plan uses objective diagnostic accuracy only. It is not an official IELTS Band estimate.",
       });
     } catch (err) {
       next(err);
