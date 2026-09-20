@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { spiritsAPI, dialogueAPI } from "../api/client";
+import { spiritsAPI, dialogueAPI, generationAPI } from "../api/client";
 import SpiritSprite, { AnimState } from "../components/SpiritSprite";
 import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
 const STAGES = ["蛋","幼体","少年体","成年体","究极体","传说体"];
@@ -24,6 +24,9 @@ export default function SpiritDetail() {
   const nav = useNavigate();
   const [s, setS] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [art, setArt] = useState<any>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [artError, setArtError] = useState("");
   const [evolving, setEvolving] = useState(false);
   const [evolveMsg, setEvolveMsg] = useState("");
   const [msgs, setMsgs] = useState<{ role: string; content: string }[]>([]);
@@ -36,7 +39,21 @@ export default function SpiritDetail() {
   const { speak, isSpeaking } = useVoiceOutput();
 const [animState, setAnimState] = useState<AnimState>("idle");
 
-  useEffect(() => { if (id) load(); }, [id]);
+  useEffect(() => { if (id) {
+    load();
+    generationAPI.get(id).then(r => setArt(r.data)).catch(() => {});
+  } }, [id]);
+  const drawSpirit = async () => {
+    if (!id || drawing) return;
+    setDrawing(true); setArtError("");
+    try {
+      await generationAPI.generate(id);
+      const result = await generationAPI.get(id);
+      setArt(result.data);
+      if (result.data?.status !== "COMPLETED") setArtError(result.data?.errorMsg || "圖片正在生成，請稍後重新整理。");
+    } catch { setArtError("圖片生成暫時無法使用，請稍後再試。"); }
+    finally { setDrawing(false); }
+  };
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
   const load = async () => {
@@ -116,6 +133,10 @@ return (
       <div className="glass-card text-center mb-8">
         <SpiritSprite species={s.species} element={s.element} stage={s.stage}
           outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={180} />
+        {art?.resultUrl && <img src={art.resultUrl} alt={`${s.name}的程序式生成圖像`} className="w-64 h-64 object-contain mx-auto rounded-2xl my-4" />}
+        <button className="btn-primary my-3" disabled={drawing} onClick={drawSpirit}>{drawing ? "生成中…" : "生成精靈圖片"}</button>
+        <p className="text-sm text-white/60">原創程序式生成・依元素與成長階段繪製</p>
+        {artError && <p role="alert" className="text-red-300">{artError}</p>}
         <h1 className="text-3xl font-black text-white">{s.name}</h1>
         <div className="flex justify-center gap-3 mt-3 flex-wrap">
           <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${ec} text-white`}>
