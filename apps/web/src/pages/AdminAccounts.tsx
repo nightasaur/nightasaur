@@ -141,7 +141,7 @@ export default function AdminAccounts() {
       </p>
     );
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <section className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">帳號管理</h1>
       <p className="text-white/70">
         帳號資料保留，僅可封禁或復原，不提供永久刪除。封禁及復原會撤銷現有登入；復原後須重新登入。
@@ -316,6 +316,6 @@ export default function AdminAccounts() {
           )}
         </section>
       )}
-    </main>
+    </section>
   );
 }
