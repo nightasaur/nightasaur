@@ -50,9 +50,14 @@
         if (!doc || !doc.documentElement || frame.contentWindow.location.origin !== location.origin) {
           result.textContent = '無法量測目前頁面'; return;
         }
+        if (!doc.querySelector('nav') || !doc.querySelector('main')) {
+          result.textContent = '頁面尚未載入完成，不能判定版面通過'; return;
+        }
+        const path = frame.contentWindow.location.pathname;
         const viewport = doc.documentElement.clientWidth;
         const content = Math.max(doc.documentElement.scrollWidth, doc.body?.scrollWidth || 0);
-        result.textContent = JSON.stringify({requestedWidth: Number(width.value), viewportWidth: viewport,
+        result.textContent = JSON.stringify({page: paths.has(path) ? path : '其他本站頁面',
+          requestedWidth: Number(width.value), frameWidth: frame.getBoundingClientRect().width, viewportWidth: viewport,
           contentWidth: content, horizontalOverflow: content > viewport + 1}, null, 2);
       } catch { result.textContent = '無法量測目前頁面'; }
     }

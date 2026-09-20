@@ -127,7 +127,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
                   onClick={handleLogout}
                   className="mt-2 px-3 py-3 rounded-lg text-left text-white/60 hover:text-white hover:bg-white/5 transition text-sm"
                 >
-                  Logout
+                  {t("Logout")}
                 </button>
               </>
             ) : (
@@ -138,7 +138,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
             )}
 
             <div className="mt-3 pt-3 border-t border-white/10">
-              <LanguageSwitcher compact={true} />
+              <LanguageSwitcher compact={true} inline={true} />
             </div>
           </div>
         </div>
