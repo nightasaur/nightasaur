@@ -32,7 +32,7 @@ const CheckoutPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <div className="glass-card p-8">
             <h1 className="text-3xl font-bold mb-3 text-center">30-Day Access Plan Preview</h1>
-            <p className="text-center text-white/55 mb-8">正式付款尚未開放；登入會員目前可直接使用 IELTS Early Access。</p>
+            <p className="text-center text-white/55 mb-8">正式付款尚未開放；登入會員目前可直接使用 英語訓練對話 Early Access。</p>
 
             <div className="mb-8">
               <h2 className="text-xl font-bold mb-4">Plan Summary</h2>
@@ -79,7 +79,7 @@ const CheckoutPage: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button onClick={() => navigate('/academy/category/ielts')} className="flex-1 px-6 py-4 bg-green-600/20 border border-green-500/30 rounded-lg text-green-200 hover:bg-green-600/30">
-                直接開始 IELTS Early Access
+                直接開始 英語訓練對話 Early Access
               </button>
               <button onClick={() => navigate('/receipts/preview')} className="flex-1 px-6 py-4 border border-purple-500/30 bg-purple-500/10 rounded-lg hover:bg-purple-500/20">
                 查看收據格式

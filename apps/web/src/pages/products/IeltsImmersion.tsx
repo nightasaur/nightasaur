@@ -52,7 +52,7 @@ const ProductPage: React.FC = () => {
                     className="btn-primary px-8 py-4 text-xl font-bold flex items-center justify-center gap-3"
                   >
                     <span className="text-2xl">🎓</span>
-                    開始 IELTS 陪伴學習
+                    開始 英語訓練對話
                   </button>
                   <button
                     onClick={() => navigate('/checkout/ielts-immersion')}

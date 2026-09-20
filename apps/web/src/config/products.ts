@@ -42,8 +42,8 @@ export const formatTWD = (amount: number): string => {
 export const IELTS_IMMERSION_1M_AU: CommercialProduct = {
   code: 'IELTS_IMMERSION_1M_AU',
   name: {
-    en: 'Nightasaur Deep IELTS Immersion Experience — 1 Month',
-    'zh-TW': 'Nightasaur 深度雅思沉浸體驗一個月',
+    en: 'Nightasaur English Conversation Practice — 1 Month',
+    'zh-TW': 'Nightasaur 英語訓練對話體驗一個月',
   },
   market: 'AU',
   currency: 'AUD',
@@ -53,8 +53,8 @@ export const IELTS_IMMERSION_1M_AU: CommercialProduct = {
   accessDays: 30,
   accessMode: 'authenticated_early_access',
   description: {
-    en: 'A premium deep immersion experience for IELTS preparation, combining AI-powered personalized learning with Nightasaur\'s unique companion approach.',
-    'zh-TW': '為雅思準備設計的深度沉浸體驗，結合 AI 個人化學習與 Nightasaur Spirit 陪伴。',
+    en: 'Practice English through conversations about everyday life, work, and travel with your Nightasaur Spirit.',
+    'zh-TW': '和 Nightasaur Spirit 一起討論日常、工作與旅行話題，練習用英語表達想法。',
   },
   features: [
     'Personal assessment and learning path',

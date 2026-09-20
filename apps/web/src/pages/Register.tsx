@@ -42,7 +42,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
         <p className="text-white/50 text-center mb-3">建立帳號，開始你與 Spirit 的學習與成長歷程。</p>
         {isIeltsReturn && (
           <div className="bg-green-500/15 border border-green-500/30 text-green-200 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-            🎓 註冊完成後將直接進入 IELTS 陪伴學習 Early Access。
+            🎓 註冊完成後將直接進入 英語訓練對話 Early Access。
           </div>
         )}
 
@@ -105,7 +105,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
             ) : (
               <>
                 <span className="text-xl">🌱</span>
-                {isIeltsReturn ? '建立帳號並開始 IELTS 學習' : '建立 Nightasaur 帳號'}
+                {isIeltsReturn ? '建立帳號並開始英語訓練對話' : '建立 Nightasaur 帳號'}
               </>
             )}
           </button>

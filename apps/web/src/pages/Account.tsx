@@ -82,12 +82,12 @@ const AccountPage: React.FC = () => {
               <div className="bg-green-500/10 border border-green-500/25 rounded-xl p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
                   <div>
-                    <div className="text-sm text-green-300 font-bold mb-2">IELTS EARLY ACCESS</div>
-                    <h2 className="text-xl font-bold">登入會員目前可直接使用 IELTS 陪伴學習</h2>
+                    <div className="text-sm text-green-300 font-bold mb-2">ENGLISH CONVERSATION EARLY ACCESS</div>
+                    <h2 className="text-xl font-bold">登入會員目前可直接使用 英語訓練對話</h2>
                     <p className="text-white/60 mt-2">正式 30 天授權與付款機制尚未啟用；目前 Early Access 不代表已付款或已建立正式訂單。</p>
                   </div>
                   <button onClick={() => navigate('/academy/category/ielts')} className="btn-primary px-6 py-3 whitespace-nowrap">
-                    開始 IELTS 學習
+                    開始英語訓練對話
                   </button>
                 </div>
               </div>
