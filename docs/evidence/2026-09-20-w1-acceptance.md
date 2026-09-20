@@ -1,9 +1,20 @@
 # W1 acceptance — 2026-09-20
 
 Initial candidate: `9a4fb349b1427272f7cebba5090723f3238bd5db`.
-Latest production candidate under renewed acceptance: `d4055ca59a020841d680804d25b950396b24aca2`.
-The follow-up sections below supersede earlier pending items within their stated scope.
-Status: ACCEPTED for the W1 baseline at d4055ca with owner-reported physical Safari and administrator confirmation; language/voice personalization explicitly deferred. Historical partial results remain below.
+Accepted W1 production baseline: `d4055ca59a020841d680804d25b950396b24aca2` (PR #48).
+Account administration extension: `33a4b542adbb68f2f688e1507f6e0fe9233c4320` (PR #49).
+Status: CLOSED / ACCEPTED on 2026-09-21 (Asia/Taipei).
+
+## Final owner sign-off — 2026-09-21
+
+The owner confirmed: "W1 ceo@cccbuyear.com實機確認 結案".
+This closes W1 following the previously recorded iPhone 16 Safari retest and administrator confirmation. This is owner-reported physical-device evidence, not an independently observed CEO session or a detailed transcript of each account-management action.
+
+The W1 browser flow evidence and automated checks remain recorded below. Account administration supports banning/restoring accounts and session revocation with audit records; application administrators cannot force-delete accounts. PR #49 contains the implementation and its separate validation evidence.
+
+Language quality, personalized voice and tone remain deferred follow-up work at the owner's direction and do not block this W1 closure. This sign-off does not certify completion of W2–W12 or deferred features.
+
+All sections below are chronological historical evidence. Earlier partial/pending statements describe their original test runs and are superseded by this final verdict within the W1 scope.
 
 ## Verified in this run
 
