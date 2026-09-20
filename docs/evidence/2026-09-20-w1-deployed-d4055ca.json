@@ -1,0 +1,81 @@
+{
+  "commit": "d4055ca59a020841d680804d25b950396b24aca2",
+  "startedAt": "2026-09-20T15:38:31.439Z",
+  "checks": [
+    {
+      "name": "ordinary_navigation_new_copy",
+      "result": "PASS"
+    },
+    {
+      "name": "product_login_return_to_learning_hub",
+      "result": "PASS"
+    },
+    {
+      "name": "existing_spirit_and_image_after_login",
+      "result": "PASS"
+    },
+    {
+      "name": "spirit_dialogue_during_backend_build",
+      "result": "FAIL",
+      "observed": "connection interrupted"
+    },
+    {
+      "name": "five_language_signed_in_navigation",
+      "result": "PASS",
+      "languages": [
+        "zh-TW",
+        "en-US",
+        "zh-CN",
+        "ja-JP",
+        "ko-KR"
+      ]
+    },
+    {
+      "name": "menu_link_closes_panel",
+      "result": "PASS"
+    },
+    {
+      "name": "dashboard_390_layout",
+      "result": "PASS",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "name": "session_and_spirit_survive_backend_redeploy",
+      "result": "PASS",
+      "backend": "059c2cb8-66e4-4399-bccf-61ad4c8fe95f"
+    },
+    {
+      "name": "stable_production_spirit_dialogue",
+      "result": "PASS_CONNECTIVITY",
+      "response": "你好，我叫蛋！",
+      "languageQuality": "NOT_CERTIFIED"
+    },
+    {
+      "name": "stable_production_assistant",
+      "result": "PASS",
+      "response": "Hello"
+    },
+    {
+      "name": "logout_and_protected_dashboard_redirect",
+      "result": "PASS"
+    },
+    {
+      "name": "new_registration_on_deployed_commit",
+      "result": "PASS",
+      "account": "W1_DEPLOY_5bfa3c3844",
+      "spirit": "cmu9zjmlr0006142gf2gizuew"
+    },
+    {
+      "name": "new_user_reload_and_relogin",
+      "result": "PASS",
+      "spirit": "cmu9zjmlr0006142gf2gizuew"
+    }
+  ],
+  "status": "PARTIAL",
+  "pending": [
+    "physical iPhone Safari recheck",
+    "fresh administrator authorization evidence",
+    "full localization and English model quality"
+  ]
+}
