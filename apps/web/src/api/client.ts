@@ -41,9 +41,9 @@ export const authAPI = {
   register: (data: { email: string; username: string; password: string }) =>
     api.post("/auth/register", data),
   login: (data: { email: string; password: string }) =>
-    api.post("/auth/login", data),
+    api.post("/auth/login", data, { timeout: 45000 }),
   logout: () => api.post("/auth/logout"),
-  me: () => api.get("/auth/me"),
+  me: () => api.get("/auth/me", { timeout: 30000 }),
 };
 
 export const spiritsAPI = {

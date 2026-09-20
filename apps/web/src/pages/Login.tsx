@@ -46,7 +46,9 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
       const status = err.response?.status;
       const backendMessage = err.response?.data?.error || err.response?.data?.message;
 
-      if (!err.response) {
+      if (err.code === "ECONNABORTED" || err.code === "ETIMEDOUT") {
+        setError("登入回應逾時，尚無法確認是否成功。請稍後再試，不需要重設密碼。");
+      } else if (!err.response) {
         setError("登入服務目前無法連線，請稍後再試。");
       } else if (status === 401) {
         setError(backendMessage || "Email 或密碼錯誤");
@@ -87,6 +89,9 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             <input
               className="input-field"
               type="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               placeholder="your@email.com"
               required
               value={form.email}
@@ -101,6 +106,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             <input
               className="input-field w-full pr-10"
               type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
               placeholder="輸入密碼"
               required
               value={form.password}

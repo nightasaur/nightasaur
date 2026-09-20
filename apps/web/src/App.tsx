@@ -55,6 +55,7 @@ function LocalizedHome() {
 function AppContent() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [authUnavailable, setAuthUnavailable] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("nightasaur_token");
@@ -62,12 +63,22 @@ function AppContent() {
       authAPI
         .me()
         .then((res) => setUser(res.data))
-        .catch(() => localStorage.removeItem("nightasaur_token"))
+        .catch((error) => {
+          if (error.response?.status === 401) localStorage.removeItem("nightasaur_token");
+          else setAuthUnavailable(true);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, []);
+
+  if (authUnavailable) {
+    return <main className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
+      <p role="alert">暫時無法確認登入狀態，請重新連線後再試。 / Unable to verify your session. Please retry.</p>
+      <button className="btn-primary" onClick={() => window.location.reload()}>重新連線 / Retry</button>
+    </main>;
+  }
 
   if (loading) {
     return (
