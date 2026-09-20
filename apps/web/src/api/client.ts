@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearRejectedSession } from "../utils/authSession";
 
 // Production always uses the same-origin /api proxy so the browser does not depend
 // on a stale VITE_API_URL or cross-origin CORS configuration.
@@ -29,8 +30,7 @@ api.interceptors.response.use(
   async (error) => {
     const isCredentialRequest = ["/auth/login", "/auth/register"].includes(error.config?.url || "");
     if (error.response?.status === 401 && !isCredentialRequest) {
-      localStorage.removeItem("nightasaur_token");
-      window.location.href = "/login";
+      clearRejectedSession(error.config?.headers?.Authorization);
     }
 
     return Promise.reject(error);

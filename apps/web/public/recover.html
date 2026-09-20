@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>恢復網站載入 | Nightasaur</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#0a0d14;color:#e4edf4;font:17px/1.65 system-ui,sans-serif;min-height:100svh;display:grid;place-items:center;padding:24px}
+    main{width:min(100%,480px);padding:32px;border:1px solid #2c4249;border-radius:24px;background:#111c25}
+    h1{font-size:27px}p{color:#bacbd4}button,a{font:inherit}button{width:100%;padding:14px;border:0;border-radius:12px;background:#71e5c2;color:#09261e;cursor:pointer;font-weight:700}button:disabled{opacity:.55;cursor:wait}a{color:#8ce5d9}#status{min-height:3.3em}
+  </style>
+</head>
+<body>
+  <main>
+    <p>🌙 Nightasaur</p>
+    <h1>恢復網站載入</h1>
+    <p>更新網站版本並重新開啟首頁。你的登入資料會保留，帳號與密碼不會變更。</p>
+    <button id="recover" type="button">更新並重新開啟</button>
+    <p id="status" role="status" aria-live="polite">若首頁停在載入畫面，可使用此功能重試。</p>
+    <a href="/">直接返回首頁</a>
+  </main>
+  <script>
+    const button = document.querySelector('#recover');
+    const status = document.querySelector('#status');
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      status.textContent = '正在取得新版網站…';
+      try {
+        if ('serviceWorker' in navigator) {
+          await Promise.race([
+            navigator.serviceWorker.register('/service-worker.js', {updateViaCache:'none'})
+              .then(registration => registration.update()),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))
+          ]);
+        }
+        // A unique public document URL avoids an obsolete worker's cache-first entry.
+        window.location.replace('/?reload=' + Date.now());
+      } catch {
+        status.textContent = '目前無法更新，請檢查網路後再試，或使用下方連結返回首頁。';
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

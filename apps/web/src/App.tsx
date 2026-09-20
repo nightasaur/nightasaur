@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Nightasaur Team
 
-import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { authAPI } from "./api/client";
+import { SESSION_EXPIRED, clearRejectedSession } from "./utils/authSession";
 import Navbar from "./components/Navbar";
 import SEO from "./components/SEO";
 import Home, { HOME_METADATA } from "./pages/Home";
@@ -29,9 +30,29 @@ import ProductPage from "./pages/products/IeltsImmersion";
 import CheckoutPage from "./pages/checkout/IeltsImmersion";
 import ReceiptPreviewPage from "./pages/receipts/Preview";
 
+const SessionContext = createContext({
+  user: null as any,
+  loading: true,
+  unavailable: false,
+  retry: () => {},
+});
+
+function SessionStatus({ pending = false }: { pending?: boolean }) {
+  const { retry } = useContext(SessionContext);
+  return <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-6 text-center">
+    <p role={pending ? "status" : "alert"}>{pending
+      ? "正在確認登入狀態… / Checking your session…"
+      : "暫時無法確認登入狀態，請重新連線後再試。 / Unable to verify your session. Please retry."}</p>
+    {!pending && <button className="btn-primary" onClick={retry}>重新連線 / Retry</button>}
+    <Link className="text-teal-300 underline" to="/">返回首頁 / Home</Link>
+  </div>;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem("nightasaur_token");
-  if (!token) return <Navigate to="/login" />;
+  const { user, loading, unavailable } = useContext(SessionContext);
+  if (loading) return <SessionStatus pending />;
+  if (unavailable) return <SessionStatus />;
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -53,46 +74,63 @@ function LocalizedHome() {
 }
 
 function AppContent() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUserState] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authUnavailable, setAuthUnavailable] = useState(false);
+  const verification = useRef(0);
+  const { pathname } = useLocation();
+  const publicPage = ["/", "/login", "/register", "/privacy", "/products/ielts-immersion"].includes(pathname);
 
-  useEffect(() => {
+  const setUser = useCallback((nextUser: any) => {
+    verification.current += 1;
+    setUserState(nextUser);
+    setLoading(false);
+    setAuthUnavailable(false);
+  }, []);
+
+  const verifySession = useCallback(async () => {
+    const attempt = ++verification.current;
     const token = localStorage.getItem("nightasaur_token");
-    if (token) {
-      authAPI
-        .me()
-        .then((res) => setUser(res.data))
-        .catch((error) => {
-          if (error.response?.status === 401) localStorage.removeItem("nightasaur_token");
-          else setAuthUnavailable(true);
-        })
-        .finally(() => setLoading(false));
-    } else {
+    setAuthUnavailable(false);
+    if (!token) {
+      setUserState(null);
       setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const stillCurrent = () => attempt === verification.current && token === localStorage.getItem("nightasaur_token");
+    try {
+      const res = await authAPI.me();
+      if (stillCurrent()) setUserState(res.data);
+    } catch (error: any) {
+      if (!stillCurrent()) return;
+      if (error.response?.status === 401) clearRejectedSession(`Bearer ${token}`);
+      else setAuthUnavailable(true);
+    } finally {
+      if (stillCurrent()) setLoading(false);
     }
   }, []);
 
-  if (authUnavailable) {
-    return <main className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
-      <p role="alert">暫時無法確認登入狀態，請重新連線後再試。 / Unable to verify your session. Please retry.</p>
-      <button className="btn-primary" onClick={() => window.location.reload()}>重新連線 / Retry</button>
-    </main>;
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen gradient-night flex items-center justify-center">
-        <SEO />
-        <div className="text-4xl animate-float">🌙</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const expired = () => setUser(null);
+    window.addEventListener(SESSION_EXPIRED, expired);
+    void verifySession();
+    return () => {
+      verification.current += 1;
+      window.removeEventListener(SESSION_EXPIRED, expired);
+    };
+  }, [setUser, verifySession]);
 
   return (
+    <SessionContext.Provider value={{ user, loading, unavailable: authUnavailable, retry: verifySession }}>
     <div className="min-h-screen relative z-10">
       <Navbar user={user} setUser={setUser} />
       <main className="pt-20">
+        {publicPage && loading && <p role="status" className="px-6 py-2 text-center text-white/60 text-sm">正在確認登入狀態，你可以繼續瀏覽。 / Checking your session; browsing remains available.</p>}
+        {publicPage && authUnavailable && <div className="px-6 py-3 text-center text-sm">
+          <p role="alert">暫時無法確認登入狀態，公開頁面仍可使用。 / Session verification is unavailable; public pages remain available.</p>
+          <button className="text-teal-300 underline mt-2" onClick={verifySession}>重新連線 / Retry</button>
+        </div>}
         <Routes>
           <Route path="/" element={<LocalizedHome />} />
           <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
@@ -160,6 +198,7 @@ function AppContent() {
         </Routes>
       </main>
     </div>
+    </SessionContext.Provider>
   );
 }
 
