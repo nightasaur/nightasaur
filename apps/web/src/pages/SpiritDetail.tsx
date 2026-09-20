@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { spiritsAPI, dialogueAPI, generationAPI } from "../api/client";
 import SpiritSprite, { AnimState } from "../components/SpiritSprite";
 import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
-const STAGES = ["蛋","幼体","少年体","成年体","究极体","传说体"];
-const REQ: Record<string,number> = { "幼体":1,"少年体":5,"成年体":15,"究极体":30,"传说体":60 };
+import { STAGES, REQ, progression, growthValue } from "../utils/spiritPresentation";
+import { spiritText } from "../utils/spiritCopy";
+import { useLanguage } from "../contexts/LanguageContext";
 const COLS: Record<string,string> = {
   FIRE:"from-orange-500 to-red-500", WATER:"from-cyan-400 to-blue-500",
   LIGHT:"from-yellow-300 to-amber-400", SHADOW:"from-violet-700 to-indigo-900",
@@ -20,6 +21,8 @@ const EXPS = ["😄开心","😤认真","😴慵懒","😎酷炫","🥺撒娇","
 const OUTFITS = ["🧣探索背心", "🎓學習外套", "🎀創作圍巾", "🧢專注帽子", "🪖記憶頭盔", "⛓️協作披風"];
 const ACCS = ["💍學習徽章", "🔮創造水晶", "📿記憶護符", "🪶靈感羽毛", "🌟成長徽章"];
 export default function SpiritDetail() {
+  const { currentLanguage } = useLanguage();
+  const t = (key: string, values: Record<string, string | number> = {}) => spiritText(currentLanguage, key, values);
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
   const [s, setS] = useState<any>(null);
@@ -50,8 +53,8 @@ const [animState, setAnimState] = useState<AnimState>("idle");
       await generationAPI.generate(id);
       const result = await generationAPI.get(id);
       setArt(result.data);
-      if (result.data?.status !== "COMPLETED") setArtError(result.data?.errorMsg || "圖片正在生成，請稍後重新整理。");
-    } catch { setArtError("圖片生成暫時無法使用，請稍後再試。"); }
+      if (result.data?.status !== "COMPLETED") setArtError(result.data?.errorMsg || t("圖片正在生成，請稍後重新整理。"));
+    } catch { setArtError(t("圖片生成暫時無法使用，請稍後再試。")); }
     finally { setDrawing(false); }
   };
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
@@ -61,22 +64,22 @@ const [animState, setAnimState] = useState<AnimState>("idle");
       const response = await spiritsAPI.getById(id!);
       const data = response.data;
       setS(data.spirit || data);
-      setCustom(data.spirit?.customization || {});
-      setExpression(data.spirit?.expression || "😄开心");
+      setCustom((data.spirit || data).customization || {});
+      setExpression((data.spirit || data).expression || "😄开心");
     } catch { nav("/spirits"); }
     finally { setLoading(false); }
   };
 
   const evolve = async () => {
-    setEvolving(true); setEvolveMsg("进化中...✨");
+    setEvolving(true); setEvolveMsg(t("进化中...✨"));
     try {
       const response = await spiritsAPI.evolve(id!);
       const data = response.data;
       setS(data.spirit || data);
-      setEvolveMsg("进化成功！🎉");
-      speak("进化成功！");
+      setEvolveMsg(t("进化成功！🎉"));
+      speak(t("进化成功！"));
     } catch (e: any) {
-      setEvolveMsg(e.response?.data?.error || "进化失败");
+      setEvolveMsg(e.response?.data?.error || t("进化失败"));
     }
     setTimeout(() => { setEvolving(false); setEvolveMsg(""); }, 2500);
   };
@@ -88,14 +91,14 @@ const [animState, setAnimState] = useState<AnimState>("idle");
   };
 
   const deleteSpirit = async () => {
-    if (!window.confirm(`確定要刪除精靈「${s.name}」嗎？此操作無法還原。`)) return;
+    if (!window.confirm(t("刪除確認", {name: s.name}))) return;
     
     try {
       await spiritsAPI.delete(id!);
-      alert("精靈已成功刪除");
+      alert(t("精靈已成功刪除"));
       nav("/spirits");
     } catch (error: any) {
-      alert(error.response?.data?.message || "刪除失敗");
+      alert(error.response?.data?.message || t("刪除失敗"));
     }
   };
 
@@ -112,7 +115,7 @@ const [animState, setAnimState] = useState<AnimState>("idle");
       if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level }));
       speak(reply);
     } catch {
-      setMsgs(p => [...p, { role: "assistant", content: "感应中断了🦕" }]);
+      setMsgs(p => [...p, { role: "assistant", content: t("感应中断了🦕") }]);
     }
     setSending(false);
   };
@@ -123,29 +126,26 @@ const [animState, setAnimState] = useState<AnimState>("idle");
     </div>
   );
 
-  const ci = STAGES.indexOf(s.stage);
-  const ns = STAGES[ci+1];
-  const nr = ns ? REQ[ns]||1 : 0;
-  const can = ns && s.level >= nr;
+  const { index: ci, next: ns, required: nr, canEvolve: can } = progression(s.stage, s.level);
   const ec = COLS[s.element]||"from-teal-500 to-cyan-400";
 return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="glass-card text-center mb-8">
         <SpiritSprite species={s.species} element={s.element} stage={s.stage}
           outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={180} />
-        {art?.resultUrl && <img src={art.resultUrl} alt={`${s.name}的程序式生成圖像`} className="w-64 h-64 object-contain mx-auto rounded-2xl my-4" />}
-        <button className="btn-primary my-3" disabled={drawing} onClick={drawSpirit}>{drawing ? "生成中…" : "生成精靈圖片"}</button>
-        <p className="text-sm text-white/60">原創程序式生成・依元素與成長階段繪製</p>
+        {art?.resultUrl && <img src={art.resultUrl} alt={s.name} className="w-64 max-w-full h-auto object-contain mx-auto rounded-2xl my-4" />}
+        <button className="btn-primary my-3" disabled={drawing} onClick={drawSpirit}>{drawing ? t("生成中…") : t("生成精靈圖片")}</button>
+        <p className="text-sm text-white/60">{t("原創程序式生成・依元素與成長階段繪製")}</p>
         {artError && <p role="alert" className="text-red-300">{artError}</p>}
         <h1 className="text-3xl font-black text-white">{s.name}</h1>
         <div className="flex justify-center gap-3 mt-3 flex-wrap">
           <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${ec} text-white`}>
-            {ICO[s.element]||"?"} {s.element}
+            {ICO[s.element]||"✨"} {s.element}
           </span>
           <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-white/70">
-            {ICO[s.species]||"?"} {s.species||"?"}
+            🦕 {s.species || t("未設定物種")}
           </span>
-          <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-white/70">{s.stage}</span>
+          <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-white/70">{ci >= 0 ? t(s.stage) : t("未知階段")}</span>
           <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-white/70">Lv.{s.level}</span>
         </div>
         <div className="flex justify-center gap-2 mt-4 flex-wrap">
@@ -154,17 +154,17 @@ return (
               className={`px-2 py-1 rounded-lg text-xs transition-all ${
                 expression===ex?"bg-teal-500/40 border border-teal-400 text-white":"bg-white/5 text-white/40"
               }`}
-            >{ex}</button>
+            >{t(ex)}</button>
           ))}
         </div>
       </div>
 <div className="flex gap-2 mb-6">
         <button onClick={() => setTab("chat")} className={`flex-1 py-3 rounded-xl font-bold transition-all ${
           tab==="chat"?"bg-teal-500/30 border border-teal-400/50 text-white":"bg-white/5 text-white/40"
-        }`}>💬 陪伴你的精灵对话</button>
+        }`}>{t("💬 陪伴你的精灵对话")}</button>
         <button onClick={() => setTab("customize")} className={`flex-1 py-3 rounded-xl font-bold transition-all ${
           tab==="customize"?"bg-teal-500/30 border border-teal-400/50 text-white":"bg-white/5 text-white/40"
-        }`}>🎨 装扮精灵</button>
+        }`}>{t("🎨 装扮精灵")}</button>
       </div>
 {tab === "chat" && (
         <>
@@ -173,8 +173,8 @@ return (
               <div className="text-center text-white/30 py-16">
                 <SpiritSprite species={s.species} element={s.element} stage={s.stage}
                   outfit={custom.outfit} accessory={custom.accessory} size={120} />
-                <p>点击下方按钮跟 {s.name} 聊天吧！</p>
-                <p className="text-xs mt-2">支援语音输入 🎤 与播放 🔊</p>
+                <p>{t("聊天提示", {name: s.name})}</p>
+                <p className="text-xs mt-2">{t("支援语音输入 🎤 与播放 🔊")}</p>
               </div>
             )}
             {msgs.map((m, i) => (
@@ -191,25 +191,25 @@ return (
               </div>
             ))}
             <div ref={chatEndRef} />
-            {isSpeaking && <div className="text-teal-300 text-sm animate-pulse text-center">🔊 精灵正在说话...</div>}
+            {isSpeaking && <div className="text-teal-300 text-sm animate-pulse text-center">{t("🔊 精灵正在说话...")}</div>}
           </div>
-          <div className="glass-card flex gap-3 items-center">
+          <div className="glass-card flex flex-wrap sm:flex-nowrap gap-3 items-center">
             <VoiceChat onSendText={send} />
             <input value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key==="Enter" && send()}
-              placeholder={`跟 ${s.name} 说点什么...`}
-              className="input-field flex-1" disabled={sending}
+              placeholder={t("聊天輸入", {name: s.name})}
+              className="input-field flex-1 min-w-0" disabled={sending}
             />
             <button onClick={() => send()} disabled={sending||!input.trim()}
-              className="btn-primary px-6 disabled:opacity-50"
-            >{sending?"...":"发送"}</button>
+              className="btn-primary px-3 sm:px-6 disabled:opacity-50"
+            >{sending?"...":t("发送")}</button>
           </div>
         </>
       )}
 {tab === "customize" && (
         <div className="glass-card space-y-6">
-          <h3 className="text-xl font-bold text-white">🎨 装扮你的精灵 — 纸娃娃系统</h3>
-          <p className="text-white/60 text-sm">取得方式：成長獎勵 / 每日學習 / 社群分享獲得配件</p>
+          <h3 className="text-xl font-bold text-white">{t("🎨 装扮你的精灵 — 纸娃娃系统")}</h3>
+          <p className="text-white/60 text-sm">{t("取得方式：成長獎勵 / 每日學習 / 社群分享獲得配件")}</p>
 
           {/* 大型预览 */}
           <div className="flex justify-center py-4">
@@ -218,7 +218,7 @@ return (
               animState={animState} onAnimEnd={() => setAnimState("idle")} />
           </div>
           <p className="text-center text-white/50 text-sm -mt-2">
-            {s.name} | {ICO[s.element]||"?"} {s.element} | {ICO[s.species]||"?"} {s.species||"?"} | Lv.{s.level}
+            {s.name} | {ICO[s.element]||"✨"} {s.element} | 🦕 {s.species || t("未設定物種")} | Lv.{s.level}
           </p>
 
           {/* 動作互動按鈕 */}
@@ -237,33 +237,33 @@ return (
                     ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10"
                 }`}>
-                {a.icon} {a.label}
+                {a.icon} {t(a.label)}
               </button>
             ))}
           </div>
 
-          <p className="text-white/60 mb-3 font-bold">👗 服装</p>
+          <p className="text-white/60 mb-3 font-bold">{t("👗 服装")}</p>
           <div className="flex flex-wrap gap-2">
             {OUTFITS.map(o => (
               <button key={o} onClick={() => customize("outfit", custom.outfit===o?"":o)}
                 className={`px-4 py-2 rounded-xl text-sm transition-all ${
                   custom.outfit===o?"outfit-selected bg-teal-500/40 border border-teal-400 text-white":"bg-white/5 text-white/50 hover:bg-white/10"
-                }`}>{o}</button>
+                }`}>{t(o)}</button>
             ))}
           </div>
-          <p className="text-white/60 mb-3 font-bold">🔮 配件</p>
+          <p className="text-white/60 mb-3 font-bold">{t("🔮 配件")}</p>
           <div className="flex flex-wrap gap-2">
             {ACCS.map(a => (
               <button key={a} onClick={() => customize("accessory", custom.accessory===a?"":a)}
                 className={`px-4 py-2 rounded-xl text-sm transition-all ${
                   custom.accessory===a?"outfit-selected bg-teal-500/40 border border-teal-400 text-white":"bg-white/5 text-white/50 hover:bg-white/10"
-                }`}>{a}</button>
+                }`}>{t(a)}</button>
             ))}
           </div>
         </div>
       )}
 <div className="glass-card mt-8">
-        <h3 className="text-xl font-bold text-white mb-6">📜 进化时间线</h3>
+        <h3 className="text-xl font-bold text-white mb-6">{t("📜 进化时间线")}</h3>
         <div className="flex items-center justify-between flex-wrap gap-2">
           {STAGES.map((st, i) => (
             <div key={st} className={`flex flex-col items-center gap-2 transition-all ${
@@ -274,25 +274,26 @@ return (
               }`}>
                 {["🥚","🐣","🦎","🐉","🦖","👑"][i]}
               </div>
-              <span className={`text-xs ${i===ci?"text-teal-300 font-bold":"text-white/40"}`}>{st}</span>
+              <span className={`text-xs ${i===ci?"text-teal-300 font-bold":"text-white/40"}`}>{t(st)}</span>
               {i===ci && <span className="text-xs text-teal-400">Lv.{s.level}</span>}
               {i>ci && <span className="text-xs text-white/20">Lv.{REQ[st]}</span>}
             </div>
           ))}
         </div>
         <div className="mt-8 space-y-3">
+          <p className="text-sm text-white/50">{t("成長指標")}</p>
           {[
             ["❤️ 生命力",7,20],["💪 學習力",5,18],["🛡️ 專注力",4,15],["💨 反應力",6,12],["🔮 創造力",8,22]
           ].map(([label, m, b]) => {
-            const v = s.level * (m as number) + (ci * (b as number));
+            const v = growthValue(s.stage, s.level, m as number, b as number);
             return (
               <div key={label as string} className="flex items-center gap-3">
-                <span className="w-24 text-sm text-white/60">{label}</span>
+                <span className="w-24 text-sm text-white/60">{t(label as string)}</span>
                 <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
                   <div className={`h-full bg-gradient-to-r ${ec} rounded-full`}
-                    style={{ width: `${Math.min(100, (v/500)*100)}%` }} />
+                    style={{ width: `${Math.min(100, ((v ?? 0)/500)*100)}%` }} />
                 </div>
-                <span className="text-xs text-white/40 w-10">{v}</span>
+                <span className="text-xs text-white/40 w-10">{v ?? "—"}</span>
               </div>
             );
           })}
@@ -301,25 +302,25 @@ return (
           <div className="mt-6 text-center">
             <button onClick={evolve} disabled={!can||evolving}
               className={`btn-primary text-lg px-10 ${!can?"opacity-40 cursor-not-allowed":""}`}>
-              {evolving?"进化中...✨":can?`进化到 ${ns} →`:`需要 Lv.${nr} 才能进化`}
+              {evolving?t("进化中...✨"):can?t("進化到", {stage: t(ns)}):t("需要等級", {level: nr ?? 0})}
             </button>
             {evolveMsg && <p className="mt-3 text-teal-300 animate-pulse">{evolveMsg}</p>}
           </div>
         )}
         {s && s.stage !== "EGG" && (
           <div className="mt-6 text-center">
-            <Link to={`/spirits/${s.id}/battle`}
+            <Link to="/academy"
               className="btn-primary text-lg px-10 inline-block">
-              🎯 學習挑戰
+              {t("🎯 學習挑戰")}
             </Link>
           </div>
         )}
         <div className="mt-4 text-center">
           <button onClick={deleteSpirit}
             className="btn-danger text-lg px-10 inline-block bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300">
-            🗑️ 刪除精靈
+            {t("🗑️ 刪除精靈")}
           </button>
-          <p className="text-white/40 text-sm mt-2">此操作無法還原</p>
+          <p className="text-white/40 text-sm mt-2">{t("此操作無法還原")}</p>
         </div>
       </div>
     </div>

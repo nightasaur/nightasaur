@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Nightasaur Team
 
+import { spiritText } from "../utils/spiritCopy";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../api/client";
@@ -29,6 +30,7 @@ const PUBLIC_NAV_COPY: Record<string, {
 export default function Navbar({ user, setUser }: NavbarProps) {
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
+  const t = (key: string) => spiritText(currentLanguage, key);
   const publicCopy = PUBLIC_NAV_COPY[currentLanguage] ?? PUBLIC_NAV_COPY["zh-TW"];
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -46,13 +48,13 @@ export default function Navbar({ user, setUser }: NavbarProps) {
 
   const userLinks = (
     <>
-      <Link to="/dashboard" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">Dashboard</Link>
-      <Link to="/spirits" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">💞 Spirit</Link>
-      <Link to="/assistant" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🤖 Assistant</Link>
-      <Link to="/academy" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">📚 Learning</Link>
-      <Link to="/social" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🌍 Social</Link>
-      <Link to="/account" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">Account</Link>
-      <Link to="/settings/language" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">Language</Link>
+      <Link to="/dashboard" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Dashboard")}</Link>
+      <Link to="/spirits" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">💞 {t("Spirit")}</Link>
+      <Link to="/assistant" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🤖 {t("Assistant")}</Link>
+      <Link to="/academy" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">📚 {t("Learning")}</Link>
+      <Link to="/social" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🌍 {t("Social")}</Link>
+      <Link to="/account" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Account")}</Link>
+      <Link to="/settings/language" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Language")}</Link>
     </>
   );
 
@@ -81,7 +83,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           {user ? (
             <>
               {userLinks}
-              <button onClick={handleLogout} className="text-white/50 hover:text-white/80 transition text-sm">Logout</button>
+              <button onClick={handleLogout} className="text-white/50 hover:text-white/80 transition text-sm">{t("Logout")}</button>
               <span className="text-white/40">|</span>
               <span className="max-w-28 truncate text-white/60 text-sm" title={user.username}>{user.username}</span>
             </>
@@ -117,7 +119,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
 
             {user ? (
               <>
-                <div className="px-3 py-2 text-xs text-white/40 truncate">登入：{user.username}</div>
+                <div className="px-3 py-2 text-xs text-white/40 truncate">{t("登入")}：{user.username}</div>
                 <div className="flex flex-col gap-1 [&_a]:px-3 [&_a]:py-3 [&_a]:rounded-lg [&_a]:hover:bg-white/5">
                   {userLinks}
                 </div>
