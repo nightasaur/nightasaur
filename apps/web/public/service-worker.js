@@ -1,130 +1,53 @@
-// Nightasaur Service Worker
-// 版本: 1.0.0
+// Nightasaur Service Worker: public offline resources only.
+// Never persist application HTML, authenticated responses or API requests.
+const CACHE_PREFIX = 'nightasaur-';
+const CACHE_NAME = 'nightasaur-public-v2';
+const PUBLIC_FILES = ['/offline.html', '/manifest.json', '/nightasaur.svg'];
 
-const CACHE_NAME = 'nightasaur-v1.0.0';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/nightasaur.svg',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
-];
-
-// 安裝 Service Worker
 self.addEventListener('install', event => {
-  console.log('🦖 Service Worker 安裝中...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('📦 快取檔案:', urlsToCache);
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        console.log('✅ Service Worker 安裝完成');
-        return self.skipWaiting();
-      })
-      .catch(error => {
-        console.error('❌ Service Worker 安裝失敗:', error);
-      })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(PUBLIC_FILES);
+    await self.skipWaiting();
+  })());
 });
 
-// 啟用 Service Worker
 self.addEventListener('activate', event => {
-  console.log('🦖 Service Worker 啟用中...');
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('🗑️ 刪除舊快取:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('✅ Service Worker 啟用完成');
-      return self.clients.claim();
-    })
-  );
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(names
+      .filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+      .map(name => caches.delete(name)));
+    await self.clients.claim();
+  })());
 });
 
-// 攔截請求
 self.addEventListener('fetch', event => {
-  // 只處理 GET 請求
-  if (event.request.method !== 'GET') return;
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Let the browser handle API traffic without reading or writing Cache Storage.
+  if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return;
 
-  // 對於 API 請求，使用網絡優先策略
-  if (event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // 複製響應以用於快取
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        })
-        .catch(() => {
-          // 網絡失敗時從快取中獲取
-          return caches.match(event.request);
-        })
-    );
+  // Every document comes from the server. Offline fallback is generic public UI.
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(fetch(request, { cache: 'no-store' }).catch(async () => {
+      const cache = await caches.open(CACHE_NAME);
+      return await cache.match('/offline.html') || new Response('Offline', {
+        status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }));
     return;
   }
 
-  // 對於靜態資源，使用快取優先策略
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          console.log('📦 從快取提供:', event.request.url);
-          return cachedResponse;
-        }
-
-        // 如果快取中沒有，從網絡獲取
-        return fetch(event.request)
-          .then(response => {
-            // 檢查是否為有效的響應
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // 複製響應以用於快取
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch(error => {
-            console.error('🌐 網絡請求失敗:', error);
-            
-            // 對於 HTML 頁面，返回離線頁面
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/offline.html');
-            }
-            
-            // 對於其他資源，返回預設圖標
-            if (event.request.destination === 'image') {
-              return caches.match('/nightasaur.svg');
-            }
-            
-            return new Response('離線模式', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
-          });
-      })
-  );
+  // Only these public files are eligible for service-worker caching.
+  // Bundled scripts/styles and all other requests use normal HTTP semantics.
+  if (!url.search && PUBLIC_FILES.includes(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      return await cache.match(url.pathname) || fetch(request);
+    })());
+  }
 });
 
 // 處理推送通知
