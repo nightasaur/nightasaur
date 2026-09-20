@@ -3,7 +3,7 @@
 Initial candidate: `9a4fb349b1427272f7cebba5090723f3238bd5db`.
 Latest production candidate under renewed acceptance: `d4055ca59a020841d680804d25b950396b24aca2`.
 The follow-up sections below supersede earlier pending items within their stated scope.
-Status: PARTIAL; not full W1 acceptance.
+Status: ACCEPTED for the W1 baseline at d4055ca with owner-reported physical Safari and administrator confirmation; language/voice personalization explicitly deferred. Historical partial results remain below.
 
 ## Verified in this run
 
@@ -253,3 +253,10 @@ Additional stable-deployment results:
 W1 remains PARTIAL. These results certify only the stated browser flows, not physical Safari, full translation, administrator authorization, model quality, payments, social login or all assistant modes.
 
 New-account re-login PASS: logout and login returned the same account and initial spirit. The test session was logged out at completion. Structured observations: `2026-09-20-w1-deployed-d4055ca.json`.
+
+
+## Owner acceptance and scope decision
+
+Owner confirms iPhone Safari recheck is normal and administrator access using `ceo@cccbuyear.com` is normal after the d4055ca deployment. These two gates are accepted based on explicit owner evidence, not represented as independent agent observation. The attached Vercel screenshot shows d4055ca Production Ready; it is deployment evidence, not a phone or admin UI screenshot.
+
+Owner explicitly defers language response quality, individual tone and voice personalization to later AI improvements. The W1 baseline is accepted on this narrowed scope with the browser evidence above plus owner confirmation. This is not a full-product or language-quality certification. Newly requested account administration (CEO badge, suspension/restoration, audit, no permanent account deletion) is a separate follow-up feature and does not retroactively change this baseline.
