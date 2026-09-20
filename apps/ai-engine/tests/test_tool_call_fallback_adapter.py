@@ -116,3 +116,12 @@ def test_parse_never_raises_on_none_input():
 
     assert response.content is None
     assert response.tool_calls == []
+
+
+def test_observed_bare_json_failure_stays_unexecutable():
+    # Captured failure shape from the real SmolLM2 CPU reproduction. The fix
+    # teaches the required marker; it must not widen the parser to guess calls.
+    raw = '{"name":"workspace_inspect","arguments":{"action":"read","path":"challenge.txt"}}'
+    response = FallbackToolCallAdapter().parse(raw)
+    assert response.content == raw
+    assert response.tool_calls == []
