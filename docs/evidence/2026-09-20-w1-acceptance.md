@@ -44,3 +44,26 @@ passed based on the query-parameter recovery alone.
 No payment, social publication, account password change or schema migration
 was performed for this acceptance run. Existing QA data only was read through
 application APIs; a fresh QA login created its normal session.
+
+## Signed-in follow-up
+
+After owner manual login, the browser showed the administrator dashboard and
+Logout control. Dashboard, spirit list and existing spirit detail rendered.
+No existing spirit/account data was modified.
+
+A synthetic assistant greeting submitted through the UI failed with the old
+message claiming the AI engine was not started. Source review found a generic
+10-second frontend timeout versus a 60-second backend assistant deadline.
+PR #35 aligns the four assistant client deadlines to 75 seconds and replaces
+that unsupported error claim. Post-deployment browser verification is pending.
+
+Additional observed gaps:
+- zh-TW selected but signed-in navigation remains English and spirit pages mix
+  simplified/traditional Chinese. Homepage-only language pass is not a full-app
+  localization pass.
+- Existing spirit detail displayed negative values for several attributes and
+  incomplete labels (`? ?`, an evolution entry without a level). The provenance
+  and intended semantics of these values are not established; do not alter user
+  data or claim the detail view is fully accepted.
+- Mobile viewport acceptance remains unverified. Browser zoom shortcuts did not
+  change the measured CSS viewport and were restored; this is not mobile evidence.
