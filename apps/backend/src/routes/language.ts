@@ -11,6 +11,9 @@ router.use(authMiddleware);
 // Language preferences
 router.get("/preference", languageController.getUserLanguagePreference);
 router.put("/preference", languageController.updateLanguagePreference);
+// The web client has historically used PATCH for partial preference updates.
+// Keep PUT for backwards compatibility and accept PATCH on the same handler.
+router.patch("/preference", languageController.updateLanguagePreference);
 router.post("/auto-detect", languageController.autoDetectLanguage);
 router.get("/settings-menu", languageController.getLanguageSettingsMenu);
 router.post("/reset", languageController.resetLanguageSettings);
