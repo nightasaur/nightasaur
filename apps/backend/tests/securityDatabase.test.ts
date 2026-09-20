@@ -33,6 +33,17 @@ test("isolated SQLite enforces draft ownership and atomic publish; auth import c
     assert.match(storedSession.token, /^[a-f0-9]{64}$/);
     await authService.logout(login.token);
     assert.equal(await prisma.session.count({ where: { userId: owner.id } }), 0);
+    // Preserve explicitly authorized existing credentials without accepting them
+    // for new accounts or bypassing hash/active-account validation.
+    const legacyPassword = "admin" + "123";
+    const legacyHash = await bcrypt.hash(legacyPassword, 4);
+    const legacy = await prisma.user.create({ data: { email: "legacy@example.invalid", username: "legacy-fixture", passwordHash: legacyHash, role: "ADMIN" } });
+    const legacyLogin = await authService.login(legacy.email, legacyPassword);
+    assert.equal(verifyToken(legacyLogin.token).userId, legacy.id);
+    assert.equal((await prisma.user.findUniqueOrThrow({where: {id: legacy.id}})).passwordHash, legacyHash);
+    await assert.rejects(authService.login(legacy.email, "wrong-password"), {statusCode: 401});
+    await prisma.user.update({where: {id: legacy.id}, data: {isActive: false}});
+    await assert.rejects(authService.login(legacy.email, legacyPassword), {statusCode: 403});
     const ownedSpirit = await prisma.spirit.create({ data: { userId: owner.id, name: "owned", element: "FIRE" } });
     const foreignSpirit = await prisma.spirit.create({ data: { userId: other.id, name: "foreign", element: "WATER" } });
     const item = await prisma.item.create({ data: { name: "fixture item", type: "BOOST", effect: JSON.stringify({ xp: 25 }) } });
