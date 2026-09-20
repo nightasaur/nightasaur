@@ -1,0 +1,127 @@
+﻿src/controllers/arLocation.ts(133,46): error TS2554: Expected 8 arguments, but got 7.
+src/controllers/gameLogic.ts(19,46): error TS2339: Property 'completeGameCycle' does not exist on type 'GameLogicService'.
+src/controllers/gameLogic.ts(36,47): error TS2339: Property 'getGameOverview' does not exist on type 'GameLogicService'.
+src/controllers/gameLogic.ts(62,46): error TS2339: Property 'completeGameCycle' does not exist on type 'GameLogicService'.
+src/controllers/language.ts(42,9): error TS2783: 'message' is specified more than once, so this usage will be overwritten.
+src/controllers/language.ts(362,33): error TS2339: Property 'updatedAt' does not exist on type '{ languageInfo: { code: string; name: string; nativeName: string; flag: string; }; secondaryLanguageInfo: { code: string; name: string; nativeName: string; flag: string; } | null; displayModeInfo: { ...; }; ... 12 more ...; showEnglishHint: boolean; }'.
+src/controllers/languagePart2.ts(110,33): error TS2339: Property 'updatedAt' does not exist on type '{ languageInfo: { code: string; name: string; nativeName: string; flag: string; }; secondaryLanguageInfo: { code: string; name: string; nativeName: string; flag: string; } | null; displayModeInfo: { ...; }; ... 12 more ...; showEnglishHint: boolean; }'.
+src/controllers/namingController.ts(86,13): error TS7034: Variable 'history' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/controllers/namingController.ts(90,9): error TS7005: Variable 'history' implicitly has an 'any[]' type.
+src/controllers/puzzle.ts(129,35): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(14,35): error TS2339: Property 'playerLocation' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(53,36): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(64,29): error TS7006: Parameter 'spawn' implicitly has an 'any' type.
+src/services/arLocation.ts(72,12): error TS7006: Parameter 'spawn' implicitly has an 'any' type.
+src/services/arLocation.ts(86,35): error TS2339: Property 'hotspot' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(90,28): error TS7006: Parameter 'hotspot' implicitly has an 'any' type.
+src/services/arLocation.ts(98,12): error TS7006: Parameter 'hotspot' implicitly has an 'any' type.
+src/services/arLocation.ts(113,35): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(135,36): error TS2339: Property 'locationVisit' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(181,13): error TS2353: Object literal may only specify known properties, and 'source' does not exist in type 'Without<SpiritCreateInput, SpiritUncheckedCreateInput> & SpiritUncheckedCreateInput'.
+src/services/arLocation.ts(189,22): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(197,32): error TS2339: Property 'locationVisit' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(212,18): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(225,26): error TS2304: Cannot find name 'cooldownHours'.
+src/services/arLocation.ts(225,46): error TS2304: Cannot find name 'cooldownHours'.
+src/services/arLocation.ts(248,35): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(273,34): error TS2339: Property 'ARCapture' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(340,47): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ COMMON: number; UNCOMMON: number; RARE: number; EPIC: number; LEGENDARY: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ COMMON: number; UNCOMMON: number; RARE: number; EPIC: number; LEGENDARY: number; }'.
+src/services/arLocation.ts(428,43): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/services/arLocation.ts(428,46): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/services/arLocation.ts(447,37): error TS7006: Parameter 'spawn' implicitly has an 'any' type.
+src/services/arLocation.ts(472,35): error TS2339: Property 'hotspot' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(497,36): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(553,12): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ SHOPPING: { name: string; species: string; element: string; }[]; PARK: { name: string; species: string; element: string; }[]; STATION: { name: string; species: string; element: string; }[]; TOURIST: { name: string; species: string; element: string; }[]; CAMPUS: { ...; }[]; }'.
+  No index signature with a parameter of type 'string' was found on type '{ SHOPPING: { name: string; species: string; element: string; }[]; PARK: { name: string; species: string; element: string; }[]; STATION: { name: string; species: string; element: string; }[]; TOURIST: { name: string; species: string; element: string; }[]; CAMPUS: { ...; }[]; }'.
+src/services/arLocation.ts(569,33): error TS2339: Property 'locationVisit' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(574,35): error TS2339: Property 'ARCapture' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/arLocation.ts(579,52): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/services/arLocation.ts(580,40): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/services/arLocation.ts(587,39): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/services/arLocation.ts(587,44): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/services/game.ts(31,18): error TS2353: Object literal may only specify known properties, and 'questId_userId' does not exist in type 'QuestProgressWhereUniqueInput'.
+src/services/game.ts(40,18): error TS2353: Object literal may only specify known properties, and 'questId_userId' does not exist in type 'QuestProgressWhereUniqueInput'.
+src/services/game.ts(51,20): error TS2353: Object literal may only specify known properties, and 'questId_userId' does not exist in type 'QuestProgressWhereUniqueInput'.
+src/services/game.ts(182,16): error TS2353: Object literal may only specify known properties, and 'questId_userId' does not exist in type 'QuestProgressWhereUniqueInput'.
+src/services/game.ts(191,16): error TS2353: Object literal may only specify known properties, and 'questId_userId' does not exist in type 'QuestProgressWhereUniqueInput'.
+src/services/gameLogic.ts(12,9): error TS2561: Object literal may only specify known properties, but 'spirits' does not exist in type 'UserInclude<DefaultArgs>'. Did you mean to write 'Spirits'?
+src/services/gameLogic.ts(40,26): error TS2339: Property 'spirits' does not exist on type '{ id: string; isActive: boolean; createdAt: Date; updatedAt: Date; email: string; username: string; passwordHash: string; avatarUrl: string | null; bio: string | null; role: string; ... 4 more ...; activeSpiritId: string | null; }'.
+src/services/gameLogic.ts(59,33): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/gameLogic.ts(90,20): error TS18046: 'error' is of type 'unknown'.
+src/services/gameLogic.ts(137,18): error TS18046: 'error' is of type 'unknown'.
+src/services/gameLogic.ts(149,36): error TS2339: Property 'completedQuests' does not exist on type '{ xpAwarded: number; itemsAwarded: string[]; }'.
+src/services/googleMaps.ts(57,19): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ shopping_mall: string[]; park: string[]; train_station: string[]; tourist_attraction: string[]; university: string[]; restaurant: string[]; cafe: string[]; museum: string[]; }'.
+  No index signature with a parameter of type 'string' was found on type '{ shopping_mall: string[]; park: string[]; train_station: string[]; tourist_attraction: string[]; university: string[]; restaurant: string[]; cafe: string[]; museum: string[]; }'.
+src/services/googleMaps.ts(141,12): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ shopping_mall: string; department_store: string; park: string; train_station: string; subway_station: string; tourist_attraction: string; museum: string; art_gallery: string; university: string; school: string; restaurant: string; cafe: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ shopping_mall: string; department_store: string; park: string; train_station: string; subway_station: string; tourist_attraction: string; museum: string; art_gallery: string; university: string; school: string; restaurant: string; cafe: string; }'.
+src/services/googleMaps.ts(162,12): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ SHOPPING: string[]; PARK: string[]; STATION: string[]; TOURIST: string[]; CAMPUS: string[]; }'.
+  No index signature with a parameter of type 'string' was found on type '{ SHOPPING: string[]; PARK: string[]; STATION: string[]; TOURIST: string[]; CAMPUS: string[]; }'.
+src/services/googleMaps.ts(175,12): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ SHOPPING: number[]; PARK: number[]; STATION: number[]; TOURIST: number[]; CAMPUS: number[]; }'.
+  No index signature with a parameter of type 'string' was found on type '{ SHOPPING: number[]; PARK: number[]; STATION: number[]; TOURIST: number[]; CAMPUS: number[]; }'.
+src/services/googleMaps.ts(183,34): error TS2339: Property 'locationSpawn' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/googleMaps.ts(244,12): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ SHOPPING: { name: string; species: string; element: string; }[]; PARK: { name: string; species: string; element: string; }[]; STATION: { name: string; species: string; element: string; }[]; TOURIST: { name: string; species: string; element: string; }[]; CAMPUS: { ...; }[]; }'.
+  No index signature with a parameter of type 'string' was found on type '{ SHOPPING: { name: string; species: string; element: string; }[]; PARK: { name: string; species: string; element: string; }[]; STATION: { name: string; species: string; element: string; }[]; TOURIST: { name: string; species: string; element: string; }[]; CAMPUS: { ...; }[]; }'.
+src/services/googleMaps.ts(327,36): error TS2339: Property 'hotspot' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/hatchingService.ts(87,10): error TS2339: Property 'addEvent' does not exist on type 'HatchingService'.
+src/services/hatchingService.ts(88,10): error TS2339: Property 'addEvent' does not exist on type 'HatchingService'.
+src/services/hatchingService.ts(89,10): error TS2339: Property 'addEvent' does not exist on type 'HatchingService'.
+src/services/hatchingService.ts(93,20): error TS2339: Property 'hatchingRecord' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/hatchingService.ts(153,16): error TS2339: Property 'temperature' does not exist on type '{ progress: number; temperature: number; } | { progress: number; temperature: number; } | { progress: number; humidity: number; } | { progress: number; temperature: number; humidity: number; } | { ...; }'.
+  Property 'temperature' does not exist on type '{ progress: number; humidity: number; }'.
+src/services/hatchingService.ts(154,35): error TS2339: Property 'temperature' does not exist on type '{ progress: number; temperature: number; } | { progress: number; temperature: number; } | { progress: number; humidity: number; } | { progress: number; temperature: number; humidity: number; } | { ...; }'.
+  Property 'temperature' does not exist on type '{ progress: number; humidity: number; }'.
+src/services/hatchingService.ts(159,16): error TS2339: Property 'humidity' does not exist on type '{ progress: number; temperature: number; } | { progress: number; temperature: number; } | { progress: number; humidity: number; } | { progress: number; temperature: number; humidity: number; } | { ...; }'.
+  Property 'humidity' does not exist on type '{ progress: number; temperature: number; }'.
+src/services/hatchingService.ts(160,32): error TS2339: Property 'humidity' does not exist on type '{ progress: number; temperature: number; } | { progress: number; temperature: number; } | { progress: number; humidity: number; } | { progress: number; temperature: number; humidity: number; } | { ...; }'.
+  Property 'humidity' does not exist on type '{ progress: number; temperature: number; }'.
+src/services/hatchingService.ts(174,10): error TS2339: Property 'addEvent' does not exist on type 'HatchingService'.
+src/services/hatchingService.ts(201,20): error TS2339: Property 'hatchingInteraction' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/hatchingService.ts(246,20): error TS2339: Property 'hatchingRecord' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/hatchingService.ts(264,10): error TS2339: Property 'addEvent' does not exist on type 'HatchingService'.
+src/services/hatchingService.ts(270,23): error TS2339: Property 'addExperience' does not exist on type 'GameService'.
+src/services/imagegen.ts(39,19): error TS2353: Object literal may only specify known properties, and 'imageUrl' does not exist in type '(Without<SpiritUpdateInput, SpiritUncheckedUpdateInput> & SpiritUncheckedUpdateInput) | (Without<...> & SpiritUpdateInput)'.
+src/services/puzzle.ts(15,34): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(26,35): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(31,24): error TS7006: Parameter 'puzzle' implicitly has an 'any' type.
+src/services/puzzle.ts(32,31): error TS7006: Parameter 'prog' implicitly has an 'any' type.
+src/services/puzzle.ts(52,36): error TS2339: Property 'dailyPuzzle' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(60,36): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(71,34): error TS2339: Property 'dailyPuzzle' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(95,33): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(102,33): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(107,31): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(116,31): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(133,31): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(146,20): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(163,20): error TS2339: Property 'puzzleLevel' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(205,28): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ EASY: number; MEDIUM: number; HARD: number; EXPERT: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ EASY: number; MEDIUM: number; HARD: number; EXPERT: number; }'.
+src/services/puzzle.ts(266,25): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ PUZZLE: string; MEMORY: string; LOGIC: string; MATH: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ PUZZLE: string; MEMORY: string; LOGIC: string; MATH: string; }'.
+src/services/puzzle.ts(268,32): error TS2339: Property 'spiritUpgrade' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(273,30): error TS2339: Property 'spiritUpgrade' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(286,32): error TS2339: Property 'spiritUpgrade' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(294,32): error TS2339: Property 'spiritUpgrade' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(306,35): error TS2339: Property 'spiritUpgrade' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(316,37): error TS7006: Parameter 'u' implicitly has an 'any' type.
+src/services/puzzle.ts(350,38): error TS2339: Property 'spiritPuzzleProgress' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/puzzle.ts(352,29): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/services/puzzle.ts(352,36): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/services/quiz.ts(184,20): error TS2322: Type 'number[]' is not assignable to type 'string[]'.
+  Type 'number' is not assignable to type 'string'.
+src/services/quiz.ts(342,48): error TS2304: Cannot find name 'genIELTSReadingQs'.
+src/services/quiz.ts(359,20): error TS2322: Type 'number[]' is not assignable to type 'string[]'.
+  Type 'number' is not assignable to type 'string'.
+src/services/quizBattle.ts(84,81): error TS2554: Expected 3 arguments, but got 4.
+src/services/social.ts(17,31): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/social.ts(41,31): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/social.ts(53,20): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/social.ts(64,20): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/social.ts(192,19): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/social.ts(202,19): error TS2339: Property 'socialPost' does not exist on type 'PrismaClient<{ log: ("query" | "warn" | "error")[]; }, never, DefaultArgs>'.
+src/services/squad.ts(131,9): error TS2353: Object literal may only specify known properties, and 'squadId_spiritId_trainingType' does not exist in type 'SquadTrainingWhereUniqueInput'.
+src/services/squad.ts(142,11): error TS2353: Object literal may only specify known properties, and 'squadId' does not exist in type '(Without<SquadTrainingCreateInput, SquadTrainingUncheckedCreateInput> & SquadTrainingUncheckedCreateInput) | (Without<...> & SquadTrainingCreateInput)'.
+src/services/squad.ts(188,13): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ COMBAT: number; INTELLIGENCE: number; AGILITY: number; DEFENSE: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ COMBAT: number; INTELLIGENCE: number; AGILITY: number; DEFENSE: number; }'.
+src/services/squad.ts(258,9): error TS2322: Type '{ id: string; userId: string; name: string; element: string; species: string | null; personality: string | null; appearance: string | null; stage: string; level: number; experience: number; ... 7 more ...; updatedAt: Date; }' is not assignable to type 'null'.
