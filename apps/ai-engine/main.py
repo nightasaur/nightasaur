@@ -41,7 +41,10 @@ async def verify_inference(request: InferenceCheck):
         raise HTTPException(422, "A synthetic 32-character hexadecimal challenge is required")
     result = await provider.generate([
         {"role": "user", "content": "Repeat this code exactly: " + request.challenge}
-    ], temperature=0, num_predict=80)
+    ], temperature=0, num_predict=80, response_schema={
+        "type": "object", "properties": {"challenge": {"type": "string", "enum": [request.challenge]}},
+        "required": ["challenge"], "additionalProperties": False,
+    })
     if request.challenge not in (result.content or ""):
         raise InferenceUnavailable("challenge_not_reproduced")
     return {"verified": True, "scope": "synthetic_inference_connectivity",

@@ -164,6 +164,8 @@ class OllamaModelProvider(ModelProvider):
         }
         if tools and self.tool_call_mode == "json_schema":
             payload["format"] = self._tool_call_adapter.response_schema(tools, require_call=require_call)
+        elif options.get("response_schema") is not None:
+            payload["format"] = options["response_schema"]
 
         try:
             async with httpx.AsyncClient(**self._client_options(120.0)) as client:

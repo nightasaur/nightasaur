@@ -71,3 +71,23 @@ async def test_ops_probe_requires_auth_and_maps_provider_failure_to_503(monkeypa
                                      headers={"Authorization": "Bearer " + key})
         assert response.status_code == 503
         assert response.json()["code"] == "provider_unavailable"
+
+
+@pytest.mark.asyncio
+async def test_ops_probe_uses_structured_actual_generation(monkeypatch):
+    import json
+    import main
+    from services.assistant_llm import assistant_llm_service
+    monkeypatch.setenv("OLLAMA_EXPECTED_DIGEST", DIGEST)
+    provider=ProductionOllamaModelProvider("http://127.0.0.1:11434", "fixture-model:unit")
+    monkeypatch.setattr(assistant_llm_service.agent_core,"model_provider",provider)
+    challenge="0123456789abcdef"*2
+    async def send(client,request,**kwargs):
+        if request.url.path=="/api/tags":
+            return httpx.Response(200,json={"models":[{"name":provider.model,"digest":DIGEST}]},request=request)
+        payload=json.loads(request.content)
+        assert payload["format"]["properties"]["challenge"]["enum"]==[challenge]
+        return httpx.Response(200,json={"message":{"content":json.dumps({"challenge":challenge})},"done":True,"eval_count":35},request=request)
+    monkeypatch.setattr(httpx.AsyncClient,"send",send)
+    result=await main.verify_inference(main.InferenceCheck(challenge=challenge))
+    assert result["verified"] and result["generated_tokens"]==35
