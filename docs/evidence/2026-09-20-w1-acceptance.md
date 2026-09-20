@@ -1,7 +1,7 @@
 # W1 acceptance — 2026-09-20
 
 Initial candidate: `9a4fb349b1427272f7cebba5090723f3238bd5db`.
-Latest verified production candidate: `617724250afe89e4226cba7155a16229ecb0bc33`.
+Latest production candidate under renewed acceptance: `d4055ca59a020841d680804d25b950396b24aca2`.
 The follow-up sections below supersede earlier pending items within their stated scope.
 Status: PARTIAL; not full W1 acceptance.
 
@@ -225,3 +225,31 @@ stale-page recovery gaps above are resolved for this browser. Remaining scope:
 No login credentials were entered and no new account was created during the
 mobile checks. No purchase, social publication or user-content operation was
 performed. Administrator access was not needed for these public checks.
+
+
+## PR #48 deployment and renewed W1 acceptance
+
+Owner authorized production deployment and renewed end-to-end verification. PR #48 merged at `d4055ca59a020841d680804d25b950396b24aca2`. Main backend/frontend/AI/PostgreSQL/lint checks all passed. Vercel GitHub status reports success for deployment `4vQqFeyfKMwmsxA7MW9xX1MrEryK`; normal production navigation visibly loads asset `/assets/index-BLGs2R-3.js` and the new English Conversation Practice copy. The Vercel connector cannot independently inspect this team's deployment (403); no Vercel runtime-log certification is claimed.
+
+Railway backend deployment `059c2cb8-66e4-4399-bccf-61ad4c8fe95f` and AI deployment `758db3ff-45f5-4134-9a42-c90626b5fbd2` both report SUCCESS for this exact commit.
+
+Observed browser flow at 390 CSS px:
+- Public menu opens; updated product introduction -> login -> English conversation learning hub -> existing spirit list/detail works.
+- Existing synthetic QA account and spirit/image survive login and backend replacement; a fresh document load after deployment still renders the same account and spirit.
+- All five languages update signed-in navigation and the English conversation entry. Traditional Chinese restored. This is not a full-product localization certificate.
+- Menu link navigation closes the menu. Dashboard content width equals viewport width (390px).
+- The first dialogue request during deployment failed. The old AI container was shutting down at that time and backend logged AI unavailable; this temporal correlation is not a complete root-cause proof. Stable-deployment retry is recorded in the follow-up below.
+
+Physical iPhone 16 Safari recheck requested after deployment, awaiting owner result. Previous missing-menu and failed-dialogue report remains open. Fresh administrator privilege verification remains open; do not substitute a synthetic USER account or historical admin evidence.
+
+Stable-deployment retry: the actual spirit UI rendered `你好，我叫蛋！` for `Say hello in one short sentence.` Connectivity and rendering PASS. English-conversation language quality is still not certified.
+
+Additional stable-deployment results:
+- Assistant UI rendered exactly `Hello` for a synthetic greeting.
+- Logout returned to login; direct navigation to protected `/dashboard` remained on login.
+- Fresh registration created synthetic USER `W1_DEPLOY_5bfa3c3844` and initial spirit `cmu9zjmlr0006142gf2gizuew`; reload preserved both. This additional account/spirit remains as bounded acceptance data. No real user's account was changed.
+- Query of the new backend deployment's error logs returned no entries at the time of this check. This is a bounded observation, not a guarantee of no errors.
+
+W1 remains PARTIAL. These results certify only the stated browser flows, not physical Safari, full translation, administrator authorization, model quality, payments, social login or all assistant modes.
+
+New-account re-login PASS: logout and login returned the same account and initial spirit. The test session was logged out at completion. Structured observations: `2026-09-20-w1-deployed-d4055ca.json`.
