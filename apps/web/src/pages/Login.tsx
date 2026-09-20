@@ -67,7 +67,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
         <p className="text-white/50 text-center mb-3">登入 Nightasaur，繼續你與 Spirit 的學習歷程。</p>
         {isIeltsReturn && (
           <div className="bg-green-500/15 border border-green-500/30 text-green-200 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-            🎓 登入後將直接進入 IELTS 陪伴學習 Early Access。
+            🎓 登入後將直接進入 英語訓練對話 Early Access。
           </div>
         )}
 
@@ -139,7 +139,7 @@ export default function Login({ setUser }: { setUser: (u: any) => void }) {
             ) : (
               <>
                 <span className="text-xl">🔑</span>
-                {isIeltsReturn ? '登入並開始 IELTS 學習' : '登入 Nightasaur'}
+                {isIeltsReturn ? '登入並開始英語訓練對話' : '登入 Nightasaur'}
               </>
             )}
           </button>

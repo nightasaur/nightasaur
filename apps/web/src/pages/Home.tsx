@@ -54,7 +54,7 @@ const COPY: Record<string, HomeCopy> = {
       "從學習、創作、職業技能到日常工作，Spirit 會記住你的歷程、理解你的習慣，並隨著你們共同完成的真實任務逐步成長。",
     enterSpirit: "進入我的 Spirit 世界 ✨",
     createSpirit: "建立我的 Spirit 🥚",
-    exploreIelts: "探索 IELTS 深度沉浸體驗 🎓",
+    exploreIelts: "探索英語訓練對話 🎓",
     pillarsTitle: "Nightasaur 核心支柱",
     pillars: [
       { title: "Agent — 能力", description: "AI 驅動的學習與創作能力" },
@@ -81,7 +81,7 @@ const COPY: Record<string, HomeCopy> = {
       "从学习、创作、职业技能到日常工作，Spirit 会记住你的历程、理解你的习惯，并随着你们共同完成的真实任务逐步成长。",
     enterSpirit: "进入我的 Spirit 世界 ✨",
     createSpirit: "创建我的 Spirit 🥚",
-    exploreIelts: "探索 IELTS 深度沉浸体验 🎓",
+    exploreIelts: "探索英语训练对话 🎓",
     pillarsTitle: "Nightasaur 核心支柱",
     pillars: [
       { title: "Agent — 能力", description: "AI 驱动的学习与创作能力" },
@@ -108,7 +108,7 @@ const COPY: Record<string, HomeCopy> = {
       "From learning and creativity to professional skills and daily work, your Spirit remembers your journey, understands your habits, and grows as you complete real-world missions together.",
     enterSpirit: "Enter My Spirit World ✨",
     createSpirit: "Create My Spirit 🥚",
-    exploreIelts: "Explore IELTS Deep Immersion 🎓",
+    exploreIelts: "Explore English Conversation Practice 🎓",
     pillarsTitle: "Nightasaur Core Pillars",
     pillars: [
       { title: "Agent — Capability", description: "AI-powered learning and creative capabilities" },
@@ -135,7 +135,7 @@ const COPY: Record<string, HomeCopy> = {
       "学習、創作、専門スキル、日々の仕事まで。Spirit はあなたの歩みと習慣を理解し、現実のミッションを共に達成しながら成長します。",
     enterSpirit: "Spirit の世界へ ✨",
     createSpirit: "Spirit を作る 🥚",
-    exploreIelts: "IELTS 深度イマージョンを体験 🎓",
+    exploreIelts: "英会話トレーニングを体験 🎓",
     pillarsTitle: "Nightasaur の中核",
     pillars: [
       { title: "Agent — 能力", description: "AI による学習と創作の能力" },
@@ -162,7 +162,7 @@ const COPY: Record<string, HomeCopy> = {
       "학습과 창작부터 직무 기술과 일상 업무까지, Spirit은 당신의 여정과 습관을 이해하고 실제 과제를 함께 완수하며 성장합니다.",
     enterSpirit: "나의 Spirit 세계로 ✨",
     createSpirit: "나의 Spirit 만들기 🥚",
-    exploreIelts: "IELTS 심층 몰입 체험하기 🎓",
+    exploreIelts: "영어 회화 연습 시작하기 🎓",
     pillarsTitle: "Nightasaur 핵심 축",
     pillars: [
       { title: "Agent — 역량", description: "AI 기반 학습 및 창작 역량" },

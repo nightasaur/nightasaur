@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -11,6 +11,8 @@ const require = createRequire(import.meta.url);
 
 test("isolated SQLite enforces draft ownership and atomic publish; auth import creates no users", async () => {
   const dir = await mkdtemp(join(tmpdir(), "nightasaur-security-"));
+  // Prisma's Windows schema engine needs the empty SQLite file to exist.
+  await writeFile(join(dir, "test.db"), "", { flag: "wx" });
   process.env.DATABASE_URL = `file:${join(dir, "test.db")}`;
   execFileSync(process.execPath, [require.resolve("prisma/build/index.js"), "db", "push", "--skip-generate", "--schema", "prisma/schema.prisma"], { env: process.env, stdio: "pipe" });
   const { default: prisma } = await import("../src/config/prisma.js");

@@ -179,7 +179,7 @@ function AppContent() {
           />
           <Route
             path="/academy/category/ielts"
-            element={<ProtectedRoute><><SEO title="IELTS Companion Learning | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts" /><IeltsLearningHub /></></ProtectedRoute>}
+            element={<ProtectedRoute><><SEO title="English Conversation Practice | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts" /><IeltsLearningHub /></></ProtectedRoute>}
           />
           <Route
             path="/academy/category/ielts/assessment"
@@ -192,7 +192,7 @@ function AppContent() {
 
           {/* Front Office Routes */}
           <Route path="/account" element={<ProtectedRoute><><SEO title="Account Settings | Nightasaur" canonical="https://www.nightasaur.com/account" /><AccountPage /></></ProtectedRoute>} />
-          <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur Deep IELTS Immersion Experience — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
+          <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur English Conversation Practice — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
           <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><><SEO title="Checkout | Nightasaur" canonical="https://www.nightasaur.com/checkout/ielts-immersion" /><CheckoutPage /></></ProtectedRoute>} />
           <Route path="/receipts/preview" element={<ProtectedRoute><><SEO title="Receipt Preview | Nightasaur" canonical="https://www.nightasaur.com/receipts/preview" /><ReceiptPreviewPage /></></ProtectedRoute>} />
         </Routes>

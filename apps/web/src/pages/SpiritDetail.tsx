@@ -110,7 +110,8 @@ const [animState, setAnimState] = useState<AnimState>("idle");
     try {
       const response = await dialogueAPI.chat(id!, msg);
       const data = response.data;
-      const reply = data.reply || "...";
+      const reply = data.message;
+      if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty dialogue response");
       setMsgs(p => [...p, { role: "assistant", content: reply }]);
       if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level }));
       speak(reply);

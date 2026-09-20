@@ -46,16 +46,16 @@ export default function IeltsLearningHub() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-200 text-sm mb-4">
               🌙 Authenticated Early Access
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black mb-3">Nightasaur IELTS Companion</h1>
+            <h1 className="text-3xl sm:text-4xl font-black mb-3">Nightasaur 英語訓練對話</h1>
             <p className="text-white/65 max-w-3xl leading-relaxed">
-              這裡是 IELTS 陪伴學習的主入口。先建立你的起始程度，再由 Spirit 陪你拆解每日任務、練習四科、回顧錯誤與累積學習紀錄。
+              從日常生活、工作與旅行話題出發，練習用英語分享想法、提問與討論。你可以前往精靈頁開始文字對話；聽力、閱讀、寫作與口說專項仍在準備中。
             </p>
           </div>
           <button
-            onClick={() => navigate("/account")}
+            onClick={() => navigate("/spirits")}
             className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 transition-colors text-sm whitespace-nowrap"
           >
-            查看授權與帳戶
+            前往精靈開始對話
           </button>
         </div>
       </div>
@@ -64,8 +64,8 @@ export default function IeltsLearningHub() {
         <div className="glass-card p-6 lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
             <div>
-              <h2 className="text-2xl font-bold mb-2">🎯 第一步：起始評量</h2>
-              <p className="text-white/60">先設定 Target Band（目標分數）與每日可投入時間，再進入真實作答評量。尚未作答前不顯示虛構分數。</p>
+              <h2 className="text-2xl font-bold mb-2">🎯 選用：IELTS 目標設定</h2>
+              <p className="text-white/60">若你也有 IELTS 備考需求，可以設定目標分數與每日可投入時間。此設定不是測驗成績，也不是開始英語對話的必要條件。</p>
             </div>
             <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-200 text-xs whitespace-nowrap w-fit">設定已開放</span>
           </div>
@@ -104,7 +104,7 @@ export default function IeltsLearningHub() {
       </div>
 
       <div className="mb-4">
-        <h2 className="text-2xl font-bold mb-1">四科訓練</h2>
+        <h2 className="text-2xl font-bold mb-1">英語專項練習</h2>
         <p className="text-white/50">先建立清楚入口，後續逐科接入真實題目、AI 回饋與進度紀錄。</p>
       </div>
 

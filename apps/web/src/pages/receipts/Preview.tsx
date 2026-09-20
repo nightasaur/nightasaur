@@ -67,7 +67,7 @@ const ReceiptPreviewPage: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <button onClick={() => navigate('/academy/category/ielts')} className="flex-1 px-6 py-4 bg-green-600/20 border border-green-500/30 rounded-lg text-green-200 hover:bg-green-600/30">
-                開始 IELTS Early Access
+                開始 英語訓練對話 Early Access
               </button>
               <button onClick={() => navigate('/products/ielts-immersion')} className="flex-1 px-6 py-4 border border-white/20 rounded-lg hover:bg-white/5">
                 返回方案頁

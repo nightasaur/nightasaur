@@ -20,11 +20,11 @@ const PUBLIC_NAV_COPY: Record<string, {
   openMenu: string;
   closeMenu: string;
 }> = {
-  "zh-TW": { ielts: "IELTS 深度沉浸", login: "登入", register: "註冊", openMenu: "開啟選單", closeMenu: "關閉選單" },
-  "zh-CN": { ielts: "IELTS 深度沉浸", login: "登录", register: "注册", openMenu: "打开菜单", closeMenu: "关闭菜单" },
-  "en-US": { ielts: "IELTS Immersion", login: "Login", register: "Register", openMenu: "Open menu", closeMenu: "Close menu" },
-  "ja-JP": { ielts: "IELTS 深度イマージョン", login: "ログイン", register: "登録", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
-  "ko-KR": { ielts: "IELTS 심층 몰입", login: "로그인", register: "가입", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기" },
+  "zh-TW": { ielts: "英語訓練對話", login: "登入", register: "註冊", openMenu: "開啟選單", closeMenu: "關閉選單" },
+  "zh-CN": { ielts: "英语训练对话", login: "登录", register: "注册", openMenu: "打开菜单", closeMenu: "关闭菜单" },
+  "en-US": { ielts: "English Conversation Practice", login: "Login", register: "Register", openMenu: "Open menu", closeMenu: "Close menu" },
+  "ja-JP": { ielts: "英会話トレーニング", login: "ログイン", register: "登録", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
+  "ko-KR": { ielts: "영어 회화 연습", login: "로그인", register: "가입", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기" },
 };
 
 export default function Navbar({ user, setUser }: NavbarProps) {

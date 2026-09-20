@@ -72,7 +72,7 @@ export default function IeltsAssessment() {
           onClick={() => navigate("/academy/category/ielts")}
           className="text-left text-sm text-white/55 hover:text-white transition-colors w-fit"
         >
-          ← 返回 IELTS Companion
+          ← 返回英語訓練對話
         </button>
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 text-sky-200 text-sm mb-3">

@@ -1,0 +1,171 @@
+{
+  "candidate": "ae143d9d984e1524b3139fa0de7cdaad6751a607",
+  "startedAt": "2026-09-20T15:13:49.341Z",
+  "registration": {
+    "result": "PASS",
+    "account": "W1_QA_2b22b19152"
+  },
+  "checks": [
+    {
+      "name": "reload_preserves_registered_user",
+      "result": "PASS"
+    },
+    {
+      "name": "spirit_detail",
+      "result": "PASS",
+      "growthValues": [
+        7,
+        5,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "synthetic_spirit_image",
+      "result": "PASS"
+    },
+    {
+      "name": "spirit_dialogue",
+      "result": "FAIL",
+      "message": "連線中斷，請稍後重試"
+    },
+    {
+      "name": "assistant_mobile_roundtrip",
+      "result": "PASS",
+      "response": "Hello"
+    },
+    {
+      "name": "production_dashboard_390",
+      "result": "PASS",
+      "layout": {
+        "content": 390,
+        "heading": "歡迎回來，W1_QA_2b22b19152 🌙",
+        "width": 390
+      }
+    },
+    {
+      "name": "candidate_spirit_dialogue",
+      "result": "PASS_CONNECTIVITY",
+      "response": "你好，我是活潑的蛋！",
+      "note": "English instruction not followed; no language-quality pass claimed"
+    },
+    {
+      "name": "production_spirits_390",
+      "result": "PASS",
+      "layout": {
+        "content": 390,
+        "width": 390
+      }
+    },
+    {
+      "name": "production_logout",
+      "result": "PASS",
+      "visible": "login form; no protected content"
+    },
+    {
+      "name": "logged_out_dashboard_redirect",
+      "result": "PASS",
+      "url": "https://www.nightasaur.com/login"
+    },
+    {
+      "name": "candidate_spirit_responsive",
+      "result": "PASS_LAYOUT_ONLY",
+      "layouts": [
+        {
+          "content": 360,
+          "menu": [
+            {
+              "rect": {
+                "bottom": 53,
+                "height": 40,
+                "left": 303,
+                "right": 343,
+                "top": 13,
+                "width": 40,
+                "x": 303,
+                "y": 13
+              },
+              "visible": true
+            }
+          ],
+          "width": 375
+        },
+        {
+          "content": 375,
+          "menu": [
+            {
+              "rect": {
+                "bottom": 53,
+                "height": 40,
+                "left": 318,
+                "right": 358,
+                "top": 13,
+                "width": 40,
+                "x": 318,
+                "y": 13
+              },
+              "visible": true
+            }
+          ],
+          "width": 390
+        },
+        {
+          "content": 415,
+          "menu": [
+            {
+              "rect": {
+                "bottom": 53,
+                "height": 40,
+                "left": 358,
+                "right": 398,
+                "top": 13,
+                "width": 40,
+                "x": 358,
+                "y": 13
+              },
+              "visible": true
+            }
+          ],
+          "width": 430
+        }
+      ]
+    },
+    {
+      "name": "frontend_tests",
+      "result": "PASS",
+      "count": 33
+    },
+    {
+      "name": "backend_tests_after_windows_fixture_fix",
+      "result": "PASS",
+      "count": 32
+    },
+    {
+      "name": "frontend_backend_build",
+      "result": "PASS"
+    },
+    {
+      "name": "lint",
+      "result": "PASS",
+      "errors": 0,
+      "warnings": 57
+    }
+  ],
+  "physicalDevice": {
+    "source": "owner report in task",
+    "device": "iPhone 16",
+    "browser": "Safari regular webpage",
+    "spiritPage": "PASS_REPORTED",
+    "keyboard": "PASS_REPORTED",
+    "hamburgerMenu": "FAIL_REPORTED_NOT_VISIBLE",
+    "aiDialogue": "FAIL_REPORTED",
+    "screenshotReceived": false
+  },
+  "administrator": {
+    "source": "owner reports login completed",
+    "agentObserved": false,
+    "note": "Only synthetic USER session is visible in the connected browser"
+  },
+  "status": "BLOCKED_NOT_W1_VERIFIED"
+}
