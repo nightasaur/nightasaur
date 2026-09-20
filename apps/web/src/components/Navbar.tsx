@@ -34,6 +34,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
   const publicCopy = PUBLIC_NAV_COPY[currentLanguage] ?? PUBLIC_NAV_COPY["zh-TW"];
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const adminLabel = user?.role === "ADMIN" ? (user.email?.toLowerCase() === "ceo@cccbuyear.com" ? "CEO · 管理員" : "管理員") : null;
   const closeMobile = () => setMobileOpen(false);
 
   const handleLogout = async () => {
@@ -48,6 +49,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
 
   const userLinks = (
     <>
+      {adminLabel && <Link to="/admin/accounts" onClick={closeMobile} className="text-amber-300 text-sm">🛡️ {adminLabel}</Link>}
       <Link to="/dashboard" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Dashboard")}</Link>
       <Link to="/spirits" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">💞 {t("Spirit")}</Link>
       <Link to="/assistant" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🤖 {t("Assistant")}</Link>

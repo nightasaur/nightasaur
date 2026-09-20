@@ -1,3 +1,4 @@
+import AdminAccounts from "./pages/AdminAccounts";
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Nightasaur Team
 
@@ -191,6 +192,7 @@ function AppContent() {
           />
 
           {/* Front Office Routes */}
+          <Route path="/admin/accounts" element={<ProtectedRoute><AdminAccounts /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><><SEO title="Account Settings | Nightasaur" canonical="https://www.nightasaur.com/account" /><AccountPage /></></ProtectedRoute>} />
           <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur English Conversation Practice — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
           <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><><SEO title="Checkout | Nightasaur" canonical="https://www.nightasaur.com/checkout/ielts-immersion" /><CheckoutPage /></></ProtectedRoute>} />

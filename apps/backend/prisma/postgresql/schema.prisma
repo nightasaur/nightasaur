@@ -671,3 +671,16 @@ model OpenSourceContentChunk {
   @@index([resourceId])
   @@map("open_source_content_chunks")
 }
+
+model AccountAudit {
+  id String @id @default(cuid())
+  actorId String
+  targetId String
+  action String
+  reason String
+  previousActive Boolean
+  resultingActive Boolean
+  createdAt DateTime @default(now())
+  @@index([targetId, createdAt])
+  @@map("account_audits")
+}

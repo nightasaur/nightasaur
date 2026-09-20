@@ -136,3 +136,9 @@ export const generationAPI = {
   get: (id: string) => api.get(`/generate/spirit/${id}`),
   generate: (id: string) => api.post(`/generate/spirit/${id}`, {}, {timeout: 45000}),
 };
+
+export const adminAccountsAPI = {
+ list: (params: {q:string;status:string;page:number}) => api.get("/admin/accounts",{params}),
+ action: (id:string,data:{action:"BAN"|"RESTORE"|"REVOKE_SESSIONS";reason:string}) => api.post(`/admin/accounts/${encodeURIComponent(id)}/actions`,data),
+ history: (id:string) => api.get(`/admin/accounts/${encodeURIComponent(id)}/history`),
+};

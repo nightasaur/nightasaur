@@ -1,3 +1,4 @@
+import adminAccounts from "./routes/adminAccounts.js";
 import express from "express";
 import cors from "cors";
 import { config } from "./config/index.js";
@@ -38,6 +39,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // API 路由配置
+app.use("/api/admin/accounts", adminAccounts);
 app.use("/api/auth", authRoutes);
 app.use("/api/spirits", spiritRoutes);
 app.use("/api/dialogue", dialogueRouter);

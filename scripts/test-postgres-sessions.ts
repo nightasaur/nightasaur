@@ -24,6 +24,12 @@ try {
   await revokeSession(db, token);
   assert.equal(await hasSession(db, token, user.id), false);
   assert.equal((await db.user.findUniqueOrThrow({ where: { id: user.id } })).passwordHash, "not-a-real-password-hash");
+  await assert.rejects(db.user.delete({ where: { id: user.id } }));
+  await assert.rejects(db.$executeRawUnsafe('TRUNCATE TABLE "users" CASCADE'));
+  assert.equal(await db.user.count({where:{id:user.id}}),1);
+  const audit=await db.accountAudit.create({data:{actorId:user.id,targetId:user.id,action:"TEST",reason:"isolated migration test",previousActive:true,resultingActive:true}});
+  await assert.rejects(db.accountAudit.update({where:{id:audit.id},data:{reason:"rewrite"}}));
+  await assert.rejects(db.accountAudit.delete({where:{id:audit.id}}));
   console.log("Isolated PostgreSQL migration and session smoke test passed");
 } finally { await db.$disconnect(); }
 
