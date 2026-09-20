@@ -61,7 +61,10 @@ export class DialogueService {
             }))
           ).slice(-16), // 保留最近16條
         },
-        aiRequestOptions(30000)
+        // CPU-backed production inference can legitimately take longer than 30s.
+        // The AI service already bounds concurrency and validates the pinned model;
+        // allow the request to finish instead of turning a healthy inference into 503.
+        aiRequestOptions(120000)
       );
       if (typeof res.data.response !== "string" || !res.data.response.trim()) {
         throw new Error("Empty AI response");
