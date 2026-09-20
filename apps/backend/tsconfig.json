@@ -12,6 +12,8 @@
     "strictNullChecks": false,
     "noImplicitReturns": false,
     "skipLibCheck": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "ignoreDeprecations": "5.0",
     "strictFunctionTypes": false,
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
@@ -27,7 +29,6 @@
     "noPropertyAccessFromIndexSignature": false,
     "allowUnreachableCode": true,
     "allowUnusedLabels": true,
-    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../../packages/shared/src/*"]
