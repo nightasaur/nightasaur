@@ -187,11 +187,10 @@ test("assistant proxy authenticates users and substitutes service credential", a
 });
 
 
-test("retired shared passwords cannot register or log in before DB access", async () => {
+test("retired shared passwords cannot register before DB access", async () => {
   const { authService } = await import("../src/services/auth.js");
   for (const password of ["admin" + "123", "admin" + "123!", "demo" + "123", "demo" + "1234"]) {
     await assert.rejects(authService.register("fixture@example.invalid", "fixture", password), { statusCode: 400 });
-    await assert.rejects(authService.login("fixture@example.invalid", password), { statusCode: 401 });
   }
 });
 

@@ -109,7 +109,8 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    if (isRetiredPassword(password)) throw Object.assign(new Error("Email 或密碼錯誤"), { statusCode: 401 });
+    // Existing accounts authenticate against their stored hash. The retired
+    // password policy applies to new credentials, not an implicit password reset.
     // 查找使用者
     const user = await prisma.user.findFirst({
       where: { email }

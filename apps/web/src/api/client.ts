@@ -27,7 +27,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const isCredentialRequest = ["/auth/login", "/auth/register"].includes(error.config?.url || "");
+    if (error.response?.status === 401 && !isCredentialRequest) {
       localStorage.removeItem("nightasaur_token");
       window.location.href = "/login";
     }
