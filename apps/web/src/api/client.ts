@@ -129,3 +129,8 @@ export const userAPI = {
     localStorage.removeItem('nightasaur_token');
   },
 };
+
+export const generationAPI = {
+  get: (id: string) => api.get(`/generate/spirit/${id}`),
+  generate: (id: string) => api.post(`/generate/spirit/${id}`, {}, {timeout: 45000}),
+};

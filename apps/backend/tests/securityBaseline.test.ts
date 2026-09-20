@@ -200,5 +200,6 @@ test("AI generation gateway rejects other owners and non-admin batch access", as
   mockDb(prisma.spirit, "findFirst", async (args: any) => { assert.equal(args.where.userId, "owner"); return null; });
   const headers = { Authorization: `Bearer ${token()}` };
   assert.equal((await http("/generate/spirit/other", { method: "POST", headers })).status, 404);
+  assert.equal((await http("/generate/spirit/other", { headers })).status, 404);
   assert.equal((await http("/generate/process", { method: "POST", headers })).status, 403);
 });
