@@ -24,6 +24,22 @@ try {
   await revokeSession(db, token);
   assert.equal(await hasSession(db, token, user.id), false);
   assert.equal((await db.user.findUniqueOrThrow({ where: { id: user.id } })).passwordHash, "not-a-real-password-hash");
+  const { makeReceipt, provision, cleanup } = await import('./test-account-lifecycle.mjs');
+  const key = randomBytes(48).toString('hex');
+  const target = process.env.DATABASE_URL!;
+  const receipt = makeReceipt(key, target);
+  await provision(db, receipt, key, target, randomBytes(32).toString('hex'));
+  const fixtureId = receipt.payload.id;
+  const spirit = await db.spirit.findFirstOrThrow({ where: { userId: fixtureId } });
+  await db.conversation.create({ data: { spiritId: spirit.id, userMessage: 'synthetic', aiResponse: 'synthetic' } });
+  await db.session.create({ data: { userId: fixtureId, token: randomBytes(32).toString('hex'), expiresAt: new Date(Date.now() + 60000) } });
+  assert.equal((await cleanup(db, receipt, key, target)).status, 'preview');
+  assert.equal((await cleanup(db, receipt, key, target, fixtureId)).status, 'deleted');
+  assert.equal(await db.session.count({ where: { userId: fixtureId } }), 0);
+  assert.equal(await db.conversation.count({ where: { spiritId: spirit.id } }), 0);
+  assert.equal(await db.spirit.count({ where: { id: spirit.id } }), 0);
+  assert.equal(await db.user.count({ where: { id: user.id } }), 1);
+  assert.equal((await cleanup(db, receipt, key, target, fixtureId)).status, 'already_absent');
   console.log("Isolated PostgreSQL migration and session smoke test passed");
 } finally { await db.$disconnect(); }
 
