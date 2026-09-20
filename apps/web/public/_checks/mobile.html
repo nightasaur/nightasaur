@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Nightasaur 手機版面驗收</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #e9edf2; color: #172338; font: 16px/1.5 system-ui, sans-serif; }
+    header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #cbd5e1; }
+    h1 { margin: 0; font-size: 22px; }
+    p { margin: 8px 0; }
+    .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+    label { display: grid; gap: 4px; }
+    select, button { font: inherit; min-height: 44px; padding: 8px 12px; }
+    #stage { overflow: auto; padding: 20px; }
+    iframe { display: block; width: 390px; height: 844px; margin: 0 auto; border: 0; background: #080812; box-shadow: 0 4px 20px #0003; }
+    output { display: block; white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nightasaur 手機版面驗收</h1>
+    <p>測試 CSS 視窗布局。此頁不模擬 iPhone Safari、觸控手勢或螢幕鍵盤。</p>
+    <p>內嵌的是本站正式頁面，操作會依你的登入權限正常執行。</p>
+    <div class="controls">
+      <label>視窗寬度<select id="width"><option>375</option><option selected>390</option><option>430</option></select></label>
+      <label>頁面<select id="page">
+        <option value="/">首頁</option><option value="/login">登入</option><option value="/register">註冊</option>
+        <option value="/products/ielts-immersion">IELTS 介紹</option><option value="/dashboard">總覽</option>
+        <option value="/spirits">精靈列表</option><option value="/assistant">AI 助手</option>
+      </select></label>
+      <button id="open" type="button">載入頁面</button>
+      <button id="measure" type="button">檢查版面</button>
+    </div>
+    <output id="result" role="status" aria-live="polite">等待載入</output>
+  </header>
+  <div id="stage"><iframe title="手機版面預覽" src="/" referrerpolicy="same-origin"></iframe></div>
+  <script>
+    const frame = document.querySelector('iframe');
+    const width = document.querySelector('#width');
+    const page = document.querySelector('#page');
+    const result = document.querySelector('#result');
+    const paths = new Set(Array.from(page.options, option => option.value));
+    const sizes = new Set(['375', '390', '430']);
+    function measure() {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc || !doc.documentElement || frame.contentWindow.location.origin !== location.origin) {
+          result.textContent = '無法量測目前頁面'; return;
+        }
+        const viewport = doc.documentElement.clientWidth;
+        const content = Math.max(doc.documentElement.scrollWidth, doc.body?.scrollWidth || 0);
+        result.textContent = JSON.stringify({requestedWidth: Number(width.value), viewportWidth: viewport,
+          contentWidth: content, horizontalOverflow: content > viewport + 1}, null, 2);
+      } catch { result.textContent = '無法量測目前頁面'; }
+    }
+    width.addEventListener('change', () => {
+      if (!sizes.has(width.value)) return;
+      frame.style.width = width.value + 'px';
+      requestAnimationFrame(measure);
+    });
+    document.querySelector('#open').addEventListener('click', () => {
+      if (!paths.has(page.value)) return;
+      result.textContent = '等待載入'; frame.src = page.value;
+    });
+    document.querySelector('#measure').addEventListener('click', measure);
+    frame.addEventListener('load', measure);
+  </script>
+</body>
+</html>
