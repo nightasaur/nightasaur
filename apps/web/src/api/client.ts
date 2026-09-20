@@ -90,7 +90,7 @@ export const battleAPI = {
 
 export const languageAPI = {
   getUserPreference: () => api.get("/language/preference"),
-  updatePreference: (data: any) => api.patch("/language/preference", data),
+  updatePreference: (data: any) => api.put("/language/preference", data),
   autoDetect: () => api.post("/language/auto-detect"),
   getTranslation: (module: string, key: string, language?: string) =>
     api.get(`/language/translation/${module}/${key}`, { params: { language } }),
