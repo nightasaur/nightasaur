@@ -7,4 +7,4 @@ COPY apps/ai-engine /app
 RUN useradd --uid 10001 --create-home appuser
 USER appuser
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "::", "--port", "8000", "--no-access-log"]
+CMD ["python", "serve.py"]
