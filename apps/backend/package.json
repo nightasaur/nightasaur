@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "ops:promote-admin-once": "node --import tsx src/ops/promoteAdminOnce.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
