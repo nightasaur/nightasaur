@@ -1,23 +1,38 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import SpiritDetail from './pages/SpiritDetail';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { progression, growthValue, STAGES } from './utils/spiritPresentation';
-const fixtures = vi.hoisted(() => ({stage:'HATCHLING', level:2}));
+const fixtures = vi.hoisted(() => ({stage:'HATCHLING', level:2, message:'A real server reply'}));
 vi.mock('./api/client', () => ({
   spiritsAPI: {getById: vi.fn(async () => ({data:{id:'fixture',name:'Fixture',stage:fixtures.stage,level:fixtures.level,element:'WATER',species:null,customization:{}}}))},
   generationAPI: {get:vi.fn(async () => ({data:{status:'PENDING'}}))},
-  dialogueAPI: {}, languageAPI: {}
+  dialogueAPI: {chat:vi.fn(async () => ({data:{message:fixtures.message,spiritName:'Fixture'}}))}, languageAPI: {}
 }));
 vi.mock('./components/SpiritSprite', () => ({default:()=> <span>sprite</span>}));
 vi.mock('./components/VoiceChat', () => ({VoiceChat:()=>null,useVoiceOutput:()=>({speak:vi.fn(),isSpeaking:false})}));
-beforeEach(()=>{localStorage.clear();fixtures.stage='HATCHLING';fixtures.level=2;Element.prototype.scrollIntoView=vi.fn();});
+beforeEach(()=>{localStorage.clear();fixtures.stage='HATCHLING';fixtures.level=2;fixtures.message='A real server reply';Element.prototype.scrollIntoView=vi.fn();});
 afterEach(cleanup);
 function mount(language='zh-TW') {
  localStorage.setItem('nightasaur_language',language);
  render(<LanguageProvider><MemoryRouter initialEntries={['/spirits/fixture']}><Routes><Route path='/spirits/:id' element={<SpiritDetail/>}/></Routes></MemoryRouter></LanguageProvider>);
 }
+it('renders the backend message field instead of a fabricated ellipsis',async()=>{
+ mount();await screen.findByRole('heading',{name:'Fixture'});
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'Synthetic greeting'}});
+ fireEvent.click(screen.getByRole('button',{name:'傳送',exact:true}));
+ expect(await screen.findByText('A real server reply')).toBeInTheDocument();
+ expect(screen.queryByText('...')).not.toBeInTheDocument();
+});
+it('shows failure and restores input when the backend returns no message',async()=>{
+ fixtures.message='';mount();await screen.findByRole('heading',{name:'Fixture'});
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'Synthetic greeting'}});
+ fireEvent.click(screen.getByRole('button',{name:'傳送',exact:true}));
+ expect(await screen.findByText(/連線中斷/)).toBeInTheDocument();
+ expect(screen.getByRole('textbox')).toBeEnabled();
+ expect(screen.queryByText('...')).not.toBeInTheDocument();
+});
 it('renders canonical hatchling at level 2 without negative growth or egg evolution',async()=>{
  mount();await screen.findByRole('heading',{name:'Fixture'});
  expect(screen.getByRole('button',{name:'需要 Lv.5 才能進化'})).toBeDisabled();

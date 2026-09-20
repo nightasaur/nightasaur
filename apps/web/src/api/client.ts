@@ -60,7 +60,8 @@ export const spiritsAPI = {
 
 export const dialogueAPI = {
   chat: (spiritId: string, message: string) =>
-    api.post("/dialogue", { spiritId, message }),
+    // The backend permits 120s for inference; leave time for the proxy response.
+    api.post("/dialogue", { spiritId, message }, { timeout: 135000 }),
 };
 
 export const socialAPI = {
