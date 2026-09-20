@@ -67,3 +67,18 @@ Additional observed gaps:
   data or claim the detail view is fully accepted.
 - Mobile viewport acceptance remains unverified. Browser zoom shortcuts did not
   change the measured CSS viewport and were restored; this is not mobile evidence.
+
+## PR #35 production recheck
+
+PR #35 merged as `1a891c49745b165cda250cae060ed98fbde7551d` after both
+head workflows passed. Frontend build and 6 language tests passed locally.
+The production browser loaded /assets/index-C4sZtFid.js and retained positive
+signed-in navigation. A fresh synthetic greeting submitted through the actual
+assistant textbox/button rendered the model response `Hello!` on screen.
+This supersedes the pending assistant post-deployment check above: basic signed-in
+assistant UI round-trip now PASS. It does not certify other assistant modes,
+Chinese response quality, mobile rendering or load capacity.
+
+W1 remains PARTIAL due to mobile evidence, signed-in localization/display gaps
+and stale-document recovery described above. Administrator login and dashboard,
+list/detail loading, and the basic assistant UI interaction are verified.
