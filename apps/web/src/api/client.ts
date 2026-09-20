@@ -70,15 +70,16 @@ export const socialAPI = {
   getAllPosts: () => api.get("/social/posts/admin/posts"),
 };
 
+// Backend AI requests have a 60-second deadline; allow time for the proxy response.
 export const assistantAPI = {
   chat: (message: string, history: { role: string; content: string }[] = []) =>
-    api.post("/assistant/chat", { message, history }),
+    api.post("/assistant/chat", { message, history }, { timeout: 75000 }),
   code: (code: string, language: string, task: string = "explain") =>
-    api.post("/assistant/code", { code, language, task }),
+    api.post("/assistant/code", { code, language, task }, { timeout: 75000 }),
   translate: (text: string, targetLang: string = "zh-TW", sourceLang: string = "auto") =>
-    api.post("/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }),
+    api.post("/assistant/translate", { text, source_lang: sourceLang, target_lang: targetLang }, { timeout: 75000 }),
   document: (content: string, task: string = "summarize", docType: string = "text") =>
-    api.post("/assistant/document", { content, task, doc_type: docType }),
+    api.post("/assistant/document", { content, task, doc_type: docType }, { timeout: 75000 }),
 };
 
 export const battleAPI = {
