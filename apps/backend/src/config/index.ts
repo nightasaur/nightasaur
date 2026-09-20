@@ -1,14 +1,16 @@
 import dotenv from "dotenv";
+import { requireSecret } from "./secrets.js";
 dotenv.config();
 
 export const config = {
   port: parseInt(process.env.PORT || "3002", 10), // 改為 3002
   nodeEnv: process.env.NODE_ENV || "development",
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  trustProxyHops: parseInt(process.env.TRUST_PROXY_HOPS || "0", 10),
 
   jwt: {
-    secret: process.env.JWT_SECRET || "dev-secret-change-me",
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    secret: requireSecret("JWT_SECRET", process.env.JWT_SECRET),
+    expiresIn: "1h",
   },
 
   database: {
@@ -24,6 +26,7 @@ export const config = {
   },
 
   ai: {
+    apiKey: process.env.AI_ENGINE_API_KEY || "",
     engineUrl: process.env.AI_ENGINE_URL || "http://localhost:8000",
     comfyUIUrl: process.env.COMFYUI_URL || "http://localhost:8188",
     ollamaUrl: process.env.OLLAMA_URL || "http://localhost:11434",

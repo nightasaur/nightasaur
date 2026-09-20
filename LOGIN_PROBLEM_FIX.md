@@ -7,7 +7,7 @@
 **解決方案**：創建了新的登入界面 `login-simple.html`，包含眼睛符號功能
 
 ### 問題2：遊戲前台登入失敗
-**錯誤**：`http://localhost:5173/login` 使用 `admin@nightasaur.com / admin123` 登入失敗
+**錯誤**：`http://localhost:5173/login` 使用 `admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE` 登入失敗
 **原因**：
 1. 遊戲前台（端口5173）的Vite配置將 `/api` 代理到 `http://localhost:3000`
 2. 但登入API運行在測試服務器 `http://localhost:3002`
@@ -56,7 +56,7 @@ file:///C:/Nightasaur/login-simple.html
 
 # 2. 使用管理員帳號登入
 #    電子郵件: admin@nightasaur.com
-#    密碼: admin123
+#    密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 
 # 3. 自動跳轉到遊戲界面
 #    http://localhost:5173/dashboard
@@ -90,7 +90,7 @@ copy vite.config.ts vite.config.ts.backup
 ### 方式1：整合登入（推薦）
 ```
 1. 訪問: file:///C:/Nightasaur/login-simple.html
-2. 登入: admin@nightasaur.com / admin123
+2. 登入: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 3. 跳轉: 自動到 http://localhost:5173/dashboard
 ```
 
@@ -106,7 +106,7 @@ copy vite.config.ts vite.config.ts.backup
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```

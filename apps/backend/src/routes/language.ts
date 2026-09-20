@@ -1,37 +1,37 @@
 import { Router } from "express";
 import { LanguageController } from "../controllers/language.js";
-import { authMiddleware } from "../middleware/auth.js";
+import { adminMiddleware, authMiddleware } from "../middleware/auth.js";
 
 const languageController = new LanguageController();
 const router = Router();
 
-// ?Ä?âË∑Ø?±ÈÉΩ?ÄË¶ÅË?Ë≠?
+// All language routes require authentication.
 router.use(authMiddleware);
 
-// Ë™ûË?Ë®≠Â??∏È?
+// Language preferences
 router.get("/preference", languageController.getUserLanguagePreference);
 router.put("/preference", languageController.updateLanguagePreference);
 router.post("/auto-detect", languageController.autoDetectLanguage);
 router.get("/settings-menu", languageController.getLanguageSettingsMenu);
 router.post("/reset", languageController.resetLanguageSettings);
 
-// Ë™ûË??∏È??óË°®
+// Supported options
 router.get("/languages", languageController.getSupportedLanguages);
 router.get("/display-modes", languageController.getDisplayModes);
 router.get("/themes", languageController.getThemes);
 
-// ÁøªË≠Ø?∏È?
+// Translations
 router.get("/translation/:module/:key", languageController.getTranslation);
 router.post("/translations/:module/batch", languageController.getBatchTranslations);
 router.get("/translations/:module/:key/multi", languageController.getMultiLanguageTranslations);
 router.get("/interface-translations", languageController.getGameInterfaceTranslations);
 router.get("/bilingual/:module/:key", languageController.generateBilingualText);
 
-// Ê≠∑Âè≤Ë®òÈ?
+// History
 router.get("/history", languageController.getUserLanguageHistory);
 
-// ÁÆ°Á??°Â???
-router.get("/admin/statistics", languageController.getLanguageStatistics);
-router.post("/admin/translation", languageController.upsertTranslation);
+// Administrative operations
+router.get("/admin/statistics", adminMiddleware, languageController.getLanguageStatistics);
+router.post("/admin/translation", adminMiddleware, languageController.upsertTranslation);
 
 export default router;

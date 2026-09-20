@@ -1,6 +1,6 @@
 # 🌙 Nightasaur - Open Source AI Digital Spirit & Personal Assistant Platform
 
-> Create and evolve your AI spirit companion, or switch to a powerful personal AI assistant. 100% open source.
+> Create and evolve your AI spirit companion, or switch to a powerful personal AI assistant. Core source is MIT-licensed; models, assets and dependencies have separate terms. See [provenance inventory](docs/PROVENANCE.md); commercial release review is incomplete.
 
 [![License](https://img.shields.io/github/license/nightasaur/nightasaur)](https://github.com/nightasaur/nightasaur/blob/main/LICENSE)
 [![Version](https://img.shields.io/github/v/release/nightasaur/nightasaur)](https://github.com/nightasaur/nightasaur/releases)
@@ -115,8 +115,8 @@ nightasaur/
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@nightasaur.com | admin123! |
-| Trainer | demo@nightasaur.com | demo1234 |
+| Admin | admin@nightasaur.com | RETIRED-CREDENTIAL-DO-NOT-USE |
+| Trainer | demo@nightasaur.com | RETIRED-CREDENTIAL-DO-NOT-USE |
 
 ## 🔧 Development
 

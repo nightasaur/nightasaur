@@ -75,7 +75,7 @@ def build_read_only_agent_core(
     registry = ToolRegistry()
     registry.register(WorkspaceInspectTool(workspace_root))
     return AgentCore(
-        model_provider=OllamaModelProvider(base_url=base_url, model=model),
+        model_provider=OllamaModelProvider(base_url=base_url, model=model, tool_call_mode="json_schema"),
         tool_registry=registry,
         memory_provider=EphemeralMemoryProvider(),
         execution_policy=ReadOnlyExecutionPolicy(),

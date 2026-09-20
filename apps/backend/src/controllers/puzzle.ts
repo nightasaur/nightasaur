@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import { puzzleService } from "../services/puzzle.js";
 import prisma from "../config/prisma.js";
+import { routeParam } from "../utils/request.js";
 
 export class PuzzleController {
   // 獲取可用的益智關卡
   async getAvailablePuzzles(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const { spiritId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
       
       if (!spiritId) {
         res.status(400).json({ error: "請提供精靈ID" });
@@ -35,7 +36,8 @@ export class PuzzleController {
   async attemptPuzzle(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const { spiritId, puzzleId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
+      const puzzleId = routeParam(req, "puzzleId");
       const { solution, timeSpent } = req.body;
       
       if (!spiritId || !puzzleId || !solution || timeSpent === undefined) {
@@ -62,14 +64,15 @@ export class PuzzleController {
   // 獲取精靈升級狀態
   async getSpiritUpgrades(req: Request, res: Response) {
     try {
-      const { spiritId } = req.params;
+      const userId = (req as any).userId;
+      const spiritId = routeParam(req, "spiritId");
       
       if (!spiritId) {
         res.status(400).json({ error: "請提供精靈ID" });
         return;
       }
       
-      const upgrades = await puzzleService.getSpiritUpgrades(spiritId);
+      const upgrades = await puzzleService.getSpiritUpgrades(userId, spiritId);
       res.json({ upgrades });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

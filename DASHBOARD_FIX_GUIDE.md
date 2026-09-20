@@ -22,8 +22,8 @@ npm run dev
 **預期輸出：**
 ```
 ✅ 預設帳號已確保存在
-   Admin: admin@nightasaur.com / admin123!
-   Demo: demo@nightasaur.com / demo1234
+   Admin: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
+   Demo: demo@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 
 ┌─────────────────────────────────────────┐
 │       🦖 Nightasaur Backend 🦖         │
@@ -52,8 +52,8 @@ npm run dev
 ### 步驟 3：測試登入
 1. 訪問：http://localhost:5173/login
 2. 使用以下帳號：
-   - 管理員：`admin@nightasaur.com` / `admin123!`
-   - 示範：`demo@nightasaur.com` / `demo1234`
+   - 管理員：`admin@nightasaur.com` / `RETIRED-CREDENTIAL-DO-NOT-USE`
+   - 示範：`demo@nightasaur.com` / `RETIRED-CREDENTIAL-DO-NOT-USE`
 
 ### 步驟 4：訪問儀表板
 登入後應該自動跳轉到：http://localhost:5173/dashboard

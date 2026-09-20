@@ -15,13 +15,13 @@
 
 ### 管理員帳號
 - **Email**: `admin@nightasaur.com`
-- **密碼**: `admin123!` (注意最後的驚嘆號)
+- **密碼**: `RETIRED-CREDENTIAL-DO-NOT-USE` (注意最後的驚嘆號)
 - **使用者 ID**: `cmtqq2ro70000azzpxmn4t89v`
 - **角色**: ADMIN
 
 ### 示範帳號
 - **Email**: `demo@nightasaur.com`
-- **密碼**: `demo1234`
+- **密碼**: `RETIRED-CREDENTIAL-DO-NOT-USE`
 - **使用者 ID**: `cmtqq2rv00001azzp9hg4nszb`
 - **角色**: USER
 
@@ -42,8 +42,8 @@
 
 使用以下任一帳號：
 ```
-管理員: admin@nightasaur.com / admin123!
-示範用戶: demo@nightasaur.com / demo1234
+管理員: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
+示範用戶: demo@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 ```
 
 ### 2. 創建精靈
@@ -66,7 +66,7 @@ Content-Type: application/json
 
 {
   "email": "admin@nightasaur.com",
-  "password": "admin123!"
+  "password": "RETIRED-CREDENTIAL-DO-NOT-USE"
 }
 ```
 

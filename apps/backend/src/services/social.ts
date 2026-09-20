@@ -52,6 +52,9 @@ export class SocialService {
     platform: "FACEBOOK" | "INSTAGRAM";
     scheduledAt?: Date;
   }) {
+    if (params.spiritId && !await prisma.spirit.findFirst({ where: {
+      id: params.spiritId, userId: params.userId, isActive: true,
+    } })) throw Object.assign(new Error("精靈不存在"), { statusCode: 404 });
     const post = await prisma.socialPost.create({
       data: {
         userId: params.userId,
@@ -66,27 +69,37 @@ export class SocialService {
       },
     });
 
-    // 如果是立即發布，直接執行
-    if (!params.scheduledAt) {
-      await this.publishPost(post.id);
-      const publishedPost = await prisma.socialPost.findUnique({ where: { id: post.id } });
-      return publishedPost ? normalizePost(publishedPost) : normalizePost(post);
-    }
-
+    // Creating a draft never sends content to the platform account.
     return normalizePost(post);
   }
 
   /**
    * 發布貼文到 FB / IG
    */
-  async publishPost(postId: string) {
-    const post = await prisma.socialPost.findUnique({ where: { id: postId } });
+  async publishPost(postId: string, actorId: string) {
+    if (!actorId) throw Object.assign(new Error("未登入"), { statusCode: 401 });
+    const actor = await prisma.user.findUnique({ where: { id: actorId } });
+    if (!actor?.isActive || actor.role !== "ADMIN") {
+      throw Object.assign(new Error("平台社群帳號僅限管理員發布"), { statusCode: 403 });
+    }
+    const post = await prisma.socialPost.findFirst({ where: { id: postId, userId: actorId } });
     if (!post) throw Object.assign(new Error("貼文不存在"), { statusCode: 404 });
+    if (process.env.SOCIAL_PUBLISH_ENABLED !== "true") {
+      throw Object.assign(new Error("社群發布尚未啟用"), { statusCode: 503 });
+    }
     const stored = decodeSocialContent(post.content);
     if (!stored) {
       throw Object.assign(new Error("舊貼文缺少發布平台資訊，請重新建立貼文"), { statusCode: 400 });
     }
 
+    if (!["FACEBOOK", "INSTAGRAM"].includes(stored.platform)) {
+      throw Object.assign(new Error("不支援的發布平台"), { statusCode: 400 });
+    }
+    const claimed = await prisma.socialPost.updateMany({
+      where: { id: postId, userId: actorId, status: { in: ["DRAFT", "SCHEDULED"] } },
+      data: { status: "PUBLISHING" },
+    });
+    if (claimed.count !== 1) throw Object.assign(new Error("貼文已發布或待人工確認，禁止重送"), { statusCode: 409 });
     try {
       let publishedPostId: string | null = null;
 
@@ -112,7 +125,8 @@ export class SocialService {
     } catch (error: any) {
       await prisma.socialPost.update({
         where: { id: postId },
-        data: { status: "FAILED" },
+        // A timeout may follow acceptance by the platform. Never auto-retry.
+        data: { status: "REVIEW_REQUIRED" },
       });
       throw error;
     }

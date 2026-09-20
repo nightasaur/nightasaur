@@ -30,7 +30,7 @@
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```
@@ -46,7 +46,7 @@
 
 2. **密碼欄位**
    - 類型: password
-   - 預設值: `admin123`
+   - 預設值: `RETIRED-CREDENTIAL-DO-NOT-USE`
    - 必填: 是
    - 驗證: 最少6字符
 
@@ -84,7 +84,7 @@ npx tsx auth-server.ts
 
 ### **3. 測試帳號**
 ```
-管理員: admin@nightasaur.com / admin123
+管理員: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 測試用戶: test@nightasaur.com / test123
 支援信箱: service@nightasaur.com
 ```
@@ -100,8 +100,7 @@ npx tsx auth-server.ts
 
 ### **測試文件**
 6. **`system-test.js`** - 系統測試腳本
-7. **`test-forgot-password.js`** - 忘記密碼測試
-8. **`quick-test.js`** - 快速測試
+7. 舊版密碼重設腳本已停用並移除；不得對正式管理員帳號執行測試重設
 
 ### **文檔文件**
 9. **`FORGOT_PASSWORD_COMPLETE.md`** - 項目完成報告
@@ -140,8 +139,7 @@ GET    /api/auth/profile        # 用戶資料
 # 運行完整測試
 node system-test.js
 
-# 測試忘記密碼功能
-node test-forgot-password.js
+# 密碼重設僅能使用隔離資料庫與一次性 fixture account
 ```
 
 ### **測試項目**
@@ -328,7 +326,7 @@ cd apps/backend && npx tsx auth-server.ts
 
 # 3. 使用管理員帳號
 # 電子郵件: admin@nightasaur.com
-# 密碼: admin123
+# 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 # 支援: service@nightasaur.com
 ```
 

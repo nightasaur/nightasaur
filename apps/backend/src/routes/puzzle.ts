@@ -1,28 +1,28 @@
 import { Router } from "express";
 import { puzzleController } from "../controllers/puzzle.js";
-import { authMiddleware } from "../middleware/auth.js";
+import { adminMiddleware, authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// ?€?‰è·¯?±éƒ½?€è¦è?è­?
+// All puzzle routes require authentication.
 router.use(authMiddleware);
 
-// ?²å??¯ç”¨?„ç??ºé???
+// Available puzzles for an owned spirit
 router.get("/spirits/:spiritId/puzzles", puzzleController.getAvailablePuzzles);
 
-// ?²å?æ¯æ—¥?Šæ™º
+// Daily puzzle
 router.get("/daily", puzzleController.getDailyPuzzle);
 
-// ?—è©¦è§?±º?Šæ™º
+// Puzzle attempt
 router.post("/spirits/:spiritId/puzzles/:puzzleId/attempt", puzzleController.attemptPuzzle);
 
-// ?²å?ç²¾é??‡ç??€??
+// Owned spirit upgrades
 router.get("/spirits/:spiritId/upgrades", puzzleController.getSpiritUpgrades);
 
-// ?²å??’è?æ¦?
+// Leaderboard
 router.get("/leaderboard", puzzleController.getLeaderboard);
 
-// ?µå»ºæ¸¬è©¦?œå¡ï¼ˆç®¡?†å“¡?¨ï?
-router.post("/admin/test-puzzle", puzzleController.createTestPuzzle);
+// Administrative test fixture creation
+router.post("/admin/test-puzzle", adminMiddleware, puzzleController.createTestPuzzle);
 
 export default router;

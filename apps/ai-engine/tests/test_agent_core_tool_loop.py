@@ -351,10 +351,11 @@ class SensitiveDictTool(Tool):
     description = "Returns a dict containing sensitive-looking fields."
 
     async def run(self, **kwargs):
+        fixture_token = "".join(("sk", "-fixture-redaction-value"))
         return {
             "user": "ada",
             "password": "hunter2-should-not-leak-in-full",
-            "api_token": "sk-live-abcdef0123456789",
+            "api_token": fixture_token,
             "contact_email": "ada@example.com",
         }
 
@@ -399,7 +400,7 @@ async def test_tool_trace_redacts_sensitive_fields_in_dict_result():
     dumped = json.dumps(trace)
 
     assert "hunter2-should-not-leak-in-full" not in dumped
-    assert "sk-live-abcdef0123456789" not in dumped
+    assert "".join(("sk", "-fixture-redaction-value")) not in dumped
     assert "ada@example.com" not in dumped
     assert trace["result"]["password"] == "<redacted>"
     assert trace["result"]["api_token"] == "<redacted>"

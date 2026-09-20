@@ -13,7 +13,7 @@ npx tsx simple-server.ts
 
 ### 2. 訪問服務器
 - 網址: http://localhost:3001
-- 默認帳號: admin@nightasaur.com / admin123
+- 默認帳號: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 - 測試帳號: test@nightasaur.com / test123
 
 ## 🔧 功能特色
@@ -59,7 +59,7 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "username": "player1",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -70,7 +70,7 @@ Content-Type: application/json
 
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -235,7 +235,7 @@ const response = await fetch('http://localhost:3001/api/settings/language', {
 - ✅ 設定系統: 音效/震動設定
 
 ### 默認帳號
-- **管理員**: admin@nightasaur.com / admin123
+- **管理員**: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 - **測試用戶**: test@nightasaur.com / test123
 
 ## 🛠️ 開發指南

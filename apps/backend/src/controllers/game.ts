@@ -1,17 +1,11 @@
 import { Request, Response } from "express";
 import { gameService } from "../services/game.js";
+import { routeParam } from "../utils/request.js";
 
 export async function getQuests(req: Request, res: Response) {
   const userId = (req as any).userId;
   const quests = await gameService.getQuests(userId);
   res.json({ quests });
-}
-
-export async function trackAction(req: Request, res: Response) {
-  const userId = (req as any).userId;
-  const { action, amount } = req.body;
-  const result = await gameService.trackAction(userId, action, amount || 1);
-  res.json(result);
 }
 
 export async function getAchievements(req: Request, res: Response) {
@@ -26,25 +20,13 @@ export async function getInventory(req: Request, res: Response) {
   res.json({ inventory });
 }
 
-export async function claimQuest(req: Request, res: Response) {
-  const userId = (req as any).userId;
-  const { questId } = req.params;
-  const reward = await gameService.claimQuest(userId, questId);
-  if (!reward) throw Object.assign(new Error("?¡æ??˜å??å‹µ"), { statusCode: 400 });
-  res.json({ reward });
-}
-
-export const completeQuest = async (req: Request, res: Response) => {
-  const userId = (req as any).userId;
-  const { questId } = req.params;
-  await gameService.completeQuest(userId, questId);
-  res.json({ success: true });
-};
-
 export const useItem = async (req: Request, res: Response) => {
   const userId = (req as any).userId;
-  const { itemId } = req.params;
+  const itemId = routeParam(req, "itemId");
   const { spiritId } = req.body;
+  if (typeof spiritId !== "string" || !spiritId) {
+    throw Object.assign(new Error("è«‹æä¾›æœ‰æ•ˆçš„ç²¾éˆ ID"), { statusCode: 400 });
+  }
   await gameService.useItem(userId, spiritId, itemId);
   res.json({ success: true });
 };

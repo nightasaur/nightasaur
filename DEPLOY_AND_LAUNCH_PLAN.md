@@ -58,7 +58,8 @@ cd apps\backend
 railway up --service nightasaur-backend -d .
 
 # F: 環境變數
-railway env set JWT_SECRET=your-random-key
+# Set JWT_SECRET through the approved secret manager using at least 32 random bytes.
+# Never paste the value into source, scripts, tickets, logs, or shell history.
 railway env set CORS_ORIGIN=https://nightasaur-web.vercel.app
 railway env set PORT=3002
 
@@ -108,7 +109,7 @@ vercel --prod
 cd c:\Nightasaur\apps\ai-engine
 railway up --service nightasaur-ai -d .
 
-railway env set OLLAMA_MODEL=qwen2.5:3b
+# Text inference remains disabled until exact model provenance/license review.
 railway env set HOST=0.0.0.0
 railway env set PORT=8000
 ```

@@ -38,7 +38,7 @@
 2. **點擊登入按鈕**：進入登入頁面
 3. **使用管理員帳號**：
    - 電子郵件：admin@nightasaur.com
-   - 密碼：admin123
+   - 密碼：RETIRED-CREDENTIAL-DO-NOT-USE
 4. **登入成功後**：自動跳轉到儀表板
 
 ### 方案2：整合登入系統
@@ -116,7 +116,7 @@ app.listen(PORT, () => {
 
 ### 步驟3：測試流程
 1. 訪問 http://localhost:3001/login
-2. 使用 admin@nightasaur.com / admin123 登入
+2. 使用 admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE 登入
 3. 自動跳轉到 http://localhost:5173/dashboard
 
 ## 立即實施方案
@@ -124,7 +124,7 @@ app.listen(PORT, () => {
 ### 方案A：使用現有系統（最簡單）
 1. **訪問**：http://localhost:5173
 2. **點擊登入**：右上角登入按鈕
-3. **輸入帳號**：admin@nightasaur.com / admin123
+3. **輸入帳號**：admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 4. **自動跳轉**：到遊戲儀表板
 
 ### 方案B：創建整合入口頁面
@@ -173,7 +173,7 @@ app.listen(PORT, () => {
     <div style="margin-top: 50px; background: #334155; padding: 20px; border-radius: 10px;">
       <h3>📋 管理員帳號</h3>
       <p><strong>電子郵件:</strong> admin@nightasaur.com</p>
-      <p><strong>密碼:</strong> admin123</p>
+      <p><strong>密碼:</strong> RETIRED-CREDENTIAL-DO-NOT-USE</p>
       <p><strong>支援信箱:</strong> service@nightasaur.com</p>
     </div>
   </div>
@@ -238,7 +238,7 @@ taskkill /F /PID [進程ID]
 
 ### 實施步驟：
 1. **訪問**：http://localhost:5173
-2. **登入**：使用 admin@nightasaur.com / admin123
+2. **登入**：使用 admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 3. **開始遊戲**：進入儀表板開始遊戲
 
 ### 備用方案：創建整合入口
@@ -248,5 +248,5 @@ taskkill /F /PID [進程ID]
 
 **狀態**：系統已準備好，可以直接使用現有遊戲系統登入
 **推薦**：訪問 http://localhost:5173 使用完整遊戲功能
-**帳號**：admin@nightasaur.com / admin123
+**帳號**：admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 **支援**：service@nightasaur.com

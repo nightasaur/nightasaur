@@ -15,8 +15,12 @@ import json
 import platform
 import subprocess
 import sys
+from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from model_policy import validate_model_selection
 
 
 def _check_gpu() -> dict:
@@ -38,6 +42,12 @@ def _check_gpu() -> dict:
 
 
 def _check_ollama(base_url: str, model: str) -> dict:
+    try:
+        model = validate_model_selection(model)
+    except ValueError:
+        return {"ok": False, "error": "model_prohibited"}
+    if not model:
+        return {"ok": False, "error": "model_not_configured"}
     url = f"{base_url.rstrip('/')}/api/tags"
     try:
         with urlopen(url, timeout=5) as response:  # noqa: S310 - local URL is CLI input
@@ -89,18 +99,21 @@ def build_report(base_url: str, model: str) -> dict:
         "gate": "Nightasaur3070-v0.4-Gate-A",
         "mode": "read-only",
         "checks": checks,
-        "verified": all(item["ok"] for item in checks.values()),
+        "environment_ready": all(item["ok"] for item in checks.values()),
+        "verified": False,
+        "status": "ENVIRONMENT_ONLY",
+        "remaining": ["same_commit_ci", "reviewed_model_digest", "real_agent_run"],
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
-    parser.add_argument("--model", default="qwen2.5:3b")
+    parser.add_argument("--model", required=True, help="Explicit reviewed model identifier")
     args = parser.parse_args()
     report = build_report(args.ollama_url, args.model)
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0 if report["verified"] else 1
+    return 0 if report["environment_ready"] else 1
 
 
 if __name__ == "__main__":

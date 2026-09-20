@@ -154,25 +154,18 @@ export class GameLogicService {
     };
   }
 
-  // 執行一次可驗證的遊戲循環，不偽造對話或益智結果。
+  // 回傳一次遊戲狀態循環。客戶端提供的 action 僅供 UI 對應，
+  // 不得作為任務進度或獎勵的權威事件來源。
   async completeGameCycle(userId: string, spiritId: string, action: string) {
     const spirit = await prisma.spirit.findFirst({
       where: { id: spiritId, userId, isActive: true }
     });
     if (!spirit) throw new Error("精靈不存在或不屬於此使用者");
 
-    const questRewards = await gameService.trackAction(userId, action, 1);
     const [quests, availablePuzzles] = await Promise.all([
       gameService.getQuests(userId),
       puzzleService.getAvailablePuzzles(userId, spiritId).catch(() => [])
     ]);
-
-    const rewards = [
-      ...(questRewards.xpAwarded > 0
-        ? [{ type: "XP", amount: questRewards.xpAwarded }]
-        : []),
-      ...questRewards.itemsAwarded.map(name => ({ type: "ITEM", name, amount: 1 }))
-    ];
 
     return {
       action,
@@ -180,7 +173,7 @@ export class GameLogicService {
       dialogue: null,
       quests,
       puzzle: availablePuzzles[0] || null,
-      rewards
+      rewards: []
     };
   }
 
