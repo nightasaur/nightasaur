@@ -82,3 +82,47 @@ Chinese response quality, mobile rendering or load capacity.
 W1 remains PARTIAL due to mobile evidence, signed-in localization/display gaps
 and stale-document recovery described above. Administrator login and dashboard,
 list/detail loading, and the basic assistant UI interaction are verified.
+
+## Defect remediation — PR #36
+
+Merged candidate: `08c82c5286ae45f2d0e09e46250bc6e625a1ced7`.
+Head CI runs 35489206513 and 35489206549 passed; Vercel preview passed.
+Production backend deployment bb570694-feff-4117-afe0-3947d9154949 succeeded.
+Frontend asset: /assets/index-ZDQ0cmb1.js.
+
+Root cause: the detail page searched canonical backend stages such as HATCHLING
+in an array of Chinese display labels. Index -1 produced negative cosmetic
+indicators and an invalid evolution-to-egg suggestion. Canonical stage codes,
+level validation, explicit missing-species labels and translated display labels
+now resolve this without changing persisted spirit data. Unknown/invalid state
+cannot offer an evolution action. Indicators are explicitly labeled as calculated
+growth values, not persisted combat statistics.
+
+Production browser recheck on the existing level-2 hatchling:
+- Growth indicators: 34, 28, 23, 24, 38; no negative values.
+- Correct disabled evolution action: requires level 5.
+- Missing species shown explicitly; stage and timeline labels populated.
+- zh-TW spirit list and detail now render traditional Chinese.
+- Signed-in navigation and detail controls successfully switched through zh-CN,
+  en-US, ja-JP, ko-KR and zh-TW; restored zh-TW at end.
+- No spirit evolution, deletion, customization or database repair performed.
+  Language preferences changed through the normal UI and were restored.
+
+HTTP delivery recheck:
+- Root and /spirits: 200 with Cache-Control: no-store, max-age=0.
+- Obsolete /assets/index-fzx90sMh.js: 404 text/plain, not 200 HTML.
+- /api/health remains 200 JSON.
+- Ordinary navigation to /spirits loaded the current frontend without a
+  cache-busting query. Existing documents cached before this change may need
+  a refresh; this change does not claim to remotely purge browser caches.
+- Startup HTML provides loading/recovery text before the app mounts.
+
+Validation: 13 frontend tests pass (including real component stage regression,
+all-five-language detail controls, invalid stages/levels and terminal evolution
+boundaries), production build and diff checks pass.
+
+Narrow-layout code improvements: list headers wrap, detail chat inputs shrink,
+buttons wrap and generated images respect container width. Actual phone viewport
+visual verification remains outstanding; no desktop-only result certifies it.
+Full-product translation outside the changed navigation/dashboard/spirit pages
+and model language quality are outside this remediation scope.
