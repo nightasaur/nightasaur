@@ -3,10 +3,11 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 interface LanguageSwitcherProps {
   compact?: boolean;
+  inline?: boolean;
   onLanguageChange?: (languageCode: string) => void;
 }
 
-export default function LanguageSwitcher({ compact = false, onLanguageChange }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({ compact = false, inline = false, onLanguageChange }: LanguageSwitcherProps) {
   const { currentLanguage, setCurrentLanguage, supportedLanguages, loading } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -35,6 +36,7 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
     return (
       <div className="relative">
         <button
+          aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-white text-sm font-medium transition-all duration-200"
         >
@@ -52,11 +54,11 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
 
         {isOpen && (
           <>
-            <div 
-              className="fixed inset-0 z-40" 
+            {!inline && <div
+              className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
-            />
-            <div className="absolute top-full mt-1 right-0 z-50 min-w-[180px] bg-[#0a0a1a] border border-red-500/30 rounded-xl shadow-2xl overflow-hidden">
+            />}
+            <div className={`${inline ? "relative mt-2 w-full" : "absolute top-full mt-1 right-0 min-w-[180px]"} z-50 bg-[#0a0a1a] border border-red-500/30 rounded-xl shadow-2xl overflow-hidden`}>
               {supportedLanguages.map((lang) => (
                 <button
                   key={lang.code}
@@ -89,6 +91,7 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
   return (
     <div className="relative">
       <button
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 text-white font-medium transition-all duration-200 group"
       >

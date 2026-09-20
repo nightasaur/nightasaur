@@ -3,7 +3,9 @@
 Use `/_checks/mobile.html` on a deployment of this repository. It loads the actual
 same-origin application in a fixed 375, 390 or 430 CSS-pixel iframe. It does not
 read credentials, cookies, storage, user content or request bodies. Measurements
-contain widths and an overflow flag only; no telemetry is transmitted.
+contain an allowlisted page path, widths and an overflow flag only; no telemetry
+is transmitted. Measurement refuses to pass until navigation and main content
+have rendered, and records the actual framed path after in-app navigation.
 
 The framed application retains normal authentication and behavior. Use public
 pages first. For protected pages use a dedicated QA account where available;
@@ -25,3 +27,5 @@ software keyboard, touch/voice permissions, dynamic viewport height and safe-are
 behavior require an actual-device check and must not be reported as passed from
 an iframe. On a phone narrower than the selected size the outer test canvas can
 scroll intentionally; measure the inner viewport, not the test canvas.
+Desktop scrollbars may reduce the inner viewport (for example, a 375px frame
+can have a 360px content viewport). Record both frame and viewport widths.
