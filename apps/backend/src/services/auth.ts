@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import { signToken } from "../utils/jwt.js";
 import { PrismaClient } from "@prisma/client";
 import { spiritService } from "./spirit.js";
@@ -9,9 +9,10 @@ const SALT_ROUNDS = 12;
 const inMemoryUsers = new Map();
 
 export class AuthService {
+  private prisma: PrismaClient | null = null;
+  private isDatabaseConnected: boolean = false;
+
   constructor() {
-    this.prisma = null;
-    this.isDatabaseConnected = false;
     this.initializeDatabase();
   }
 
@@ -25,7 +26,7 @@ export class AuthService {
       
       // 確保預設帳號存在
       await this.ensureDefaultUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.warn("⚠️  資料庫連線失敗，使用記憶體模式:", error.message);
       this.isDatabaseConnected = false;
       this.prisma = null;
@@ -314,7 +315,7 @@ export class AuthService {
 
   async login(email: string, password: string) {
     // 查找使用者
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: { email }
     });
     
@@ -355,7 +356,7 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         Spirits: {  // 注意：大寫 S，因為 Schema 中是 Spirits
