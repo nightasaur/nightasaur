@@ -8,7 +8,6 @@ import Navbar from "./components/Navbar";
 import SEO from "./components/SEO";
 import Home, { HOME_METADATA } from "./pages/Home";
 import Login from "./pages/Login";
-import AdminPasswordReset from "./pages/AdminPasswordReset";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Spirits from "./pages/Spirits";
@@ -86,7 +85,6 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<LocalizedHome />} />
           <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
-          <Route path="/admin-password-reset" element={<AdminPasswordReset />} />
           <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
           <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />
           <Route
