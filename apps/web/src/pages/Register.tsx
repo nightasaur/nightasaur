@@ -6,25 +6,72 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
   const nav = useNavigate();
   const [form, setForm] = useState({ email: "", username: "", password: "" });
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setWarning("");
     setLoading(true);
 
     try {
       const res = await authAPI.register(form);
 
-      if (res.data && res.data.token) {
-        localStorage.setItem("nightasaur_token", res.data.token);
-        setUser(res.data.user);
-        nav("/dashboard");
+      // 檢查回應格式
+      if (res.data && res.data.success) {
+        // 儲存 token
+        if (res.data.token) {
+          localStorage.setItem("nightasaur_token", res.data.token);
+        }
+        
+        // 設定使用者資訊
+        if (res.data.user) {
+          setUser(res.data.user);
+        }
+        
+        // 顯示警告訊息（如記憶體模式）
+        if (res.data.warning) {
+          setWarning(res.data.warning);
+          // 仍然允許註冊成功，但顯示警告
+          setTimeout(() => {
+            nav("/dashboard");
+          }, 2000);
+        } else {
+          // 正常跳轉到儀表板
+          nav("/dashboard");
+        }
+        
+        // 如果有精靈資訊，顯示成功訊息
+        if (res.data.spirit) {
+          console.log("🎉 註冊成功！初始精靈已創建:", res.data.spirit.name);
+        }
       } else {
-        setError("註冊響應格式錯誤");
+        // 處理錯誤回應
+        setError(res.data?.message || "註冊失敗，請檢查輸入資料");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data?.error || "註冊失敗，請稍後再試");
+      // 處理 API 錯誤
+      const errorData = err.response?.data;
+      
+      if (errorData) {
+        // 結構化錯誤訊息
+        if (errorData.message) {
+          setError(errorData.message);
+        } else if (errorData.error) {
+          setError(errorData.error);
+        } else {
+          setError("註冊失敗，請稍後再試");
+        }
+        
+        // 如果有詳細錯誤資訊，記錄到 console
+        if (errorData.details) {
+          console.error("註冊詳細錯誤:", errorData.details);
+        }
+      } else {
+        // 網路錯誤或其他錯誤
+        setError(err.message || "網路錯誤，請檢查連線狀態");
+      }
     } finally {
       setLoading(false);
     }
@@ -36,7 +83,22 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
         <h2 className="text-3xl font-black text-center mb-2 neon-text">加入 Nightasaur 🌙</h2>
         <p className="text-white/50 text-center mb-8">開始你的精靈冒險旅程</p>
 
-        {error && <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">{error}</div>}
+        {/* 錯誤訊息 */}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg mb-4">
+            <div className="font-medium">❌ 註冊失敗</div>
+            <div className="text-sm mt-1">{error}</div>
+          </div>
+        )}
+
+        {/* 警告訊息 */}
+        {warning && (
+          <div className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 px-4 py-2 rounded-lg mb-4">
+            <div className="font-medium">⚠️ 注意</div>
+            <div className="text-sm mt-1">{warning}</div>
+            <div className="text-xs mt-2 text-yellow-400/70">將在 2 秒後自動跳轉...</div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -65,6 +127,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               disabled={loading}
             />
+            <p className="text-xs text-white/40 mt-1">3-20 個字元，可使用中文、英文或數字</p>
           </div>
 
           <div>
@@ -83,7 +146,7 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
           </div>
 
           <button
-            className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg"
+            className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             type="submit"
             disabled={loading}
           >
@@ -114,6 +177,13 @@ export default function Register({ setUser }: { setUser: (u: any) => void }) {
               登入 →
             </Link>
           </p>
+        </div>
+
+        {/* 資料庫狀態提示 */}
+        <div className="mt-6 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <div className="text-xs text-blue-300/70">
+            💡 提示：系統會自動檢測資料庫連線狀態。如果資料庫不可用，將使用記憶體模式暫時儲存資料。
+          </div>
         </div>
       </div>
     </div>

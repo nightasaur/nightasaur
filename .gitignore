@@ -55,3 +55,5 @@ apps/ai-engine/models/
 apps/ai-engine/checkpoints/
 .vercel
 .env*
+# Backup directory - contains sensitive information
+backup/
