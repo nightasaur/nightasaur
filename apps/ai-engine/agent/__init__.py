@@ -12,6 +12,8 @@ v0.3 新增：
 - capability：能力描述系統
 - contexts：運行時上下文資料結構
 """
+import os
+
 from agent.capability import Capability, CapabilitySet
 from agent.contexts import (
     AgentIdentity,
@@ -54,8 +56,12 @@ def build_default_agent_core(base_url: str, model: str) -> AgentCore:
     ToolRegistry 為空時，AgentCore 的 tool-calling loop 只會執行一次
     generate() 就結束，行為與 v0.1 完全相同。
     """
+    provider = OllamaModelProvider
+    if os.getenv("AI_STRICT_INFERENCE") == "1":
+        from agent.providers.production_ollama import ProductionOllamaModelProvider
+        provider = ProductionOllamaModelProvider
     return AgentCore(
-        model_provider=OllamaModelProvider(base_url=base_url, model=model),
+        model_provider=provider(base_url=base_url, model=model),
         tool_registry=ToolRegistry(),
         memory_provider=EphemeralMemoryProvider(),
         execution_policy=ReadOnlyExecutionPolicy(),

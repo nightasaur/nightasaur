@@ -15,6 +15,7 @@ RUN npm ci --ignore-scripts
 
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
+COPY deploy/verify-production-ai.mjs deploy/verify-production-ai.mjs
 
 RUN cd apps/backend && npx prisma generate --schema prisma/postgresql/schema.prisma
 
