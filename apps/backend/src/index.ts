@@ -14,6 +14,7 @@ import squadRoutes from "./routes/squad.js";
 import arLocationRoutes from "./routes/arLocation.js";
 import languageRoutes from "./routes/language.js";
 import academyRoutes from "./routes/academy.js";
+import englishTrainingRoutes from "./routes/englishTraining.js";
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/squads", squadRoutes);
 app.use("/api/ar", arLocationRoutes);
 app.use("/api/language", languageRoutes);
 app.use("/api/academy", academyRoutes);
+app.use("/api/english-training", englishTrainingRoutes);
 
 // 錯誤處理中間件
 app.use(errorHandler);
