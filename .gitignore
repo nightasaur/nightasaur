@@ -54,6 +54,57 @@ apps/ai-engine/outputs/
 apps/ai-engine/models/
 apps/ai-engine/checkpoints/
 .vercel
-.env*
 # Backup directory - contains sensitive information
 backup/
+
+# ========================================
+# Phase 5A-4 additions
+# ========================================
+
+# Phase 5A artifacts
+_backup/
+_logs/
+scripts/*.ps1
+
+# Backup and diagnostic files
+*.phase5a3bak
+*.phase5a4bak
+*.before*
+
+# Test leftovers (apps/backend root)
+apps/backend/test-*.ts
+apps/backend/test-*.js
+apps/backend/check-*.ts
+apps/backend/validate-*.ts
+apps/backend/verify-*.ts
+apps/backend/setup-test-db*.js
+
+apps/backend/*.db
+
+# Phase 5A-2 archived migrations
+apps/backend/prisma/migrations.sqlite.archived/
+
+# Sensitive files
+apps/backend/test.env
+apps/backend/test-env.txt
+apps/backend/test-db-password.txt
+
+# Env templates (must be tracked)
+!.env.example
+!**/.env.example
+
+# DB files (local only)
+apps/backend/*.db
+apps/backend/prisma/*.db
+apps/backend/prisma/*.db-journal
+
+# Env test files (not committed)
+apps/backend/.env.test
+apps/backend/.env.test.local
+apps/backend/.env.test.*
+
+# Validation diagnostics
+apps/backend/validation-*.txt
+
+# Prisma archive (local backup only)
+apps/backend/prisma/_archive/
