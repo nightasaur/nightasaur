@@ -1,4 +1,4 @@
-﻿import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { signToken } from "../utils/jwt.js";
 import { PrismaClient } from "@prisma/client";
 import { spiritService } from "./spirit.js";
@@ -53,10 +53,10 @@ export class AuthService {
 
     try {
       // 檢查並創建管理員帳號
-      let adminUser = await this.prisma.user.findFirst({ where: { email: DEFAULT_ADMIN.email } });
+      let adminUser = await this.prisma!.user.findFirst({ where: { email: DEFAULT_ADMIN.email } });
       if (!adminUser) {
         const adminHash = await bcrypt.hash(DEFAULT_ADMIN.password, SALT_ROUNDS);
-        adminUser = await this.prisma.user.create({
+        adminUser = await this.prisma!.user.create({
           data: {
             email: DEFAULT_ADMIN.email,
             username: DEFAULT_ADMIN.username,
@@ -70,10 +70,10 @@ export class AuthService {
       }
 
       // 檢查並創建示範帳號
-      let demoUser = await this.prisma.user.findFirst({ where: { email: DEFAULT_DEMO.email } });
+      let demoUser = await this.prisma!.user.findFirst({ where: { email: DEFAULT_DEMO.email } });
       if (!demoUser) {
         const demoHash = await bcrypt.hash(DEFAULT_DEMO.password, SALT_ROUNDS);
-        demoUser = await this.prisma.user.create({
+        demoUser = await this.prisma!.user.create({
           data: {
             email: DEFAULT_DEMO.email,
             username: DEFAULT_DEMO.username,
@@ -239,7 +239,7 @@ export class AuthService {
         console.warn("⚠️  資料庫不可用，使用記憶體模式註冊");
 
         // 檢查記憶體中是否已存在
-        for (const [key, user] of inMemoryUsers.entries()) {
+        for (const [_key, user] of inMemoryUsers.entries()) {
           if (user.email === email || user.username === username) {
             const field = user.email === email ? "Email" : "使用者名稱";
             throw { 
@@ -315,7 +315,7 @@ export class AuthService {
 
   async login(email: string, password: string) {
     // 查找使用者
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma!.user.findFirst({
       where: { email }
     });
     
@@ -350,13 +350,13 @@ export class AuthService {
     };
   }
 
-  async logout(token: string) {
+  async logout(_token: string) {
     // 這裡可以實現令牌黑名單或其他登出邏輯
     // 目前只是簡單實現
   }
 
   async getProfile(userId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma!.user.findUnique({
       where: { id: userId },
       include: {
         Spirits: {  // 注意：大寫 S，因為 Schema 中是 Spirits

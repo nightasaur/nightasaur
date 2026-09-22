@@ -135,7 +135,7 @@ export class GameLogicService {
             spiritId: member.spiritId,
             spiritName: member.spirit.name,
             success: false,
-            error: error.message
+            error: error instanceof Error ? error.message : String(error)
           });
         }
       }
@@ -182,7 +182,7 @@ export class GameLogicService {
         results.push({
           spiritId: member.spiritId,
           spiritName: member.spirit.name,
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }

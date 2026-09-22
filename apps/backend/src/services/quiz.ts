@@ -1,6 +1,5 @@
 import { IELTS_WORDS } from "./ieltsVocab";
 import { IELTS_ARTICLES } from "./ieltsReading";
-import type { IeltsArticle } from "./ieltsReading";
 
 // IELTS vocabulary question generator
 function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
@@ -142,7 +141,6 @@ const DISADV: Record<string,string[]> = {
   MOON:["SHADOW"], NATURE:["FIRE","ICE"], THUNDER:["ILLUSION"], ICE:["FIRE"],
 };
 
-const STG: Record<string,number> = {HATCHLING:1, JUVENILE:5, ADULT:15, ULTIMATE:30, LEGENDARY:60};
 /** Generate element advantage questions */
 function* genElementQs(langIdx: number): Generator<QuizQuestion> {
   for (const elem of ELEMENTS) {

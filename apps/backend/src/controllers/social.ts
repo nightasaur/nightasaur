@@ -52,7 +52,7 @@ export class SocialController {
     }
   }
 
-  async getAllPosts(req: Request, res: Response, next: NextFunction) {
+  async getAllPosts(_req: Request, res: Response, next: NextFunction) {
     try {
       const posts = await socialService.getAllPosts();
       res.json(posts);

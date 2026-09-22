@@ -175,7 +175,7 @@ export class LanguageService {
   }
   
   // 獲取翻譯
-  async getTranslation(key: string, module: string, language: string = "zh-TW") {
+  async getTranslation(_key: string, _module: string, _language: string = "zh-TW") {
     // 註釋掉，因為 translation 模型不存在
     /*
     const translation = await prisma.translation.findUnique({
@@ -206,7 +206,7 @@ export class LanguageService {
   }
   
   // 獲取多語言翻譯
-  async getMultiLanguageTranslations(key: string, module: string) {
+  async getMultiLanguageTranslations(_key: string, _module: string) {
     // 註釋掉，因為 translation 模型不存在
     /*
     const translation = await prisma.translation.findUnique({
@@ -233,7 +233,7 @@ export class LanguageService {
   }
   
   // 批量獲取翻譯
-  async getBatchTranslations(keys: string[], module: string, language: string = "zh-TW") {
+  async getBatchTranslations(keys: string[], _module: string, _language: string = "zh-TW") {
     // 註釋掉，因為 translation 模型不存在
     /*
     const translations = await prisma.translation.findMany({
@@ -287,7 +287,7 @@ export class LanguageService {
   }
   
   // 添加或更新翻譯
-  async upsertTranslation(data: {
+  async upsertTranslation(_data: {
     key: string;
     module: string;
     zhTW: string;
@@ -312,7 +312,7 @@ export class LanguageService {
   }
   
   // 獲取用戶語言歷史
-  async getUserLanguageHistory(userId: string, limit: number = 20) {
+  async getUserLanguageHistory(_userId: string, _limit: number = 20) {
     // 註釋掉，因為 userLanguageHistory 模型不存在
     /*
     const history = await prisma.userLanguageHistory.findMany({
@@ -374,7 +374,7 @@ export class LanguageService {
   }
   
   // 獲取完整的遊戲界面翻譯
-  async getGameInterfaceTranslations(language: string = "zh-TW") {
+  async getGameInterfaceTranslations(_language: string = "zh-TW") {
     const modules = [
       "common", "menu", "settings", "game", "puzzle", 
       "squad", "dialogue", "items", "achievements"

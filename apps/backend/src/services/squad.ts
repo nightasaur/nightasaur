@@ -202,7 +202,7 @@ export class SquadService {
     };
     
     const multiplier = Math.floor(duration / 5);
-    return (baseXp[trainingType] || 10) * multiplier;
+    return (baseXp[trainingType as keyof typeof baseXp] || 10) * multiplier;
   }
   
   // 檢查精靈升級
@@ -252,7 +252,7 @@ export class SquadService {
       totalIntelligenceLevel: 0,
       totalAgilityLevel: 0,
       totalDefenseLevel: 0,
-      activeSpirit: null
+      activeSpirit: null as any
     };
     
     if (squad.members.length > 0) {

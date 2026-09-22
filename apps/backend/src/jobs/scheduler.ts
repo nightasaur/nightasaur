@@ -1,14 +1,13 @@
 /**
- * ?’ç??å? ??ä½¿ç”¨ node-cron ?–ä»£ BullMQ/Redis
+ * ?ï¿½ï¿½??ï¿½ï¿½? ??ä½¿ç”¨ node-cron ?ï¿½ä»£ BullMQ/Redis
  *
- * ä»»å?ï¼?
- * - æ¯?5 ?†é?ï¼šè???AI ?–ç??Ÿæ?ä½‡å?
- * - æ¯å¤© 08:00ï¼šè‡ª?•ç??æ??¥æ?äº?
- * - æ¯å??‚ï?æª¢æŸ¥?’ç?è²¼æ?ä¸¦ç™¼å¸?
+ * ä»»ï¿½?ï¿½?
+ * - ï¿½?5 ?ï¿½ï¿½?ï¼šï¿½???AI ?ï¿½ï¿½??ï¿½ï¿½?ä½‡ï¿½?
+ * - æ¯å¤© 08:00ï¼šè‡ª?ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½?ï¿½?
+ * - æ¯ï¿½??ï¿½ï¿½?æª¢æŸ¥?ï¿½ï¿½?è²¼ï¿½?ä¸¦ç™¼ï¿½?
  */
 import { imageGenService } from "../services/imagegen.js";
 
-let cronJob: any = null;
 
 export class Scheduler {
   private timers: NodeJS.Timeout[] = [];
@@ -16,7 +15,7 @@ export class Scheduler {
   start() {
     console.log("[Scheduler] Starting background jobs...");
 
-    // æ¯?5 ?†é?ï¼šè???AI ?–ç??Ÿæ?ä½‡å?
+    // ï¿½?5 ?ï¿½ï¿½?ï¼šï¿½???AI ?ï¿½ï¿½??ï¿½ï¿½?ä½‡ï¿½?
     this.timers.push(setInterval(async () => {
       try {
         const result = await imageGenService.processPendingTasks();
@@ -28,7 +27,7 @@ export class Scheduler {
       }
     }, 5 * 60 * 1000));
 
-    // ?Ÿå??‚ç??»è??†ä?æ¬?
+    // ?ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½?ï¿½?
     setTimeout(async () => {
       try {
         await imageGenService.processPendingTasks();

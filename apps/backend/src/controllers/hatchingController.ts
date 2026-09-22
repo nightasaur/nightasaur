@@ -76,10 +76,8 @@ export class HatchingController {
   }
 
   // 獲取孵化歷史
-  async getHistory(req: Request, res: Response, next: NextFunction) {
+  async getHistory(_req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).userId;
-      const { limit = 10 } = req.query;
 
       // 這裡可以從數據庫獲取孵化歷史
       // 目前返回示例數據
@@ -144,7 +142,6 @@ export class HatchingController {
   // 加速孵化（使用道具）
   async accelerate(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).userId;
       const { spiritId, itemId } = req.body;
 
       if (!spiritId || !itemId) {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { languageService, SUPPORTED_LANGUAGES, DISPLAY_MODES, THEMES } from "../services/language.js";
+import { languageService } from "../services/language.js";
 
 export class LanguageController {
   // 獲取用戶語言偏好設定
@@ -122,7 +122,7 @@ export class LanguageController {
   }
   
   // 獲取支援的語言列表
-  async getSupportedLanguages(req: Request, res: Response) {
+  async getSupportedLanguages(_req: Request, res: Response) {
     try {
       const languages = languageService.getSupportedLanguages();
       res.json({ languages });
@@ -132,7 +132,7 @@ export class LanguageController {
   }
   
   // 獲取顯示模式列表
-  async getDisplayModes(req: Request, res: Response) {
+  async getDisplayModes(_req: Request, res: Response) {
     try {
       const displayModes = languageService.getDisplayModes();
       res.json({ displayModes });
@@ -142,7 +142,7 @@ export class LanguageController {
   }
   
   // 獲取主題列表
-  async getThemes(req: Request, res: Response) {
+  async getThemes(_req: Request, res: Response) {
     try {
       const themes = languageService.getThemes();
       res.json({ themes });
@@ -183,7 +183,6 @@ export class LanguageController {
   // 生成雙語文本
   async generateBilingualText(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
       const { key, module } = req.params;
       const { primaryLang, secondaryLang } = req.query;
       

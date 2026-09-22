@@ -3,7 +3,7 @@ import prisma from "../config/prisma.js";
 import { getQuestionsByCategory, getCategoryStats, AcademicCategory } from "../services/academicQuiz.js";
 
 export class AcademyController {
-  async getCourses(req: Request, res: Response, next: NextFunction) {
+  async getCourses(_req: Request, res: Response, next: NextFunction) {
     try {
       const courses = [
         { id: "literature-basics", title: "文學基礎課程", icon: "📚", difficulty: "初級", unlocked: true },
@@ -12,9 +12,9 @@ export class AcademyController {
         { id: "medical-basics", title: "醫學基礎課程", icon: "🏥", difficulty: "初級", unlocked: true },
         { id: "mathematics-fundamentals", title: "數學基礎課程", icon: "🧮", difficulty: "初級", unlocked: true },
       ];
-      res.json({ courses });
+      return res.json({ courses });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
@@ -26,9 +26,9 @@ export class AcademyController {
         return res.status(400).json({ error: "無效的分類" });
       }
       const questions = getQuestionsByCategory(category as AcademicCategory, 10, 1);
-      res.json({ category, questions });
+      return res.json({ category, questions });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
@@ -60,7 +60,7 @@ export class AcademyController {
         },
       });
 
-      res.json({
+      return res.json({
         sessionId: session.id,
         course: { id: courseId, title: course.title, icon: course.icon },
         totalQuestions: 5,
@@ -68,7 +68,7 @@ export class AcademyController {
         question: questions[0],
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
@@ -110,7 +110,7 @@ export class AcademyController {
         reward = { xp: 50, coins: 25 };
       }
 
-      res.json({
+      return res.json({
         correct: isCorrect,
         correctAnswer: question.answer,
         explanation: question.explanation,
@@ -119,7 +119,7 @@ export class AcademyController {
         reward,
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
@@ -142,17 +142,17 @@ export class AcademyController {
         };
       });
 
-      res.json({
+      return res.json({
         overall: { completedCourses: sessions.length },
         categories,
         recentSessions: sessions.slice(0, 3),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
-  async getCategories(req: Request, res: Response, next: NextFunction) {
+  async getCategories(_req: Request, res: Response, next: NextFunction) {
     try {
       const stats = getCategoryStats();
       const categories = Object.entries(stats).map(([id, data]) => ({
@@ -161,9 +161,9 @@ export class AcademyController {
         icon: data.icon,
         totalQuestions: data.total,
       }));
-      res.json({ categories });
+      return res.json({ categories });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 }

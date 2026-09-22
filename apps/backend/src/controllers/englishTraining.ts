@@ -17,9 +17,9 @@ export class EnglishTrainingController {
         difficulty as string
       );
 
-      res.json({ topics });
+      return res.json({ topics });
     } catch (error: any) {
-      next(error);
+      return next(error);
     }
   }
 
@@ -40,9 +40,9 @@ export class EnglishTrainingController {
         return res.status(404).json({ error: "主題不存在" });
       }
 
-      res.json({ topic });
+      return res.json({ topic });
     } catch (error: any) {
-      next(error);
+      return next(error);
     }
   }
 
@@ -66,9 +66,9 @@ export class EnglishTrainingController {
         topicId
       );
 
-      res.json(result);
+      return res.json(result);
     } catch (error: any) {
-      next(error);
+      return next(error);
     }
   }
 
@@ -96,9 +96,9 @@ export class EnglishTrainingController {
         }
       );
 
-      res.json(result);
+      return res.json(result);
     } catch (error: any) {
-      next(error);
+      return next(error);
     }
   }
 
@@ -118,9 +118,9 @@ export class EnglishTrainingController {
         limit ? parseInt(limit as string) : 20
       );
 
-      res.json({ history });
+      return res.json({ history });
     } catch (error: any) {
-      next(error);
+      return next(error);
     }
   }
 }

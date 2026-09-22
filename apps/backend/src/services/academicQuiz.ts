@@ -50,7 +50,7 @@ function shuffle<T>(array: T[]): T[] {
 export function generateAcademicQuestions(
   count: number,
   level: number,
-  lang: Lang = "zh-TW",
+  _lang: Lang = "zh-TW",
   categories?: AcademicCategory[]
 ): AcademicQuestion[] {
   const allCategories: AcademicCategory[] = ["LITERATURE", "PHYSICS", "CHEMISTRY", "MEDICINE", "MATHEMATICS"];

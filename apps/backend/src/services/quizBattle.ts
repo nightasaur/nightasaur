@@ -6,7 +6,6 @@
  * 答對題目攻擊敵方精靈，答錯被反擊，5題決勝負
  */
 import prisma from "../config/prisma.js";
-import { gameService } from "./game.js";
 import { calculateGrowth } from "./growth.js";
 import { generateQuestions, calcQuizDamage, calcEnemyDamage, QuizQuestion } from "./quiz.js";
 
@@ -38,7 +37,6 @@ export class QuizBattleService {
     const spirit = await prisma.spirit.findUnique({ where: { id: spiritId } });
     if (!spirit) throw Object.assign(new Error("精靈不存在"), { statusCode: 404 });
 
-    const stats = typeof spirit.stats === "string" ? JSON.parse(spirit.stats || "{}") : spirit.stats;
     const growth = calculateGrowth(spirit.element, spirit.level, spirit.stage);
     const playerHp = growth.hp;
 
