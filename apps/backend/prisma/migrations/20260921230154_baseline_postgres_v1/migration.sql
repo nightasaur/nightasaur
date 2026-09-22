@@ -1,5 +1,3 @@
-BEGIN;
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -130,6 +128,10 @@ CREATE TABLE "spirits" (
     "skills" TEXT NOT NULL DEFAULT '[]',
     "customization" TEXT NOT NULL DEFAULT '{}',
     "backstory" TEXT,
+    "imageUrl" TEXT,
+    "displayIcon" TEXT,
+    "currentEmotion" TEXT,
+    "lastComfortAt" TIMESTAMP(3),
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -168,6 +170,32 @@ CREATE TABLE "user_items" (
 );
 
 -- CreateTable
+CREATE TABLE "location_spawns" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "radius" DOUBLE PRECISION NOT NULL DEFAULT 100.0,
+    "spawnRate" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+    "element" TEXT,
+    "minLevel" INTEGER NOT NULL DEFAULT 1,
+    "maxLevel" INTEGER NOT NULL DEFAULT 10,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "type" TEXT,
+    "rarity" TEXT NOT NULL DEFAULT 'COMMON',
+    "availableSpirits" TEXT,
+    "activeSpawn" TEXT,
+    "spawnStartTime" TIMESTAMP(3),
+    "spawnEndTime" TIMESTAMP(3),
+    "cooldownHours" INTEGER NOT NULL DEFAULT 24,
+
+    CONSTRAINT "location_spawns_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "quests" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -184,7 +212,7 @@ CREATE TABLE "quests" (
 );
 
 -- CreateTable
-CREATE TABLE "QuestProgress" (
+CREATE TABLE "quest_progress" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "questId" TEXT NOT NULL,
@@ -195,7 +223,7 @@ CREATE TABLE "QuestProgress" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "QuestProgress_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "quest_progress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -440,6 +468,9 @@ CREATE TABLE "social_posts" (
     "userId" TEXT NOT NULL,
     "spiritId" TEXT,
     "content" TEXT NOT NULL,
+    "imageUrl" TEXT,
+    "platform" TEXT NOT NULL DEFAULT 'FACEBOOK',
+    "postId" TEXT,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "scheduledAt" TIMESTAMP(3),
     "publishedAt" TIMESTAMP(3),
@@ -485,27 +516,6 @@ CREATE TABLE "hotspots" (
 );
 
 -- CreateTable
-CREATE TABLE "location_spawns" (
-    "id" TEXT NOT NULL,
-    "latitude" DOUBLE PRECISION NOT NULL,
-    "longitude" DOUBLE PRECISION NOT NULL,
-    "name" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "rarity" TEXT NOT NULL DEFAULT 'COMMON',
-    "spawnRate" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
-    "radius" INTEGER NOT NULL DEFAULT 100,
-    "availableSpirits" TEXT NOT NULL,
-    "activeSpawn" TEXT NOT NULL,
-    "spawnStartTime" TIMESTAMP(3) NOT NULL,
-    "spawnEndTime" TIMESTAMP(3) NOT NULL,
-    "cooldownHours" INTEGER NOT NULL DEFAULT 24,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "location_spawns_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "location_visits" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -516,6 +526,77 @@ CREATE TABLE "location_visits" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "location_visits_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "english_conversations" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "spiritId" TEXT,
+    "topicId" TEXT,
+    "userMessage" TEXT NOT NULL,
+    "aiResponse" TEXT NOT NULL,
+    "detectedEmotion" TEXT,
+    "emotionIntensity" INTEGER,
+    "emotionalValidation" TEXT,
+    "validationLocale" TEXT,
+    "truthScore" INTEGER,
+    "grammarFeedback" TEXT,
+    "vocabularyHint" TEXT,
+    "pronunciation" TEXT,
+    "score" INTEGER,
+    "correctedText" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "english_conversations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "english_topics" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "difficulty" TEXT NOT NULL DEFAULT 'BEGINNER',
+    "prompts" TEXT NOT NULL,
+    "vocabulary" TEXT,
+    "grammarTips" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "english_topics_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "english_learning_progress" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "topicId" TEXT NOT NULL,
+    "totalSessions" INTEGER NOT NULL DEFAULT 0,
+    "completedSessions" INTEGER NOT NULL DEFAULT 0,
+    "totalMessages" INTEGER NOT NULL DEFAULT 0,
+    "avgScore" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "lastSessionAt" TIMESTAMP(3),
+    "bestScore" INTEGER,
+    "streakDays" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "english_learning_progress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "action_logs" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "actionType" TEXT NOT NULL,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "action_logs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -534,56 +615,6 @@ CREATE TABLE "ar_captures" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ar_captures_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "open_source_resources" (
-    "id" TEXT NOT NULL,
-    "canonicalId" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "kind" TEXT NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'AUXILIARY_OPEN_SOURCE',
-    "sourceUrl" TEXT NOT NULL,
-    "version" TEXT,
-    "licenseExpression" TEXT NOT NULL DEFAULT 'NOASSERTION',
-    "licenseUrl" TEXT,
-    "attribution" TEXT,
-    "contentSha256" TEXT,
-    "contentIncluded" BOOLEAN NOT NULL DEFAULT false,
-    "policyReviewStatus" TEXT NOT NULL DEFAULT 'REVIEW_REQUIRED',
-    "legalReviewStatus" TEXT NOT NULL DEFAULT 'NOT_REVIEWED',
-    "ingestionStatus" TEXT NOT NULL DEFAULT 'METADATA_ONLY',
-    "decisionReason" TEXT NOT NULL,
-    "attributionRequired" BOOLEAN NOT NULL DEFAULT false,
-    "shareAlikeRequired" BOOLEAN NOT NULL DEFAULT false,
-    "commercialUseAllowed" BOOLEAN NOT NULL DEFAULT false,
-    "redistributionAllowed" BOOLEAN NOT NULL DEFAULT false,
-    "modificationAllowed" BOOLEAN NOT NULL DEFAULT false,
-    "containsPersonalData" BOOLEAN NOT NULL DEFAULT false,
-    "containsSensitiveData" BOOLEAN NOT NULL DEFAULT false,
-    "containsChildData" BOOLEAN NOT NULL DEFAULT false,
-    "isAuthoritative" BOOLEAN NOT NULL DEFAULT false,
-    "provenanceJson" TEXT NOT NULL DEFAULT '{}',
-    "reviewedBy" TEXT,
-    "reviewedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "open_source_resources_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "open_source_content_chunks" (
-    "id" TEXT NOT NULL,
-    "resourceId" TEXT NOT NULL,
-    "sequence" INTEGER NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'AUXILIARY_OPEN_SOURCE',
-    "content" TEXT NOT NULL,
-    "contentSha256" TEXT NOT NULL,
-    "isAuthoritative" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "open_source_content_chunks_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -617,7 +648,10 @@ CREATE UNIQUE INDEX "items_name_key" ON "items"("name");
 CREATE UNIQUE INDEX "user_items_userId_itemId_key" ON "user_items"("userId", "itemId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "QuestProgress_userId_questId_key" ON "QuestProgress"("userId", "questId");
+CREATE UNIQUE INDEX "location_spawns_name_latitude_longitude_key" ON "location_spawns"("name", "latitude", "longitude");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "quest_progress_userId_questId_key" ON "quest_progress"("userId", "questId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "spirit_upgrades_spiritId_upgradeType_key" ON "spirit_upgrades"("spiritId", "upgradeType");
@@ -641,19 +675,10 @@ CREATE UNIQUE INDEX "daily_puzzles_date_key" ON "daily_puzzles"("date");
 CREATE UNIQUE INDEX "spirit_puzzle_progress_spiritId_puzzleId_key" ON "spirit_puzzle_progress"("spiritId", "puzzleId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "open_source_resources_canonicalId_key" ON "open_source_resources"("canonicalId");
+CREATE UNIQUE INDEX "hotspots_name_latitude_longitude_key" ON "hotspots"("name", "latitude", "longitude");
 
 -- CreateIndex
-CREATE INDEX "open_source_resources_kind_ingestionStatus_idx" ON "open_source_resources"("kind", "ingestionStatus");
-
--- CreateIndex
-CREATE INDEX "open_source_resources_licenseExpression_idx" ON "open_source_resources"("licenseExpression");
-
--- CreateIndex
-CREATE INDEX "open_source_content_chunks_resourceId_idx" ON "open_source_content_chunks"("resourceId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "open_source_content_chunks_resourceId_sequence_key" ON "open_source_content_chunks"("resourceId", "sequence");
+CREATE UNIQUE INDEX "english_learning_progress_userId_topicId_key" ON "english_learning_progress"("userId", "topicId");
 
 -- AddForeignKey
 ALTER TABLE "language_preferences" ADD CONSTRAINT "language_preferences_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -689,10 +714,10 @@ ALTER TABLE "user_items" ADD CONSTRAINT "user_items_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "user_items" ADD CONSTRAINT "user_items_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "QuestProgress" ADD CONSTRAINT "QuestProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "quest_progress" ADD CONSTRAINT "quest_progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "QuestProgress" ADD CONSTRAINT "QuestProgress_questId_fkey" FOREIGN KEY ("questId") REFERENCES "quests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "quest_progress" ADD CONSTRAINT "quest_progress_questId_fkey" FOREIGN KEY ("questId") REFERENCES "quests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "spirit_upgrades" ADD CONSTRAINT "spirit_upgrades_spiritId_fkey" FOREIGN KEY ("spiritId") REFERENCES "spirits"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -764,6 +789,24 @@ ALTER TABLE "location_visits" ADD CONSTRAINT "location_visits_locationId_fkey" F
 ALTER TABLE "location_visits" ADD CONSTRAINT "location_visits_spiritId_fkey" FOREIGN KEY ("spiritId") REFERENCES "spirits"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "english_conversations" ADD CONSTRAINT "english_conversations_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "english_conversations" ADD CONSTRAINT "english_conversations_spiritId_fkey" FOREIGN KEY ("spiritId") REFERENCES "spirits"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "english_conversations" ADD CONSTRAINT "english_conversations_topicId_fkey" FOREIGN KEY ("topicId") REFERENCES "english_topics"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "english_learning_progress" ADD CONSTRAINT "english_learning_progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "english_learning_progress" ADD CONSTRAINT "english_learning_progress_topicId_fkey" FOREIGN KEY ("topicId") REFERENCES "english_topics"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "action_logs" ADD CONSTRAINT "action_logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ar_captures" ADD CONSTRAINT "ar_captures_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -771,9 +814,3 @@ ALTER TABLE "ar_captures" ADD CONSTRAINT "ar_captures_spiritId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "ar_captures" ADD CONSTRAINT "ar_captures_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location_spawns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "open_source_content_chunks" ADD CONSTRAINT "open_source_content_chunks_resourceId_fkey" FOREIGN KEY ("resourceId") REFERENCES "open_source_resources"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
-
-COMMIT;
