@@ -41,6 +41,9 @@ model User {
   LocationVisits        LocationVisit[]
   HatchingRecords       HatchingRecord[]
   ARCaptures            ARCapture[]
+  EnglishConversations  EnglishConversation[]
+  EnglishLearningProgress EnglishLearningProgress[]
+  ActionLogs          ActionLog[]
 
   @@map("users")
 }
@@ -156,6 +159,15 @@ model Spirit {
   skills               String                 @default("[]")
   customization        String                 @default("{}")
   backstory            String?
+  
+  // 🖼️ 精靈圖片
+  imageUrl             String?                // 精靈圖片網址
+  
+  // 🎭 情緒狀態管理
+  displayIcon          String?                // 動態顯示圖標（情緒圖標）
+  currentEmotion       String?                // 當前情緒狀態
+  lastComfortAt        DateTime?              // 上次安慰時間
+  
   isActive             Boolean                @default(true)
   deletedAt            DateTime?
   createdAt            DateTime               @default(now())
@@ -173,6 +185,7 @@ model Spirit {
   LocationVisit        LocationVisit[]
   ARCapture            ARCapture[]
   upgrades             SpiritUpgrade[]
+  EnglishConversations EnglishConversation[]
 
   @@map("spirits")
 }
@@ -208,6 +221,38 @@ model UserItem {
 
   @@unique([userId, itemId])
   @@map("user_items")
+}
+
+// LocationSpawn model for spirit spawn points
+model LocationSpawn {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  radius      Float    @default(100.0)
+  spawnRate   Float    @default(0.5)
+  element     String?
+  minLevel    Int      @default(1)
+  maxLevel    Int      @default(10)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // AR 相關欄位
+  type             String?   // 地點類型
+  rarity           String    @default("COMMON") // 稀有度
+  availableSpirits String?   // JSON 格式的可用精靈列表
+  activeSpawn      String?   // JSON 格式的當前活躍精靈
+  spawnStartTime   DateTime? // 生成開始時間
+  spawnEndTime     DateTime? // 生成結束時間
+  cooldownHours    Int       @default(24) // 冷卻時間（小時）
+  
+  visits      LocationVisit[]
+  captures    ARCapture[]
+  
+  @@unique([name, latitude, longitude])
+  @@map("location_spawns")
 }
 
 // Quest model
@@ -508,6 +553,9 @@ model SocialPost {
   userId      String
   spiritId    String?
   content     String
+  imageUrl    String?
+  platform    String    @default("FACEBOOK")
+  postId      String?   // 外部平台貼文ID
   status      String    @default("DRAFT")
   scheduledAt DateTime?
   publishedAt DateTime?
@@ -552,31 +600,11 @@ model Hotspot {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@unique([name, latitude, longitude])
   @@map("hotspots")
 }
 
-// LocationSpawn model for spirit spawn points
-model LocationSpawn {
-  id               String          @id @default(cuid())
-  latitude         Float
-  longitude        Float
-  name             String
-  type             String
-  rarity           String          @default("COMMON")
-  spawnRate        Float           @default(0.5)
-  radius           Int             @default(100)
-  availableSpirits String
-  activeSpawn      String
-  spawnStartTime   DateTime
-  spawnEndTime     DateTime
-  cooldownHours    Int             @default(24)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  arCaptures       ARCapture[]
-  locationVisits   LocationVisit[]
 
-  @@map("location_spawns")
-}
 
 // LocationVisit model for tracking location visits
 model LocationVisit {
@@ -592,6 +620,96 @@ model LocationVisit {
   spirit      Spirit?       @relation(fields: [spiritId], references: [id], onDelete: SetNull)
 
   @@map("location_visits")
+}
+
+// English Training Conversation Models
+
+model EnglishConversation {
+  id              String   @id @default(cuid())
+  userId          String
+  spiritId        String?
+  topicId         String?
+  userMessage     String   // 使用者輸入的英文句子
+  aiResponse      String   // AI 回應的英文句子
+  
+  // 📥 情緒容器維度
+  detectedEmotion       String?  // 識別出的表面/深層情緒
+  emotionIntensity      Int?     // 情緒強度 0-10
+  emotionalValidation   String?  // 精靈的情緒接納語句
+  validationLocale      String?  // 接納語句的語言
+  
+  // 📊 真實性驗證維度
+  truthScore            Int?     // 真實性得分 40-100
+  
+  // 原有學習回饋
+  grammarFeedback String?  // 文法回饋
+  vocabularyHint  String?  // 單字提示
+  pronunciation   String?  // 發音建議
+  score           Int?     // 評分 1-100
+  correctedText   String?  // 修正後的句子
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit          Spirit?  @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+  topic           EnglishTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  
+  @@map("english_conversations")
+}
+
+model EnglishTopic {
+  id          String   @id @default(cuid())
+  name        String   // 主題名稱
+  category    String   // 類別：daily, work, travel, business, social
+  description String   // 主題描述
+  difficulty  String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  prompts     String   // JSON 格式的對話提示
+  vocabulary  String?  // JSON 格式的相關單字
+  grammarTips String?  // JSON 格式的文法提示
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  conversations EnglishConversation[]
+  learningProgress EnglishLearningProgress[]
+  
+  @@map("english_topics")
+}
+
+model EnglishLearningProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  topicId         String
+  totalSessions   Int      @default(0)
+  completedSessions Int    @default(0)
+  totalMessages   Int      @default(0)
+  avgScore        Float    @default(0)
+  lastSessionAt   DateTime?
+  bestScore       Int?     // 最佳分數
+  streakDays      Int      @default(0) // 連續學習天數
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic           EnglishTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, topicId])
+  @@map("english_learning_progress")
+}
+
+// 審計日誌模型
+model ActionLog {
+  id          String   @id @default(cuid())
+  userId      String
+  actionType  String   // 行動類型，如 "ENGLISH_CHAT"
+  metadata    Json?    // 行動元數據
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("action_logs")
 }
 
 // ARCapture model for AR capture records

@@ -16,6 +16,7 @@ import arLocationRoutes from "./routes/arLocation.js";
 import languageRoutes from "./routes/language.js";
 import academyRoutes from "./routes/academy.js";
 import assistantRoutes from "./routes/assistant.js";
+import englishTrainingRoutes from "./routes/englishTraining.js";
 
 const app = express();
 if (!Number.isSafeInteger(config.trustProxyHops) || config.trustProxyHops < 0) {
@@ -53,6 +54,7 @@ app.use("/api/ar", arLocationRoutes);
 app.use("/api/language", languageRoutes);
 app.use("/api/academy", academyRoutes);
 app.use("/api/assistant", assistantRoutes);
+app.use("/api/english-training", englishTrainingRoutes);
 
 // 錯誤處理中間件
 app.use(errorHandler);
