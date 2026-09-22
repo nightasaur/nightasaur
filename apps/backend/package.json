@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && (tsc || exit 0)",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:english": "tsx src/scripts/seedEnglishTopics.ts",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate"
   },

@@ -3,17 +3,17 @@ import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
 
 /**
- * AI ?–ç??Ÿæ??å? ???¼å« Python AI Engine ??ComfyUI
+ * AI ?ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½? ???ï¿½å« Python AI Engine ??ComfyUI
  */
 export class ImageGenService {
   /**
-   * ?ºç²¾?ˆç??å??‡ï??Œæ™¯ä»»å??¨ï?
+   * ?ï¿½ç²¾?ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½??ï¿½æ™¯ä»»ï¿½??ï¿½ï¿½?
    */
   async generateSpiritImage(spiritId: string) {
     const spirit = await prisma.spirit.findUnique({ where: { id: spiritId } });
     if (!spirit) return;
 
-    // ?´æ–°ä»»å??€??
+    // ?ï¿½æ–°ä»»ï¿½??ï¿½??
     await prisma.generationTask.updateMany({
       where: { spiritId, taskType: "GENERATE_SPIRIT_IMAGE", status: "PENDING" },
       data: { status: "PROCESSING" },
@@ -36,7 +36,7 @@ export class ImageGenService {
         const imageUrl = data.images[0].url || `http://localhost:8188/view?filename=${data.images[0].filename}`;
         await prisma.spirit.update({
           where: { id: spiritId },
-          data: { imageUrl },
+          data: { imageUrl: imageUrl },
         });
         await prisma.generationTask.updateMany({
           where: { spiritId, taskType: "GENERATE_SPIRIT_IMAGE", status: "PROCESSING" },
@@ -64,7 +64,7 @@ export class ImageGenService {
   }
 
   /**
-   * ?¹æ¬¡?•ç??€?‰å??•ç??„å??‡ç??ä»»??
+   * ?ï¿½æ¬¡?ï¿½ï¿½??ï¿½?ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½??ï¿½ï¿½??ï¿½ä»»??
    */
   async processPendingTasks() {
     const tasks = await prisma.generationTask.findMany({

@@ -126,21 +126,38 @@ export class SquadService {
     
     const xpGained = this.calculateTrainingXp(duration, trainingType);
     
-    let training = await prisma.squadTraining.findUnique({
+    let training = await prisma.squadTraining.findFirst({
       where: {
-        squadId_spiritId_trainingType: {
+        member: {
           squadId: squad.id,
           spiritId,
-          trainingType
-        }
-      }
+        },
+        trainingType,
+      },
     });
     
     if (!training) {
-      training = await prisma.squadTraining.create({
-        data: {
+      // 先獲取或創建 SquadMember
+      let squadMember = await prisma.squadMember.findFirst({
+        where: {
           squadId: squad.id,
           spiritId,
+        },
+      });
+
+      if (!squadMember) {
+        squadMember = await prisma.squadMember.create({
+          data: {
+            squadId: squad.id,
+            spiritId,
+            position: 0, // 使用默認位置，因為我們無法獲取 members 屬性
+          },
+        });
+      }
+
+      training = await prisma.squadTraining.create({
+        data: {
+          memberId: squadMember.id,
           trainingType,
           xp: xpGained,
           lastTrained: new Date()

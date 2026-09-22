@@ -4,12 +4,64 @@ import { puzzleService } from "./puzzle.js";
 import { squadService } from "./squad.js";
 
 export class GameLogicService {
-  // 獲取完整遊戲狀態（包含小隊）
-  async getFullGameState(userId: string) {
+  // 完成遊戲循環
+  async completeGameCycle(userId: string, spiritId: string, action: string) {
+    // 這裡實現遊戲循環邏輯
+    // 1. 追蹤動作
+    const questResult = await gameService.trackAction(userId, action, 1);
+    
+    // 2. 更新精靈經驗
+    const spirit = await prisma.spirit.findUnique({ where: { id: spiritId } });
+    if (spirit) {
+      const xpGained = 10; // 基礎經驗
+      await prisma.spirit.update({
+        where: { id: spiritId },
+        data: { experience: { increment: xpGained } }
+      });
+      
+      // 檢查升級
+      const xpForNextLevel = 100 * spirit.level;
+      const newExperience = spirit.experience + xpGained;
+      let newLevel = spirit.level;
+      let leveledUp = false;
+      
+      if (newExperience >= xpForNextLevel) {
+        newLevel += 1;
+        leveledUp = true;
+        await prisma.spirit.update({
+          where: { id: spiritId },
+          data: {
+            level: newLevel,
+            experience: newExperience - xpForNextLevel
+          }
+        });
+      }
+      
+      return {
+        success: true,
+        action,
+        questRewards: questResult,
+        spirit: {
+          xpGained,
+          leveledUp,
+          newLevel: leveledUp ? newLevel : undefined
+        }
+      };
+    }
+    
+    return {
+      success: true,
+      action,
+      questRewards: questResult
+    };
+  }
+  
+  // 獲取遊戲概覽
+  async getGameOverview(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        spirits: {
+        Spirits: {
           where: { isActive: true },
           take: 1
         }
@@ -18,15 +70,8 @@ export class GameLogicService {
     
     if (!user) throw new Error("使用者不存在");
     
-    // 獲取小隊資訊
     const squad = await squadService.getSquad(userId);
-    const squadStats = await squadService.getSquadStats(userId);
-    
-    // 獲取任務
     const quests = await gameService.getQuests(userId);
-    
-    // 獲取每日益智
-    const dailyPuzzle = await puzzleService.getDailyPuzzle().catch(() => null);
     
     return {
       user: {
@@ -37,17 +82,20 @@ export class GameLogicService {
         gems: user.gems,
         coins: user.coins
       },
-      activeSpirit: user.spirits[0] || null,
-      quests: quests.slice(0, 3),
-      dailyPuzzle,
+      activeSpirit: user.Spirits[0] || null,
       squad: squad ? {
-        ...squad,
-        stats: squadStats
-      } : null
+        id: squad.id,
+        name: squad.name,
+        memberCount: squad.members?.length || 0
+      } : null,
+      activeQuests: quests.slice(0, 3).filter(q => !q.progress?.claimed),
+      dailyActions: {
+        remaining: 5, // 假設每日5次動作
+        completed: 0  // 可以從資料庫獲取
+      }
     };
   }
-  
-  // 小隊協同益智挑戰
+// 小隊協同益智挑戰
   async squadPuzzleChallenge(userId: string, puzzleId: string) {
     const squad = await squadService.getSquad(userId);
     if (!squad) throw new Error("請先創建小隊");
@@ -146,7 +194,7 @@ export class GameLogicService {
       success: true,
       dailyTraining,
       results,
-      completedQuests: questResult.completedQuests
+      questRewards: questResult
     };
   }
   
@@ -202,6 +250,49 @@ export class GameLogicService {
       previousSpirit: activeMember.spirit.name,
       currentSpirit: nextMember.spirit.name,
       result
+    };
+  }
+  
+  // 獲取完整遊戲狀態
+  async getFullGameState(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        Spirits: {
+          where: { isActive: true },
+          take: 1
+        }
+      }
+    });
+    
+    if (!user) throw new Error("使用者不存在");
+    
+    // 獲取小隊資訊
+    const squad = await squadService.getSquad(userId);
+    const squadStats = await squadService.getSquadStats(userId);
+    
+    // 獲取任務
+    const quests = await gameService.getQuests(userId);
+    
+    // 獲取每日益智
+    const dailyPuzzle = await puzzleService.getDailyPuzzle().catch(() => null);
+    
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        trainerLevel: user.trainerLevel,
+        trainerXp: user.trainerXp,
+        gems: user.gems,
+        coins: user.coins
+      },
+      activeSpirit: user.Spirits[0] || null,
+      quests: quests.slice(0, 3),
+      dailyPuzzle,
+      squad: squad ? {
+        ...squad,
+        stats: squadStats
+      } : null
     };
   }
 }

@@ -1,6 +1,6 @@
-import { IELTS_WORDS } from "./ieltsVocab.js";
-import { IELTS_ARTICLES } from "./ieltsReading.js";
-import type { IeltsArticle } from "./ieltsReading.js";
+import { IELTS_WORDS } from "./ieltsVocab";
+import { IELTS_ARTICLES } from "./ieltsReading";
+import type { IeltsArticle } from "./ieltsReading";
 
 // IELTS vocabulary question generator
 function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
@@ -36,6 +36,9 @@ function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
         language: LANG_NAMES[langIdx],
       };
     }
+  }
+}
+
 /** Generate IELTS reading comprehension questions */
 function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
   for (const article of IELTS_ARTICLES) {
@@ -66,8 +69,6 @@ function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
         };
       }
     }
-  }
-}
   }
 }
 // SPDX-License-Identifier: MIT
@@ -181,7 +182,7 @@ function* genMathQs(langIdx: number, level: number): Generator<QuizQuestion> {
     const final = shuffle(opts).slice(0, 4);
     yield {
       id: `math-${level}-${i}-${langIdx}`, category: "MATH" as any,
-      question: q, options: final, answer: final.indexOf(ans),
+      question: q, options: final.map(x => x.toString()), answer: final.indexOf(ans),
       explanation: `= ${ans}`, level: level,
       difficulty: level > 30 ? 3 : level > 15 ? 2 : 1,
       language: LANG_NAMES[langIdx],
@@ -356,7 +357,7 @@ export function generateQuestions(count: number, level: number, lang: Lang = "zh
     const symbols = ["＋","+","+","＋"];const q = isAdd ? `${a} ${symbols[langIdx]} ${b} = ?` : `${Math.max(a,b)}  ${symbols[langIdx]}  ${Math.min(a,b)} = ?`;
     extra.push({
       id: `extra-${level}-${i}`, category: "MATH" as any,
-      question: q, options: shuffle([ans, ans+1, ans-1, ans+2, ans*2, ans-2].filter(x => x > 0)),
+      question: q, options: shuffle([ans, ans+1, ans-1, ans+2, ans*2, ans-2].filter(x => x > 0)).map(x => x.toString()),
       answer: 0, explanation: `= ${ans}`, level,
       difficulty: level > 30 ? 3 : level > 15 ? 2 : 1,
       language: lang,

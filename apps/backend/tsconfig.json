@@ -12,7 +12,6 @@
     "strictNullChecks": false,
     "noImplicitReturns": false,
     "skipLibCheck": true,
-    "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
     "strictFunctionTypes": false,
     "strictBindCallApply": false,
