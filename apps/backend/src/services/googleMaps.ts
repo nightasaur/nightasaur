@@ -2,13 +2,12 @@ import prisma from "../config/prisma.js";
 
 export class GoogleMapsService {
   // Google Maps API 金鑰
-  private apiKey = process.env.GOOGLE_MAPS_API_KEY || "";
   
   // 使用 Google Places API 尋找附近的人潮聚集處
   async findNearbyPlaces(
     latitude: number,
     longitude: number,
-    radius: number = 1000,
+    _radius: number = 1000,
     type?: string
   ) {
     // 模擬 Google Places API 回應
@@ -54,7 +53,7 @@ export class GoogleMapsService {
       museum: ["博物館", "美術館", "展覽館", "文化中心"]
     };
     
-    const names = typeNames[type] || ["地點", "場所", "位置"];
+    const names = typeNames[type as keyof typeof typeNames] || ["地點", "場所", "位置"];
     
     for (let i = 0; i < placeCount; i++) {
       const latOffset = (Math.random() - 0.5) * 0.01;
@@ -138,7 +137,7 @@ export class GoogleMapsService {
       "cafe": "SHOPPING"
     };
     
-    return typeMapping[placeType] || "SHOPPING";
+    return typeMapping[placeType as keyof typeof typeMapping] || "SHOPPING";
   }
   
   // 計算熱門程度
@@ -159,7 +158,7 @@ export class GoogleMapsService {
       CAMPUS: ["CAMPUS", "EDUCATION", "YOUTH", "CREATIVE"]
     };
     
-    return spawnTypes[hotspotType] || ["SHOPPING"];
+    return spawnTypes[hotspotType as keyof typeof spawnTypes] || ["SHOPPING"];
   }
   
   // 生成高峰時段
@@ -172,11 +171,11 @@ export class GoogleMapsService {
       CAMPUS: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
     };
     
-    return peakHours[hotspotType] || [10, 11, 12, 13, 14, 15, 16];
+    return peakHours[hotspotType as keyof typeof peakHours] || [10, 11, 12, 13, 14, 15, 16];
   }
   
   // 從熱點創建生成點
-  private async createSpawnFromHotspot(hotspot: any, userId: string) {
+  private async createSpawnFromHotspot(hotspot: any, _userId: string) {
     try {
       const availableSpirits = this.getSpiritsByLocationType(hotspot.type);
       
@@ -241,7 +240,7 @@ export class GoogleMapsService {
       ]
     };
     
-    return spiritsByType[locationType] || [
+    return spiritsByType[locationType as keyof typeof spiritsByType] || [
       { name: "普通精靈", species: "Normal", element: "⭐" }
     ];
   }
@@ -261,7 +260,7 @@ export class GoogleMapsService {
     originLng: number,
     destinationLat: number,
     destinationLng: number,
-    mode: string = "walking"
+    _mode: string = "walking"
   ) {
     const distance = this.calculateDistance(originLat, originLng, destinationLat, destinationLng);
     const duration = Math.floor(distance / 1.4);

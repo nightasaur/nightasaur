@@ -39,7 +39,6 @@ export class ARLocationController {
   // 獲取附近的生成點
   async getNearbySpawns(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
       const { latitude, longitude, radius = 500 } = req.query;
       
       if (!latitude || !longitude) {
@@ -62,7 +61,6 @@ export class ARLocationController {
   // 獲取附近的熱點
   async getNearbyHotspots(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
       const { latitude, longitude, radius = 1000 } = req.query;
       
       if (!latitude || !longitude) {

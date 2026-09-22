@@ -23,7 +23,7 @@ export class PuzzleController {
   }
   
   // 獲取每日益智
-  async getDailyPuzzle(req: Request, res: Response) {
+  async getDailyPuzzle(_req: Request, res: Response) {
     try {
       const dailyPuzzle = await puzzleService.getDailyPuzzle();
       res.json({ dailyPuzzle });

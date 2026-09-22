@@ -3,9 +3,6 @@ import {
   HatchingEvent, 
   HatchingInteraction,
   HatchingState,
-  hatchingRequestSchema,
-  hatchingInteractionSchema,
-  hatchingStatusSchema
 } from "../utils/hatchingSystem.js";
 import prisma from "../config/prisma.js";
 import { gameService } from "./game.js";
@@ -320,7 +317,7 @@ export class HatchingService {
   }
 
   // 獲取互動反饋
-  private getInteractionFeedback(interactionType: string, intensity: number): string {
+  private getInteractionFeedback(interactionType: string, _intensity: number): string {
     const feedback = {
       TAP: "輕輕敲擊讓蛋殼產生共鳴...",
       SHAKE: "搖動讓胚胎活動筋骨...",
