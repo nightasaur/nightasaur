@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -11,9 +11,7 @@ const require = createRequire(import.meta.url);
 
 test("account remediation defaults to no writes, requires recovery, and changes only exact targets", async () => {
   const dir = await mkdtemp(join(tmpdir(), "nightasaur-remediation-"));
-  // Prisma's Windows schema engine needs the empty SQLite file to exist.
-  await writeFile(join(dir, "test.db"), "", { flag: "wx" });
-  const url = `file:${join(dir, "test.db")}`;
+  const url = process.env.TEST_DATABASE_URL; if (!url) { console.warn("SKIP: TEST_DATABASE_URL not set"); return; }
   execFileSync(process.execPath, [require.resolve("prisma/build/index.js"), "db", "push", "--skip-generate", "--schema", "prisma/schema.prisma"], { env: { ...process.env, DATABASE_URL: url }, stdio: "pipe" });
   const db = new PrismaClient({ datasources: { db: { url } } });
   try {

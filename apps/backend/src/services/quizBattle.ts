@@ -79,7 +79,7 @@ export class QuizBattleService {
 
     if (isCorrect) {
       state.correctCount++;
-      const result = calcQuizDamage(state.playerElement, state.enemyElement, state.playerLevel);
+      const result = calcQuizDamage(q.element || state.playerElement, state.enemyElement, state.playerLevel);
       damage = result.damage; effective = result.effective; critical = result.critical;
       state.enemyHp = Math.max(0, state.enemyHp - damage);
       state.totalDamage += damage;

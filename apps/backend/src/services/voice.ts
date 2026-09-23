@@ -68,7 +68,7 @@ export class VoiceService {
     if (!session) return;
     
     const jsonMsg = JSON.stringify(message);
-    for (const [userId, ws] of session.connections) {
+    for (const [_userId, ws] of session.connections) {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(jsonMsg);
       }

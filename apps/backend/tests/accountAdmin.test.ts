@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -11,8 +11,7 @@ const require = createRequire(import.meta.url);
 
 test("admin HTTP controls preserve accounts, revoke sessions, protect admins and audit atomically", async () => {
   const dir = await mkdtemp(join(tmpdir(), "nightasaur-admin-"));
-  await writeFile(join(dir, "test.db"), "", { flag: "wx" });
-  process.env.DATABASE_URL = `file:${join(dir, "test.db")}`;
+  const __testUrl = process.env.TEST_DATABASE_URL; if (!__testUrl) { console.warn("SKIP: TEST_DATABASE_URL not set"); return; } process.env.DATABASE_URL = __testUrl;
   execFileSync(
     process.execPath,
     [

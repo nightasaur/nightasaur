@@ -1,4 +1,4 @@
-import { NAMING_SYSTEM_CONFIG, namingRequestSchema, namingSuggestionSchema, namingValidationSchema } from "../utils/namingSystem.js";
+import { NAMING_SYSTEM_CONFIG, namingValidationSchema } from "../utils/namingSystem.js";
 import prisma from "../config/prisma.js";
 
 // 命名資料庫（可擴展）
@@ -202,7 +202,7 @@ export class NamingService {
   }
   
   // AI輔助命名（可擴展為調用AI服務）
-  async getAISuggestions(element: string, personality?: string) {
+  async getAISuggestions(element: string, _personality?: string) {
     // 這裡可以集成AI命名服務
     // 目前返回基於元素的基礎建議
     return this.generateSuggestions({

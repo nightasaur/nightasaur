@@ -72,7 +72,7 @@ export class ARLocationService {
       return distance <= radius;
     }).map(spawn => ({
       ...spawn,
-      availableSpirits: JSON.parse(spawn.availableSpirits),
+      availableSpirits: JSON.parse(spawn.availableSpirits ?? "[]"),
       activeSpawn: spawn.activeSpawn && spawn.activeSpawn !== "" ? JSON.parse(spawn.activeSpawn) : null,
       distance: this.calculateDistance(latitude, longitude, spawn.latitude, spawn.longitude)
     }));
@@ -156,14 +156,13 @@ export class ARLocationService {
     let spiritId = null;
     
     if (location.activeSpawn && location.activeSpawn !== "") {
-      const activeSpawn = JSON.parse(location.activeSpawn);
       const spawnChance = location.spawnRate * (Math.random() * 0.3 + 0.85);
       
       if (Math.random() < spawnChance) {
         spiritFound = true;
         
         // 從可用精靈中隨機選擇
-        const availableSpirits = JSON.parse(location.availableSpirits);
+        const availableSpirits = JSON.parse(location.availableSpirits ?? "[]");
         const selectedSpirit = availableSpirits[
           Math.floor(Math.random() * availableSpirits.length)
         ];
@@ -412,7 +411,7 @@ export class ARLocationService {
   
   // 獲取推薦的探索路線
   async getExplorationRoute(
-    userId: string, 
+    _userId: string, 
     latitude: number, 
     longitude: number, 
     radius: number = 2000

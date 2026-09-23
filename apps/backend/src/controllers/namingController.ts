@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { namingService } from "../services/namingService.js";
-import { namingRequestSchema, namingSuggestionSchema, namingValidationSchema } from "../utils/namingSystem.js";
 
 export class NamingController {
   // 獲取命名建議
   async getSuggestions(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).userId;
       const { element, count = 5, language = "zh-TW", style = "CLASSIC" } = req.query;
       
       if (!element) {
@@ -76,10 +74,8 @@ export class NamingController {
   }
   
   // 獲取命名歷史
-  async getHistory(req: Request, res: Response, next: NextFunction) {
+  async getHistory(_req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).userId;
-      const { limit = 10 } = req.query;
       
       // 這裡可以從數據庫獲取歷史
       // 目前返回空數組，待實現

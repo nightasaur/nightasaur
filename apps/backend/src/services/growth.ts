@@ -4,7 +4,6 @@
 /**
  * 精靈成長系統 — 依元素與階段決定能力成長率
  */
-import { ELEMENT_EMOJI, STAGE_LABELS } from "@nightasaur/shared";
 
 // 各元素的成長傾向
 export const ELEMENT_GROWTH: Record<string, {

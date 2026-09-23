@@ -7,7 +7,6 @@
  */
 import { Request, Response, NextFunction } from "express";
 import prisma from "../config/prisma.js";
-import { gameService } from "../services/game.js";
 
 export class AcademyControllerPart2 {
   // 獲取學習進度
@@ -50,7 +49,7 @@ export class AcademyControllerPart2 {
         };
       });
 
-      res.json({
+      return res.json({
         overall: {
           totalCourses: courses.filter(c => c.unlocked).length,
           completedCourses: sessions.length,
@@ -73,7 +72,7 @@ export class AcademyControllerPart2 {
         })),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 
