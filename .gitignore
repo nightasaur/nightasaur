@@ -64,7 +64,8 @@ backup/
 # Phase 5A artifacts
 _backup/
 _logs/
-scripts/*.ps1
+# Phase 5A diagnostic scripts (not project artifacts)
+scripts/phase5a*.ps1
 
 # Backup and diagnostic files
 *.phase5a3bak
@@ -108,3 +109,8 @@ apps/backend/validation-*.txt
 
 # Prisma archive (local backup only)
 apps/backend/prisma/_archive/
+
+# Docker Compose local data
+data/pg/
+data/ollama/
+.env.local
