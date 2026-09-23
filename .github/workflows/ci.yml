@@ -42,6 +42,23 @@ jobs:
   build-backend:
     name: Build Backend
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: nightasaur_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d nightasaur_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/nightasaur_ci
+      TEST_DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/nightasaur_ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,6 +67,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npx prisma generate
+        working-directory: apps/backend
+      - run: npx prisma migrate deploy
         working-directory: apps/backend
       - run: npm run test
         working-directory: apps/backend
@@ -97,11 +116,12 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: node scripts/sync-postgres-schema.mjs --check
-      - run: npx prisma validate --schema apps/backend/prisma/postgresql/schema.prisma
-      - run: npx prisma generate --schema apps/backend/prisma/postgresql/schema.prisma
-      - run: npx prisma migrate deploy --schema apps/backend/prisma/postgresql/schema.prisma
-      - run: npx prisma migrate deploy --schema apps/backend/prisma/postgresql/schema.prisma
-      - run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel apps/backend/prisma/postgresql/schema.prisma --exit-code
-      - run: node --import tsx scripts/test-postgres-sessions.ts
+      - run: npx prisma validate
+        working-directory: apps/backend
+      - run: npx prisma generate
+        working-directory: apps/backend
+      - run: npx prisma migrate deploy
+        working-directory: apps/backend
+      - run: npx prisma migrate status
+        working-directory: apps/backend
       - run: npm -w apps/backend run build
