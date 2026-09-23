@@ -1,0 +1,73 @@
+# Nightasaur - Local Docker Compose
+# One-command local startup: PostgreSQL + Ollama + Backend
+#
+# Usage:
+#   cp .env.local.example .env.local
+#   docker compose -f docker-compose.local.yml --env-file .env.local up -d
+#   docker compose -f docker-compose.local.yml exec ollama ollama pull qwen2.5:3b
+#   curl http://localhost:3002/api/english-training/topics
+#
+# Stop:
+#   docker compose -f docker-compose.local.yml down
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nightasaur-local-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nightasaur
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nightasaur"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nightasaur-local-ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ./data/ollama:/root/.ollama
+    # Uncomment below for GPU (requires nvidia-container-toolkit on Linux):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: nightasaur-local-app
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/nightasaur?schema=public
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:3b
+      OLLAMA_TIMEOUT_MS: "60000"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.local}
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "127.0.0.1:3002:3002"
+    command: sh -c "cd apps/backend && npx prisma migrate deploy && node dist/index.js"
+
+volumes:
+  pg_data:
+  ollama_data:
