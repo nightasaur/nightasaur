@@ -4,6 +4,7 @@ import { getLLMProvider, type LLMMessage } from "./llm/index.js";
 import { spiritDialogueService } from "./spirit/SpiritDialogueService.js";
 import type { SupportedLanguage } from "./spirit/personality.js";
 import { detectLanguage } from "./spirit/detectLanguage.js";
+import { memoryService } from "./spirit/MemoryService.js";
 
 const VALID_LANGUAGES: SupportedLanguage[] = ["zh-TW", "zh-CN", "en", "ja", "ko", "es"];
 
@@ -52,6 +53,9 @@ export class DialogueService {
       ]);
 
     // 主要：Ollama 本地推理
+    // 檢索相關記憶
+    const memories = await memoryService.retrieve(spiritId, message, 5).catch(() => []);
+
     const aiResponse = await spiritDialogueService.chat({
       spirit: {
         id: spirit.id,
@@ -68,6 +72,7 @@ export class DialogueService {
       history,
       language,
       englishFirst,
+      memories,
     });
 
     await prisma.conversation.create({
@@ -80,6 +85,12 @@ export class DialogueService {
     });
 
     await gameService.trackAction(userId, "CHAT", 1).catch(() => {});
+
+    // 提取並儲存新記憶（非阻塞）
+    memoryService
+      .extract(message, aiResponse)
+      .then((items) => memoryService.save(spiritId, userId, items))
+      .catch((err) => console.warn("[Memory] save failed:", err instanceof Error ? err.message : err));
 
     return { message: aiResponse, spiritName: spirit.name };
   }
