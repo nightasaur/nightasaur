@@ -56,7 +56,7 @@ export class DialogueService {
     // 檢索相關記憶
     const memories = await memoryService.retrieve(spiritId, message, 5).catch(() => []);
 
-    const aiResponse = await spiritDialogueService.chat({
+    const chatResult = await spiritDialogueService.chatWithEmotion({
       spirit: {
         id: spirit.id,
         name: spirit.name,
@@ -75,6 +75,24 @@ export class DialogueService {
       memories,
     });
 
+    const aiResponse = chatResult.reply;
+
+    // 更新精靈情緒狀態
+    if (spiritId) {
+      try {
+        await prisma.spirit.update({
+          where: { id: spiritId },
+          data: {
+            currentEmotion: chatResult.emotion,
+            displayIcon: chatResult.displayIcon,
+            lastComfortAt: chatResult.intensity >= 6 ? new Date() : undefined,
+          },
+        });
+      } catch (err) {
+        console.warn("[Emotion] spirit update failed:", err instanceof Error ? err.message : err);
+      }
+    }
+
     await prisma.conversation.create({
       data: { spiritId, userMessage: message, aiResponse },
     });
@@ -92,7 +110,13 @@ export class DialogueService {
       .then((items) => memoryService.save(spiritId, userId, items))
       .catch((err) => console.warn("[Memory] save failed:", err instanceof Error ? err.message : err));
 
-    return { message: aiResponse, spiritName: spirit.name };
+    return {
+      message: aiResponse,
+      spiritName: spirit.name,
+      emotion: chatResult.emotion,
+      intensity: chatResult.intensity,
+      displayIcon: chatResult.displayIcon,
+    };
   }
 
   // 生成精靈背景故事（改用 Ollama 本地推理）
