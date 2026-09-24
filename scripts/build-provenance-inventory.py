@@ -14,10 +14,12 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data/compliance"
 
+def normalized(path):
+    # Normalize CRLF -> LF so Windows and Linux produce the same bytes
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
 def digest(path):
-    # Normalize line endings so Windows (CRLF) and Linux (LF) produce the same hash
-    content = path.read_bytes().replace(b"\r\n", b"\n")
-    return hashlib.sha256(content).hexdigest()
+    return hashlib.sha256(normalized(path)).hexdigest()
 
 def snapshot():
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
@@ -51,7 +53,7 @@ def snapshot():
         if Path(name).suffix.lower() not in extensions:
             continue
         file = ROOT / name
-        assets.append({"path": name, "sha256": digest(file), "bytes": file.stat().st_size,
+        assets.append({"path": name, "sha256": digest(file), "bytes": len(normalized(file)),
             "source": "repository-file; original creator/source not independently verified",
             "license": "NOASSERTION", "reviewStatus": "SOURCE_AND_RIGHTS_REQUIRED",
             "distributionApproved": False})
