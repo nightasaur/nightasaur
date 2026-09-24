@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data/compliance"
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Normalize line endings so Windows (CRLF) and Linux (LF) produce the same hash
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
 
 def snapshot():
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
