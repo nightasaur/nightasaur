@@ -4,28 +4,34 @@ import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// ?€?‰ç²¾?ˆè·¯?±éƒ½?€è¦ç™»??
+// ?ï¿½?ï¿½ç²¾?ï¿½è·¯?ï¿½éƒ½?ï¿½è¦ç™»??
 router.use(authMiddleware);
 
-// POST /api/spirits - ?µå»º?°ç²¾??
+// POST /api/spirits - ?ï¿½å»º?ï¿½ç²¾??
 router.post("/", (req, res, next) => spiritController.create(req, res, next));
 
-// GET /api/spirits - ?²å??¨æˆ¶ç²¾é??—è¡¨
+// GET /api/spirits - ?ï¿½ï¿½??ï¿½æˆ¶ç²¾ï¿½??ï¿½è¡¨
 router.get("/", (req, res, next) => spiritController.list(req, res, next));
 
-// GET /api/spirits/:id - ç²¾é?è©³ç´°è³‡è?
+// GET /api/spirits/:id - ç²¾ï¿½?è©³ç´°è³‡ï¿½?
 router.get("/:id", (req, res, next) => spiritController.getById(req, res, next));
 
-// POST /api/spirits/:id/evolve - ç²¾é??²å?
+// POST /api/spirits/:id/evolve - ç²¾ï¿½??ï¿½ï¿½?
 router.post("/:id/evolve", (req, res, next) => spiritController.evolve(req, res, next));
 
-// PATCH /api/spirits/:id/rename - ?æ–°?½å?
+// PATCH /api/spirits/:id/rename - ?ï¿½æ–°?ï¿½ï¿½?
 router.patch("/:id/rename", (req, res, next) => spiritController.rename(req, res, next));
 
-// DELETE /api/spirits/:id - ?ªé™¤ç²¾é?
+// DELETE /api/spirits/:id - ?ï¿½é™¤ç²¾ï¿½?
 router.delete("/:id", (req, res, next) => spiritController.delete(req, res, next));
 
-// PATCH /api/spirits/:id - ?´æ–°å¤–è?/è£æ‰®
+// PATCH /api/spirits/:id - ?ï¿½æ–°å¤–ï¿½?/è£æ‰®
 router.patch("/:id", (req, res, next) => spiritController.customize(req, res, next));
 
+
+// GET /api/spirits/:id/memories - list spirit memories (owner only)
+router.get("/:id/memories", (req, res, next) => spiritController.listMemories(req, res, next));
+
+// DELETE /api/spirits/:id/memories/:memoryId - delete one memory (owner only)
+router.delete("/:id/memories/:memoryId", (req, res, next) => spiritController.deleteMemory(req, res, next));
 export default router;
