@@ -175,6 +175,7 @@ model Spirit {
   user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   evolutions           Evolution[]
   conversations        Conversation[]
+  memories             SpiritMemory[]
   generationTasks      GenerationTask[]
   squadMember          SquadMember?
   learningSessions     LearningSession[]
@@ -800,4 +801,21 @@ model AccountAudit {
   createdAt DateTime @default(now())
   @@index([targetId, createdAt])
   @@map("account_audits")
+}
+
+model SpiritMemory {
+  id          String   @id @default(cuid())
+  spiritId    String
+  userId      String
+  content     String
+  category    String   @default("fact")
+  importance  Int      @default(5)
+  sourceConv  String?
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+  spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@index([spiritId, importance])
+  @@index([userId])
+  @@map("spirit_memories")
 }

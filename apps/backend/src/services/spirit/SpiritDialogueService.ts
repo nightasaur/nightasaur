@@ -13,6 +13,7 @@ export interface DialogueContext {
   history: Array<{ role: "user" | "assistant"; content: string }>;
   language: SupportedLanguage;
   englishFirst?: boolean;
+  memories?: string[];
 }
 
 export class SpiritDialogueService {
@@ -21,6 +22,7 @@ export class SpiritDialogueService {
     const systemPrompt = buildSpiritSystemPrompt(ctx.spirit, {
       language: ctx.language,
       englishFirst: ctx.englishFirst,
+      memories: ctx.memories,
     });
 
     const messages: LLMMessage[] = [

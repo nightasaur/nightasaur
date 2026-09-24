@@ -14,6 +14,7 @@ export interface SpiritPersona {
 export interface PersonalityOptions {
   language: SupportedLanguage;
   englishFirst?: boolean;
+  memories?: string[];
 }
 
 const ELEMENT_TRAITS: Record<string, { en: string; zh: string }> = {
@@ -69,7 +70,7 @@ export function buildSpiritSystemPrompt(
   spirit: SpiritPersona,
   options: PersonalityOptions
 ): string {
-  const { language, englishFirst = false } = options;
+  const { language, englishFirst = false, memories = [] } = options;
   const element = ELEMENT_TRAITS[spirit.element] || ELEMENT_TRAITS.FIRE;
   const stage = STAGE_ABILITY[spirit.stage] || STAGE_ABILITY.HATCHLING;
   const langInstruction = LANGUAGE_INSTRUCTION[language] || LANGUAGE_INSTRUCTION["zh-TW"];
@@ -117,6 +118,16 @@ export function buildSpiritSystemPrompt(
   lines.push("- Always write at least 2 complete sentences.");
   lines.push("");
   lines.push(`REMINDER: ${langInstruction}`);
+
+
+  if (memories.length > 0) {
+    lines.push("");
+    lines.push("## Things you remember about the user");
+    for (const m of memories) {
+      lines.push(`- ${m}`);
+    }
+    lines.push("Use these naturally if relevant. Do not list them back.");
+  }
 
   return lines.join("\n");
 }
