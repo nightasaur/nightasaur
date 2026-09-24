@@ -114,3 +114,7 @@ apps/backend/prisma/_archive/
 data/pg/
 data/ollama/
 .env.local
+
+# Nightasaur Tray runtime files
+scripts/nightasaur-tray.ps1.v*bak
+scripts/*.bak
