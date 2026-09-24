@@ -9,8 +9,8 @@ it('keeps the public homepage usable while session verification is pending',()=>
  window.history.replaceState({}, '', '/');
  localStorage.setItem('nightasaur_token','fixture-token');mock.me.mockReturnValue(new Promise(()=>{}));
  render(<App/>);
- expect(screen.getByRole('heading',{name:'Nightasaur',exact:true})).toBeVisible();
- expect(screen.getByRole('link',{name:'登入',exact:true})).toHaveAttribute('href','/login');
+ expect(screen.getByRole('heading',{name:'Nightasaur'})).toBeVisible();
+ expect(screen.getByRole('link',{name:'登入'})).toHaveAttribute('href','/login');
 });
 it('keeps the login form available when the previous session check times out',async()=>{
  window.history.replaceState({}, '', '/login');
@@ -45,7 +45,7 @@ it('shows a usable return link while protected session verification is pending',
  expect(screen.getByRole('status')).toHaveTextContent('正在確認登入狀態');
  expect(screen.queryByRole('heading',{name:'Protected dashboard'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('link',{name:'返回首頁 / Home'}));
- expect(screen.getByRole('heading',{name:'Nightasaur',exact:true})).toBeVisible();
+ expect(screen.getByRole('heading',{name:'Nightasaur'})).toBeVisible();
 });
 it('does not overwrite a new login when an older session check later fails',async()=>{
  window.history.replaceState({}, '', '/login');
@@ -56,7 +56,7 @@ it('does not overwrite a new login when an older session check later fails',asyn
  render(<App/>);
  fireEvent.change(screen.getByRole('textbox',{name:'Email address'}),{target:{value:'qa@example.invalid'}});
  fireEvent.change(screen.getByLabelText('Password'),{target:{value:'test-fixture-only'}});
- fireEvent.click(screen.getByRole('button',{name:'登入',exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:'登入'}));
  expect(await screen.findByRole('heading',{name:'Protected dashboard'})).toBeVisible();
  await act(async()=>{rejectOld!({response:{status:401}});});
  expect(localStorage.getItem('nightasaur_token')).toBe('new-fixture');

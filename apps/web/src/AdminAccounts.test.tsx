@@ -41,7 +41,7 @@ it("denies ordinary users without fetching account lists", async () => {
 it("requires a reason and explicit confirmation before suspending", async () => {
   render(<AdminAccounts />);
   fireEvent.click(
-    await screen.findByRole("button", { name: "封禁", exact: true }),
+    await screen.findByRole("button", { name: "封禁" }),
   );
   expect(adminAccountsAPI.action).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "確認執行" })).toBeDisabled();
@@ -78,6 +78,6 @@ it("does not offer actions against protected administrators", async () => {
   render(<AdminAccounts />);
   expect(await screen.findByText("管理員 · 受保護")).toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "封禁", exact: true }),
+    screen.queryByRole("button", { name: "封禁" }),
   ).not.toBeInTheDocument();
 });

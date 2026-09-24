@@ -21,14 +21,14 @@ function mount(language='zh-TW') {
 it('renders the backend message field instead of a fabricated ellipsis',async()=>{
  mount();await screen.findByRole('heading',{name:'Fixture'});
  fireEvent.change(screen.getByRole('textbox'),{target:{value:'Synthetic greeting'}});
- fireEvent.click(screen.getByRole('button',{name:'傳送',exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:'傳送'}));
  expect(await screen.findByText('A real server reply')).toBeInTheDocument();
  expect(screen.queryByText('...')).not.toBeInTheDocument();
 });
 it('shows failure and restores input when the backend returns no message',async()=>{
  fixtures.message='';mount();await screen.findByRole('heading',{name:'Fixture'});
  fireEvent.change(screen.getByRole('textbox'),{target:{value:'Synthetic greeting'}});
- fireEvent.click(screen.getByRole('button',{name:'傳送',exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:'傳送'}));
  expect(await screen.findByText(/連線中斷/)).toBeInTheDocument();
  expect(screen.getByRole('textbox')).toBeEnabled();
  expect(screen.queryByText('...')).not.toBeInTheDocument();
