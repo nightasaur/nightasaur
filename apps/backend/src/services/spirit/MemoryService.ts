@@ -240,6 +240,42 @@ export class MemoryService {
       importance: r.importance,
     }));
   }
+
+  async listForUser(spiritId: string, userId: string, limit: number = 50) {
+    const spirit = await prisma.spirit.findFirst({
+      where: { id: spiritId, userId, isActive: true },
+      select: { id: true },
+    });
+    if (!spirit) throw Object.assign(new Error("Spirit not found"), { statusCode: 404 });
+
+    const rows = await prisma.spiritMemory.findMany({
+      where: { spiritId },
+      orderBy: [{ importance: "desc" }, { createdAt: "desc" }],
+      take: limit,
+      select: { id: true, content: true, category: true, importance: true, createdAt: true, lastUsedAt: true },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      content: r.content,
+      category: r.category as MemoryItem["category"],
+      importance: r.importance,
+      createdAt: r.createdAt,
+      lastUsedAt: r.lastUsedAt,
+    }));
+  }
+
+  async deleteById(spiritId: string, userId: string, memoryId: string): Promise<boolean> {
+    const spirit = await prisma.spirit.findFirst({
+      where: { id: spiritId, userId, isActive: true },
+      select: { id: true },
+    });
+    if (!spirit) throw Object.assign(new Error("Spirit not found"), { statusCode: 404 });
+
+    const result = await prisma.spiritMemory.deleteMany({
+      where: { id: memoryId, spiritId },
+    });
+    return result.count > 0;
+  }
 }
 
 export const memoryService = new MemoryService();

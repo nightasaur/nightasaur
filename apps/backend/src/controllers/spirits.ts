@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { spiritService } from "../services/spirit.js";
+import { memoryService } from "../services/spirit/MemoryService.js";
 import { createSpiritSchema, customizeSpiritSchema } from "../utils/validators.js";
 import { routeParam } from "../utils/request.js";
 
@@ -71,6 +72,33 @@ async customize(req: Request, res: Response, next: NextFunction) {
       const data = customizeSpiritSchema.parse(req.body);
       const spirit = await spiritService.customizeSpirit(routeParam(req, "id"), req.user!.userId, data);
       res.json(spirit);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async listMemories(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = routeParam(req, "id");
+      const limitRaw = parseInt((req.query.limit as string) || "50", 10);
+      const limit = Math.min(Math.max(limitRaw || 50, 1), 200);
+      const memories = await memoryService.listForUser(id, req.user!.userId, limit);
+      res.json({ memories, count: memories.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deleteMemory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = routeParam(req, "id");
+      const memoryId = routeParam(req, "memoryId");
+      const ok = await memoryService.deleteById(id, req.user!.userId, memoryId);
+      if (!ok) {
+        res.status(404).json({ error: "Memory not found" });
+        return;
+      }
+      res.json({ success: true, deletedId: memoryId });
     } catch (err) {
       next(err);
     }
