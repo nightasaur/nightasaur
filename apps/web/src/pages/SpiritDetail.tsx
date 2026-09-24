@@ -32,7 +32,7 @@ export default function SpiritDetail() {
   const [artError, setArtError] = useState("");
   const [evolving, setEvolving] = useState(false);
   const [evolveMsg, setEvolveMsg] = useState("");
-  const [msgs, setMsgs] = useState<{ role: string; content: string }[]>([]);
+  const [msgs, setMsgs] = useState<{ role: string; content: string; emotion?: string; displayIcon?: string }[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [tab, setTab] = useState<"chat"|"customize">("chat");
@@ -112,8 +112,8 @@ const [animState, setAnimState] = useState<AnimState>("idle");
       const data = response.data;
       const reply = data.message;
       if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty dialogue response");
-      setMsgs(p => [...p, { role: "assistant", content: reply }]);
-      if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level }));
+      setMsgs(p => [...p, { role: "assistant", content: reply, emotion: data.emotion, displayIcon: data.displayIcon }]);
+      if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level, currentEmotion: data.emotion, displayIcon: data.displayIcon }));
       speak(reply);
     } catch {
       setMsgs(p => [...p, { role: "assistant", content: t("感应中断了🦕") }]);
@@ -138,7 +138,7 @@ return (
         <button className="btn-primary my-3" disabled={drawing} onClick={drawSpirit}>{drawing ? t("生成中…") : t("生成精靈圖片")}</button>
         <p className="text-sm text-white/60">{t("原創程序式生成・依元素與成長階段繪製")}</p>
         {artError && <p role="alert" className="text-red-300">{artError}</p>}
-        <h1 className="text-3xl font-black text-white">{s.name}</h1>
+        <h1 className="text-3xl font-black text-white">{s.displayIcon && <span className="mr-2">{s.displayIcon}</span>}{s.name}</h1>
         <div className="flex justify-center gap-3 mt-3 flex-wrap">
           <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${ec} text-white`}>
             {ICO[s.element]||"✨"} {s.element}
@@ -183,6 +183,9 @@ return (
                 <div className={`inline-block max-w-[80%] rounded-2xl px-4 py-3 ${
                   m.role==="user"?"bg-teal-500/30 text-white":"bg-white/5 text-white/80"
                 }`}>
+                  {m.role==="assistant" && m.displayIcon && (
+                    <span className="mr-1.5" title={m.emotion || ""}>{m.displayIcon}</span>
+                  )}
                   {m.content}
                   {m.role==="assistant" && (
                     <button onClick={() => speak(m.content)}
