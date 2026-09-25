@@ -56,7 +56,22 @@ export const spiritsAPI = {
   delete: (id: string) => api.delete(`/spirits/${id}`),
   updateCustomization: (id: string, customization: any) =>
     api.patch(`/spirits/${id}/customization`, { customization }),
+
+  // Memory management
+  listMemories: (id: string, limit = 100) =>
+    api.get(`/spirits/${id}/memories`, { params: { limit } }),
+  deleteMemory: (id: string, memoryId: string) =>
+    api.delete(`/spirits/${id}/memories/${memoryId}`),
 };
+
+export interface SpiritMemory {
+  id: string;
+  content: string;
+  category: "fact" | "preference" | "event" | "relationship" | "goal";
+  importance: number;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
 
 export const dialogueAPI = {
   chat: (spiritId: string, message: string) =>
