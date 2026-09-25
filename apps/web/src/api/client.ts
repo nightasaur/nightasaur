@@ -76,7 +76,7 @@ export interface SpiritMemory {
 export const dialogueAPI = {
   chat: (spiritId: string, message: string) =>
     // The backend permits 120s for inference; leave time for the proxy response.
-    api.post("/dialogue", { spiritId, message }, { timeout: 135000 }),
+    api.post("/dialogue", { spiritId, message }, { timeout: 36000 }),
 };
 
 export const socialAPI = {
