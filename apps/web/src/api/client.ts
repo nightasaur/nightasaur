@@ -4,10 +4,9 @@ import { clearRejectedSession } from "../utils/authSession";
 // Production always uses the same-origin /api proxy so the browser does not depend
 // on a stale VITE_API_URL or cross-origin CORS configuration.
 const getApiBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    return import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-  }
-
+   const configured = import.meta.env.VITE_API_URL;
+  if (configured) return configured;
+  if (import.meta.env.DEV) return 'http://localhost:3002/api';
   return '/api';
 };
 
