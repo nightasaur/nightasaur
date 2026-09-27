@@ -3,8 +3,5 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/backend/Dockerfile"
 
 [deploy]
-healthcheckPath = "/api/health"
-healthcheckTimeout = 100
+startCommand = "cd /app/apps/backend && npx tsx src/index.ts"
 restartPolicyType = "ON_FAILURE"
-
-# trigger deploy 20260928002539
