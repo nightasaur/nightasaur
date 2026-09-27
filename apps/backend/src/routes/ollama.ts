@@ -23,6 +23,7 @@ router.post("/", async (req, res) => {
     }
 
     const fullPrompt = `${SYSTEM_PROMPT}\n\n使用者說: ${prompt}\n靈靈回應:`;
+    const isCloudflare = OLLAMA_URL.includes("nightasaur.com");
 
     const response = await axios.post(
       OLLAMA_URL,
@@ -39,22 +40,43 @@ router.post("/", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Accept-Encoding": "identity",
+          "User-Agent": "Nightasaur-Backend/1.0",
           ...(CF_CLIENT_ID && {
             "CF-Access-Client-Id": CF_CLIENT_ID,
             "CF-Access-Client-Secret": CF_CLIENT_SECRET,
           }),
         },
         timeout: 120000,
+        // 關鍵：讓 axios 不解壓縮，避免 Cloudflare 緩衝衝突
+        decompress: false,
+        // 以原始字串接收，自己解析
+        responseType: "text",
+        transformResponse: [(data) => data],
       }
     );
 
+    // 手動解析回應
+    let parsed;
+    try {
+      parsed = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+    } catch (parseErr) {
+      console.error("JSON 解析失敗，原始回應前 300 字:", String(response.data).slice(0, 300));
+      return res.status(500).json({ success: false, error: "AI 回應格式錯誤" });
+    }
+
     res.json({
       success: true,
-      response: response.data.response?.trim() || "(無回應)",
-      model: response.data.model,
+      response: parsed.response?.trim() || "(無回應)",
+      model: parsed.model || DEFAULT_MODEL,
     });
   } catch (error) {
     console.error("Ollama proxy error:", error.message);
+    if (error.response) {
+      console.error("上游狀態碼:", error.response.status);
+      console.error("上游回應前 300 字:", String(error.response.data).slice(0, 300));
+    }
     res.status(error.response?.status || 500).json({
       success: false,
       error: error.message,
