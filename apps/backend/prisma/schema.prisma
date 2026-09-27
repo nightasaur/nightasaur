@@ -108,7 +108,7 @@ model Session {
 model Squad {
   id        String   @id @default(cuid())
   userId    String   @unique
-  name      String   @default("??撠?")
+  name      String   @default("????蹎抆??")
   maxSize   Int      @default(4)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,13 +162,13 @@ model Spirit {
   customization        String                 @default("{}")
   backstory            String?
   
-  // 🖼️ 精靈圖片
-  imageUrl             String?                // 精靈圖片網址
+  // ?謘????謘?
+  imageUrl             String?                // ???謘??祈?
   
-  // 🎭 情緒狀態管理
-  displayIcon          String?                // 動態顯示圖標（情緒圖標）
-  currentEmotion       String?                // 當前情緒狀態
-  lastComfortAt        DateTime?              // 上次安慰時間
+  // ????????????
+  displayIcon          String?                // ????輯???謘?????綜?????
+  currentEmotion       String?                // ??????????
+  lastComfortAt        DateTime?              // ??瘣餅?歹?蹇?
   
   isActive             Boolean                @default(true)
   deletedAt            DateTime?
@@ -242,14 +242,14 @@ model LocationSpawn {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  // AR 相關欄位
-  type             String?   // 地點類型
-  rarity           String    @default("COMMON") // 稀有度
-  availableSpirits String?   // JSON 格式的可用精靈列表
-  activeSpawn      String?   // JSON 格式的當前活躍精靈
-  spawnStartTime   DateTime? // 生成開始時間
-  spawnEndTime     DateTime? // 生成結束時間
-  cooldownHours    Int       @default(24) // 冷卻時間（小時）
+  // AR ?鞈????
+  type             String?   // ????遴竣?
+  rarity           String    @default("COMMON") // ????撞
+  availableSpirits String?   // JSON ?瞉?????賜宏?????
+  activeSpawn      String?   // JSON ?瞉???????剁?蝘??
+  spawnStartTime   DateTime? // ?賹?????蹇?
+  spawnEndTime     DateTime? // ?賹??荒???蹇?
+  cooldownHours    Int       @default(24) // ???蹇?????蹇?
   
   visits      LocationVisit[]
   captures    ARCapture[]
@@ -558,7 +558,7 @@ model SocialPost {
   content     String
   imageUrl    String?
   platform    String    @default("FACEBOOK")
-  postId      String?   // 外部平台貼文ID
+  postId      String?   // ?叟??豢??啾?蔬?ID
   status      String    @default("DRAFT")
   scheduledAt DateTime?
   publishedAt DateTime?
@@ -632,24 +632,24 @@ model EnglishConversation {
   userId          String
   spiritId        String?
   topicId         String?
-  userMessage     String   // 使用者輸入的英文句子
-  aiResponse      String   // AI 回應的英文句子
+  userMessage     String   // ?輯撒???脫??鈭?????鈭?
+  aiResponse      String   // AI ?豯?????拆??
   
-  // 📥 情緒容器維度
-  detectedEmotion       String?  // 識別出的表面/深層情緒
-  emotionIntensity      Int?     // 情緒強度 0-10
-  emotionalValidation   String?  // 精靈的情緒接納語句
-  validationLocale      String?  // 接納語句的語言
+  // ???????啣音謒?撞
+  detectedEmotion       String?  // ?朱??蝞??萄豰???????
+  emotionIntensity      Int?     // ?????瞍?0-10
+  emotionalValidation   String?  // ??????綜???????
+  validationLocale      String?  // ?鈭??止竣?????捍
   
-  // 📊 真實性驗證維度
-  truthScore            Int?     // 真實性得分 40-100
+  // ?? ?賹???????
+  truthScore            Int?     // ?賹??????40-100
   
-  // 原有學習回饋
-  grammarFeedback String?  // 文法回饋
-  vocabularyHint  String?  // 單字提示
-  pronunciation   String?  // 發音建議
-  score           Int?     // 評分 1-100
-  correctedText   String?  // 修正後的句子
+  // ?賹??株???豯?
+  grammarFeedback String?  // ????豯?
+  vocabularyHint  String?  // ?獢???
+  pronunciation   String?  // ?瞏殉??梁???
+  score           Int?     // ?堊?? 1-100
+  correctedText   String?  // ?賣餈斗???鈭?
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -663,13 +663,13 @@ model EnglishConversation {
 
 model EnglishTopic {
   id          String   @id @default(cuid())
-  name        String   // 主題名稱
-  category    String   // 類別：daily, work, travel, business, social
-  description String   // 主題描述
+  name        String   // ??????
+  category    String   // ?遴竣??謇ily, work, travel, business, social
+  description String   // ?????渲
   difficulty  String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
-  prompts     String   // JSON 格式的對話提示
-  vocabulary  String?  // JSON 格式的相關單字
-  grammarTips String?  // JSON 格式的文法提示
+  prompts     String   // JSON ?瞉?????唳????
+  vocabulary  String?  // JSON ?瞉?????謚軋???
+  grammarTips String?  // JSON ?瞉?????????
   isActive    Boolean  @default(true)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
@@ -690,8 +690,8 @@ model EnglishLearningProgress {
   totalMessages   Int      @default(0)
   avgScore        Float    @default(0)
   lastSessionAt   DateTime?
-  bestScore       Int?     // 最佳分數
-  streakDays      Int      @default(0) // 連續學習天數
+  bestScore       Int?     // ???踹???
+  streakDays      Int      @default(0) // ????株???剜???
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -702,12 +702,12 @@ model EnglishLearningProgress {
   @@map("english_learning_progress")
 }
 
-// 審計日誌模型
+// ???鈭???
 model ActionLog {
   id          String   @id @default(cuid())
   userId      String
-  actionType  String   // 行動類型，如 "ENGLISH_CHAT"
-  metadata    Json?    // 行動元數據
+  actionType  String   // ?蛛??遴竣??? "ENGLISH_CHAT"
+  metadata    Json?    // ?蛛???塗??
   createdAt   DateTime @default(now())
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -813,6 +813,7 @@ model SpiritMemory {
   category    String   @default("fact")
   importance  Int      @default(5)
   sourceConv  String?
+    embedding   String?
   createdAt   DateTime @default(now())
   lastUsedAt  DateTime?
   spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
