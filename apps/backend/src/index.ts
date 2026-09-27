@@ -18,6 +18,7 @@ import ollamaRoutes from "./routes/ollama.js";
 import assistantRoutes from "./routes/assistant.js";
 import adminAccountsRoutes from "./routes/adminAccounts.js";
 import paymentRoutes from "./routes/payment.js";
+import englishTrainingRoutes from "./routes/englishTraining.js";
 
 const app = express();
 if (!Number.isSafeInteger(config.trustProxyHops) || config.trustProxyHops < 0) {
@@ -57,6 +58,7 @@ app.use("/api/ollama", ollamaRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/admin/accounts", adminAccountsRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/english-training", englishTrainingRoutes);
 
 // ????????豲????
 app.use(errorHandler);

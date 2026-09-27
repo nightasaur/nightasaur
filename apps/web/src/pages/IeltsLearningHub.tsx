@@ -90,6 +90,14 @@ export default function IeltsLearningHub() {
           >
             開始起始評量設定
           </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/academy/category/ielts/practice")}
+            className="mt-4 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:opacity-90 transition-opacity"
+          >
+            🐉 精靈對話練習
+          </button>
         </div>
 
         <div className="glass-card p-6">

@@ -12,30 +12,38 @@ const FALLBACK_FEEDBACK: Omit<EnglishFeedback, "correctedText"> = {
   truthScore: 80,
 };
 
-const SYSTEM_PROMPT = `You are a friendly English tutor helping learners practice conversation.
+function buildSystemPrompt(spirit?: { name: string; element: string; personality?: string | null } | null): string {
+  const spiritRole = spirit
+    ? `You are "${spirit.name}", a ${spirit.element}-element spirit companion. Your personality: ${spirit.personality || "friendly and encouraging"}. You help your human friend practice English through natural, playful conversation.`
+    : `You are a friendly English tutor.`;
+
+  return `${spiritRole}
+
 Respond with valid JSON only, no prose, no markdown fences.
 The JSON must have exactly these keys: response, grammarFeedback, vocabularyHint, correctedText, score, truthScore.
 
 Rules:
-- response: an encouraging English reply that continues the conversation (1-2 sentences)
+- response: an encouraging English reply from the spirit (1-2 sentences, stay in character, keep it warm)
 - grammarFeedback: brief grammar feedback in Traditional Chinese (1 sentence)
-- vocabularyHint: a vocabulary suggestion in Traditional Chinese (1 sentence)
-- correctedText: the user's sentence corrected (English, may equal the input if already correct)
-- score: integer between 40 and 100 rating the user's English (NOT 0 or 1). Typical values: 60-85.
-- truthScore: integer between 40 and 100. Typical values: 65-90.
+- vocabularyHint: a vocabulary suggestion in Traditional Chinese + English word (1 sentence)
+- correctedText: the user's sentence corrected (English)
+- score: integer 40-100 rating the user's English (NOT 0 or 1)
+- truthScore: integer 40-100
 
 Example input: "I is happy"
-Example output: {"response":"That is wonderful! What made you happy today?","grammarFeedback":"應該用 I am 而不是 I is。","vocabularyHint":"happy 也可以說 delighted 或 cheerful。","correctedText":"I am happy","score":65,"truthScore":75}`;
+Example output: {"response":"Oh what a lovely feeling! What made you smile today?","grammarFeedback":"記得用 I am，不是 I is 喔","vocabularyHint":"試試 delighted 或 cheerful 來表達開心","correctedText":"I am happy","score":65,"truthScore":75}`;
+}
 
 export class EnglishTrainingService {
   private async generateFeedback(
     topicName: string,
     difficulty: string,
-    userMessage: string
+    userMessage: string,
+    spirit?: { name: string; element: string; personality?: string | null } | null
   ): Promise<EnglishFeedback> {
     const provider = getLLMProvider();
     const messages: LLMMessage[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt(spirit) },
       {
         role: "user",
         content: `Topic: "${topicName}" (${difficulty}).\nLearner said: "${userMessage}"\n\nReturn the JSON.`,
@@ -72,24 +80,60 @@ export class EnglishTrainingService {
     }
   }
 
-  async chat(userId: string, payload: { topicId: string; message: string; spiritId?: string; userLocale?: string }) {
+  async chat(
+    userId: string,
+    payload: {
+      topicId: string;
+      message: string;
+      spiritId?: string;
+      userLocale?: string;
+      spiritName?: string;
+      spiritElement?: string;
+      spiritPersonality?: string;
+    }
+  ) {
     const { topicId, message, spiritId, userLocale = 'zh-TW' } = payload;
 
     const topic = await prisma.englishTopic.findUnique({ where: { id: topicId } });
     if (!topic) throw new Error('Topic not found');
 
-    const feedback = await this.generateFeedback(topic.name, topic.difficulty, message);
+    // 抓精靈資料（先試 DB，找不到就用前端傳來的自訂精靈資訊）
+    let spiritInfo: { name: string; element: string; personality?: string | null } | null = null;
+    let validSpiritId: string | null = null;
+
+    if (spiritId) {
+      const dbSpirit = await prisma.spirit.findFirst({
+        where: { id: spiritId, userId, isActive: true },
+        select: { id: true, name: true, element: true, personality: true },
+      });
+      if (dbSpirit) {
+        spiritInfo = {
+          name: dbSpirit.name,
+          element: dbSpirit.element,
+          personality: dbSpirit.personality,
+        };
+        validSpiritId = dbSpirit.id;
+      } else if (payload.spiritName && payload.spiritElement) {
+        spiritInfo = {
+          name: payload.spiritName,
+          element: payload.spiritElement,
+          personality: payload.spiritPersonality || null,
+        };
+      }
+    }
+
+    const feedback = await this.generateFeedback(topic.name, topic.difficulty, message, spiritInfo);
 
     const intensity = 0;
     const emotionStr = "Neutral";
-    const displayIcon = "✨";
-    const emotionalValidation = "我注意到你在練習英文，這很棒！";
+    const displayIcon = "🌟";
+    const emotionalValidation = "做得很好，繼續保持！";
 
     const result = await prisma.$transaction(async (tx) => {
       const conversation = await tx.englishConversation.create({
         data: {
           userId,
-          spiritId,
+          spiritId: validSpiritId,
           topicId,
           userMessage: message,
           aiResponse: feedback.response,
@@ -106,9 +150,9 @@ export class EnglishTrainingService {
         },
       });
 
-      if (spiritId) {
+      if (validSpiritId) {
         await tx.spirit.update({
-          where: { id: spiritId },
+          where: { id: validSpiritId },
           data: {
             displayIcon,
             currentEmotion: emotionStr,
@@ -123,7 +167,7 @@ export class EnglishTrainingService {
           actionType: 'ENGLISH_CHAT',
           metadata: {
             topicId,
-            spiritId,
+            spiritId: validSpiritId,
             intensity,
             emotion: emotionStr,
             score: feedback.score,
@@ -152,7 +196,7 @@ export class EnglishTrainingService {
         correctedText: feedback.correctedText,
         truthScore: feedback.truthScore,
       },
-      spirit: null,
+      spirit: spiritInfo,
       topic: {
         id: topic.id,
         name: topic.name,
@@ -197,7 +241,7 @@ export class EnglishTrainingService {
         id: spirit.id,
         name: spirit.name,
         element: spirit.element,
-        displayIcon: spirit.displayIcon || '✨',
+        displayIcon: spirit.displayIcon || '🌟',
       } : null,
       welcomeMessage: `Ready to practice "${topic.name}"? Let's start!`,
     };
