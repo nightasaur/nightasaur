@@ -51,7 +51,7 @@ file:///C:/Nightasaur/login-simple.html
 ### 方式2：使用管理員帳號
 ```
 電子郵件： admin@nightasaur.com
-密碼：     admin123
+密碼：     RETIRED-CREDENTIAL-DO-NOT-USE
 ```
 
 ### 方式3：登入後自動跳轉
@@ -237,7 +237,7 @@ file:///C:/Nightasaur/login-simple.html
 
 # 使用管理員帳號登入
 # 電子郵件：admin@nightasaur.com
-# 密碼：admin123
+# 密碼：RETIRED-CREDENTIAL-DO-NOT-USE
 
 # 自動進入遊戲界面
 # http://localhost:5173/dashboard

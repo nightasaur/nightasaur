@@ -14,9 +14,8 @@
 - `POST /api/squads/quick-switch` - 快速切換
 
 ### 訓練系統
-- `POST /api/squads/train` - 訓練單隻精靈
-- `POST /api/squads/training/daily` - 小隊日常訓練
-- `POST /api/squads/challenge/puzzle` - 小隊益智挑戰
+
+獎勵型訓練與挑戰端點目前不對外公開。重新啟用前必須加入伺服器端可驗證事件、冷卻時間與一次性獎勵；客戶端不能自行提交訓練時長或答案來取得獎勵。
 
 ### 統計查詢
 - `GET /api/squads/stats` - 小隊統計
@@ -64,12 +63,6 @@ npm run dev
 ```javascript
 // 自動創建小隊
 const squad = await fetch('/api/squads/auto-create', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
-});
-
-// 日常訓練
-const training = await fetch('/api/squads/training/daily', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
 });

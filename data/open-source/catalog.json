@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "resources": [
+    {
+      "canonicalId": "tool:ollama",
+      "name": "Ollama",
+      "kind": "SOFTWARE_TOOL",
+      "sourceUrl": "https://github.com/ollama/ollama",
+      "version": "UNPINNED",
+      "licenseExpression": "NOASSERTION",
+      "contentIncluded": false,
+      "provenance": {
+        "discoveredFrom": "Nightasaur local-provider integration",
+        "reviewNote": "Metadata only until a version and license are independently verified"
+      }
+    },
+    {
+      "canonicalId": "tool:comfyui",
+      "name": "ComfyUI",
+      "kind": "SOFTWARE_TOOL",
+      "sourceUrl": "https://github.com/comfyanonymous/ComfyUI",
+      "version": "UNPINNED",
+      "licenseExpression": "NOASSERTION",
+      "contentIncluded": false,
+      "provenance": {
+        "discoveredFrom": "apps/ai-engine/services/comfyui.py",
+        "reviewNote": "Metadata only until a version and license are independently verified"
+      }
+    }
+  ]
+}

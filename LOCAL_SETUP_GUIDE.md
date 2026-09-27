@@ -27,8 +27,8 @@ npm run dev
 **預期輸出：**
 ```
 ✅ 預設帳號已確保存在
-   Admin: admin@nightasaur.com / admin123!
-   Demo: demo@nightasaur.com / demo1234
+   Admin: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
+   Demo: demo@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 
 ┌─────────────────────────────────────────┐
 │       🦖 Nightasaur Backend 🦖         │
@@ -61,8 +61,8 @@ npm run dev
 
 | 帳號類型 | Email | 密碼 | 使用者 ID |
 |---------|-------|------|----------|
-| 管理員 | `admin@nightasaur.com` | `admin123!` | `cmtqq2ro70000azzpxmn4t89v` |
-| 示範用戶 | `demo@nightasaur.com` | `demo1234` | `cmtqq2rv00001azzp9hg4nszb` |
+| 管理員 | `admin@nightasaur.com` | `RETIRED-CREDENTIAL-DO-NOT-USE` | `cmtqq2ro70000azzpxmn4t89v` |
+| 示範用戶 | `demo@nightasaur.com` | `RETIRED-CREDENTIAL-DO-NOT-USE` | `cmtqq2rv00001azzp9hg4nszb` |
 | 測試用戶 | `test@nightasaur.com` | `testpassword` | `cmtq53zln0000q0isdxvz0hc1` |
 
 ## 🛠️ 如果仍然遇到問題
@@ -151,7 +151,7 @@ npx tsx check-login-fix.ts
 # 登入測試
 curl -X POST http://localhost:3002/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@nightasaur.com","password":"admin123!"}'
+  -d '{"email":"admin@nightasaur.com","password":"RETIRED-CREDENTIAL-DO-NOT-USE"}'
 
 # 創建精靈測試（需要先獲取令牌）
 curl -X POST http://localhost:3002/api/spirits \

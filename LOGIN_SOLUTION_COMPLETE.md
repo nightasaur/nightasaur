@@ -34,7 +34,7 @@ server: {
 ### 方式1：整合登入界面（推薦）
 ```
 1. 訪問: file:///C:/Nightasaur/login-simple.html
-2. 登入: admin@nightasaur.com / admin123
+2. 登入: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 3. 自動跳轉: http://localhost:5173/dashboard
 ```
 
@@ -42,14 +42,14 @@ server: {
 ```
 1. 訪問: http://localhost:5173
 2. 點擊右上角登入按鈕
-3. 輸入: admin@nightasaur.com / admin123
+3. 輸入: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 4. 成功進入遊戲儀表板
 ```
 
 ### 方式3：測試登入界面
 ```
 1. 訪問: http://localhost:3002
-2. 登入: admin@nightasaur.com / admin123
+2. 登入: admin@nightasaur.com / RETIRED-CREDENTIAL-DO-NOT-USE
 3. 自動跳轉到遊戲界面
 ```
 
@@ -66,7 +66,7 @@ server: {
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```

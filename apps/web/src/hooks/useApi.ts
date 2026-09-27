@@ -1,6 +1,6 @@
 // React Hook 用於 API 調用
 import { useState, useEffect, useCallback } from 'react';
-import api, { userAPI, spiritAPI, itemAPI, questAPI, settingsAPI, healthAPI } from '../api';
+import { userAPI } from '../api/client';
 
 // 使用狀態的類型
 interface ApiState<T> {
@@ -43,7 +43,13 @@ export function useApi<T>(
     }
   }, dependencies);
 
-  // Hook: 使用用戶數據
+  return {
+    ...state,
+    refetch: fetchData,
+  };
+}
+
+// Hook: 使用用戶數據
 export function useUser() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -100,7 +106,7 @@ export function useUser() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('nightasaur_token');
     if (token) {
       fetchUser();
     } else {

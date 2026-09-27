@@ -56,8 +56,8 @@ export class SpiritService {
     return s.map(fmt);
   }
 
-  async getSpiritById(id:string) {
-    const s = await prisma.spirit.findUnique({where:{id},include:{evolutions:{orderBy:{createdAt:"asc"}},conversations:{orderBy:{createdAt:"desc"},take:20}}});
+  async getSpiritById(id:string,userId:string) {
+    const s = await prisma.spirit.findFirst({where:{id,userId,isActive:true},include:{evolutions:{orderBy:{createdAt:"asc"}},conversations:{orderBy:{createdAt:"desc"},take:20}}});
     if (!s) throw Object.assign(new Error("Spirit not found"),{statusCode:404});
     return fmt(s);
   }

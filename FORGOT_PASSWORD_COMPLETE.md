@@ -91,7 +91,7 @@ npx tsx auth-server.ts
 ### 3. 測試帳號
 ```
 電子郵件: admin@nightasaur.com
-密碼: admin123
+密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 支援信箱: service@nightasaur.com
 ```
 
@@ -128,15 +128,8 @@ npx tsx auth-server.ts
    - 開發指南
    - 故障排除
 
-5. **`test-forgot-password.js`** - 測試腳本
-   - 功能測試
-   - 流程驗證
-   - 錯誤檢查
-
-6. **`quick-test.js`** - 快速測試
-   - 服務器檢查
-   - 忘記密碼測試
-   - 重置流程測試
+5. 舊版會修改正式管理員密碼的測試腳本已停用並移除。密碼重設只能使用
+   隔離資料庫與一次性 fixture account，且不得輸出憑證或重設連結。
 
 7. **`start-auth-system.bat`** - 啟動腳本
    - 環境檢查
@@ -146,9 +139,8 @@ npx tsx auth-server.ts
 ## 🔍 測試方法
 
 ### 自動測試
-```bash
-node quick-test.js
-```
+
+只執行目前 CI 內使用隔離 fixture 的測試；不得以正式管理員帳號測試重設。
 
 ### 手動測試
 1. 啟動服務器
@@ -309,7 +301,7 @@ npx tsx auth-server.ts
 📧 支援信箱: service@nightasaur.com
 🌐 服務器: http://localhost:3002
 📖 文檔: FORGOT_PASSWORD_GUIDE.md
-🧪 測試: node quick-test.js
+🧪 測試: 僅限隔離 fixture 測試
 ```
 
 ---
@@ -330,7 +322,7 @@ Nightasaur 忘記密碼系統已成功完成，提供了一個完整、安全、
 **下一步行動:**
 1. 啟動服務器: `cd apps/backend && npx tsx auth-server.ts`
 2. 訪問界面: http://localhost:3002
-3. 測試功能: `node quick-test.js`
+3. 測試功能: 僅使用隔離資料庫與一次性 fixture account
 4. 查看文檔: `FORGOT_PASSWORD_GUIDE.md`
 
 **感謝使用 Nightasaur 系統！** 🦖

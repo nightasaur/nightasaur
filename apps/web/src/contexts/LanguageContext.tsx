@@ -3,7 +3,7 @@ import { languageAPI } from "../api/client";
 
 interface LanguageContextType {
   currentLanguage: string;
-  setCurrentLanguage: (lang: string) => void;
+  setCurrentLanguage: (lang: string) => Promise<void>;
   loading: boolean;
   supportedLanguages: Array<{
     code: string;
@@ -15,7 +15,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const SUPPORTED_LANGUAGES = [
+export const SUPPORTED_LANGUAGES = [
   { code: "zh-TW", name: "繁體中文", nativeName: "繁體中文", flag: "🇹🇼" },
   { code: "zh-CN", name: "簡體中文", nativeName: "简体中文", flag: "🇨🇳" },
   { code: "en-US", name: "English", nativeName: "English", flag: "🇺🇸" },
@@ -23,16 +23,20 @@ const SUPPORTED_LANGUAGES = [
   { code: "ko-KR", name: "한국어", nativeName: "한국어", flag: "🇰🇷" }
 ];
 
+const DEFAULT_LANGUAGE = "zh-TW";
+
+function getSavedLanguage() {
+  const savedLang = localStorage.getItem("nightasaur_language");
+  return savedLang && SUPPORTED_LANGUAGES.some((lang) => lang.code === savedLang)
+    ? savedLang
+    : DEFAULT_LANGUAGE;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [currentLanguage, setCurrentLanguageState] = useState<string>("zh-TW");
+  const [currentLanguage, setCurrentLanguageState] = useState<string>(getSavedLanguage);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem("nightasaur_language");
-    if (savedLang && SUPPORTED_LANGUAGES.some(lang => lang.code === savedLang)) {
-      setCurrentLanguageState(savedLang);
-    }
-    
     // 如果用戶已登入，嘗試從服務器獲取語言偏好
     const token = localStorage.getItem("nightasaur_token");
     if (token) {
@@ -42,13 +46,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = currentLanguage;
+  }, [currentLanguage]);
+
   const loadUserPreference = async () => {
     try {
       setLoading(true);
       const response = await languageAPI.getUserPreference();
-      if (response.data?.preference?.primaryLang) {
-        setCurrentLanguageState(response.data.preference.primaryLang);
-        localStorage.setItem("nightasaur_language", response.data.preference.primaryLang);
+      const primaryLang = response.data?.preference?.primaryLang;
+      if (primaryLang && SUPPORTED_LANGUAGES.some((lang) => lang.code === primaryLang)) {
+        setCurrentLanguageState(primaryLang);
+        localStorage.setItem("nightasaur_language", primaryLang);
       }
     } catch (error) {
       console.error("Failed to load language preference:", error);
@@ -58,6 +67,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const setCurrentLanguage = async (languageCode: string) => {
+    if (!SUPPORTED_LANGUAGES.some((lang) => lang.code === languageCode)) {
+      return;
+    }
+
     setCurrentLanguageState(languageCode);
     localStorage.setItem("nightasaur_language", languageCode);
     

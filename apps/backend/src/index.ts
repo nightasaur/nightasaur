@@ -17,10 +17,14 @@ import academyRoutes from "./routes/academy.js";
 import ollamaRoutes from "./routes/ollama.js";
 
 const app = express();
+if (!Number.isSafeInteger(config.trustProxyHops) || config.trustProxyHops < 0) {
+  throw new Error("TRUST_PROXY_HOPS must be a non-negative integer");
+}
+app.set("trust proxy", config.trustProxyHops);
 
 // 銝剝?隞園?蝵?
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ?亙熒瑼Ｘ頝舐

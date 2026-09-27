@@ -1,84 +1,27 @@
-import { useState, useEffect } from "react";
-import { languageAPI } from "../api/client";
-
-interface LanguageOption {
-  code: string;
-  name: string;
-  nativeName: string;
-  flag: string;
-}
-
-const SUPPORTED_LANGUAGES: LanguageOption[] = [
-  { code: "zh-TW", name: "繁體中文", nativeName: "繁體中文", flag: "🇹🇼" },
-  { code: "zh-CN", name: "簡體中文", nativeName: "简体中文", flag: "🇨🇳" },
-  { code: "en-US", name: "English", nativeName: "English", flag: "🇺🇸" },
-  { code: "ja-JP", name: "日本語", nativeName: "日本語", flag: "🇯🇵" },
-  { code: "ko-KR", name: "한국어", nativeName: "한국어", flag: "🇰🇷" }
-];
+import { useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface LanguageSwitcherProps {
   compact?: boolean;
+  inline?: boolean;
   onLanguageChange?: (languageCode: string) => void;
 }
 
-export default function LanguageSwitcher({ compact = false, onLanguageChange }: LanguageSwitcherProps) {
-  const [currentLanguage, setCurrentLanguage] = useState<string>("zh-TW");
+export default function LanguageSwitcher({ compact = false, inline = false, onLanguageChange }: LanguageSwitcherProps) {
+  const { currentLanguage, setCurrentLanguage, supportedLanguages, loading } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  // 從localStorage讀取保存的語言設置
-  useEffect(() => {
-    const savedLang = localStorage.getItem("nightasaur_language");
-    if (savedLang && SUPPORTED_LANGUAGES.some(lang => lang.code === savedLang)) {
-      setCurrentLanguage(savedLang);
-    }
-    
-    // 如果用戶已登入，嘗試從服務器獲取語言偏好
-    const token = localStorage.getItem("nightasaur_token");
-    if (token) {
-      loadUserPreference();
-    }
-  }, []);
-
-  const loadUserPreference = async () => {
-    try {
-      setLoading(true);
-      const response = await languageAPI.getUserPreference();
-      if (response.data?.preference?.primaryLang) {
-        setCurrentLanguage(response.data.preference.primaryLang);
-        localStorage.setItem("nightasaur_language", response.data.preference.primaryLang);
-      }
-    } catch (error) {
-      console.error("Failed to load language preference:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLanguageChange = async (languageCode: string) => {
-    setCurrentLanguage(languageCode);
-    localStorage.setItem("nightasaur_language", languageCode);
+    await setCurrentLanguage(languageCode);
     setIsOpen(false);
-    
-    // 如果用戶已登入，保存到服務器
-    const token = localStorage.getItem("nightasaur_token");
-    if (token) {
-      try {
-        await languageAPI.updatePreference({ primaryLang: languageCode });
-      } catch (error) {
-        console.error("Failed to update language preference:", error);
-      }
-    }
     
     if (onLanguageChange) {
       onLanguageChange(languageCode);
     }
     
-    // 重新載入頁面以應用語言更改
-    window.location.reload();
   };
 
-  const currentLang = SUPPORTED_LANGUAGES.find(lang => lang.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
+  const currentLang = supportedLanguages.find(lang => lang.code === currentLanguage) || supportedLanguages[0];
 
   if (loading) {
     return (
@@ -93,6 +36,7 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
     return (
       <div className="relative">
         <button
+          aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-white text-sm font-medium transition-all duration-200"
         >
@@ -110,12 +54,12 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
 
         {isOpen && (
           <>
-            <div 
-              className="fixed inset-0 z-40" 
+            {!inline && <div
+              className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
-            />
-            <div className="absolute top-full mt-1 right-0 z-50 min-w-[180px] bg-[#0a0a1a] border border-red-500/30 rounded-xl shadow-2xl overflow-hidden">
-              {SUPPORTED_LANGUAGES.map((lang) => (
+            />}
+            <div className={`${inline ? "relative mt-2 w-full" : "absolute top-full mt-1 right-0 min-w-[180px]"} z-50 bg-[#0a0a1a] border border-red-500/30 rounded-xl shadow-2xl overflow-hidden`}>
+              {supportedLanguages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}
@@ -147,6 +91,7 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
   return (
     <div className="relative">
       <button
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 text-white font-medium transition-all duration-200 group"
       >
@@ -179,7 +124,7 @@ export default function LanguageSwitcher({ compact = false, onLanguageChange }: 
               <p className="text-xs text-white/50 mt-1">Select Language</p>
             </div>
             
-            {SUPPORTED_LANGUAGES.map((lang) => (
+            {supportedLanguages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}

@@ -38,7 +38,7 @@ async def test_ephemeral_memory_provider_passthrough_when_session_id_none():
     assert context == history
 
     # append 對 session_id=None 應該是 no-op，不應拋出例外也不應留下狀態。
-    await provider.append(None, "user", "hello")
+    await provider.append(None, {"role": "user", "content": "hello"})
     assert provider._sessions == {}
 
 
@@ -47,8 +47,8 @@ async def test_ephemeral_memory_provider_accumulates_history_per_session():
     """有 session_id 時應該把訊息累積起來，供同一 session 之後的 run 使用。"""
     provider = EphemeralMemoryProvider()
 
-    await provider.append("session-1", "user", "第一句")
-    await provider.append("session-1", "assistant", "回覆")
+    await provider.append("session-1", {"role": "user", "content": "第一句"})
+    await provider.append("session-1", {"role": "assistant", "content": "回覆"})
 
     context = await provider.get_context("session-1", [])
     assert context == [
@@ -61,11 +61,38 @@ async def test_ephemeral_memory_provider_accumulates_history_per_session():
 async def test_ephemeral_memory_provider_keeps_sessions_isolated():
     provider = EphemeralMemoryProvider()
 
-    await provider.append("session-a", "user", "A的訊息")
-    await provider.append("session-b", "user", "B的訊息")
+    await provider.append("session-a", {"role": "user", "content": "A的訊息"})
+    await provider.append("session-b", {"role": "user", "content": "B的訊息"})
 
     context_a = await provider.get_context("session-a", [])
     context_b = await provider.get_context("session-b", [])
 
     assert context_a == [{"role": "user", "content": "A的訊息"}]
     assert context_b == [{"role": "user", "content": "B的訊息"}]
+
+
+@pytest.mark.asyncio
+async def test_ephemeral_memory_provider_can_store_tool_call_messages():
+    """append() 應能保存完整的 tool-calling 訊息序列（含 tool_call_id/name），
+    而不只是簡單的 role/content 配對。
+    """
+    provider = EphemeralMemoryProvider()
+
+    await provider.append("session-tools", {"role": "user", "content": "幾點了？"})
+    await provider.append(
+        "session-tools",
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [{"id": "call-1", "name": "clock", "arguments": {}}],
+        },
+    )
+    await provider.append(
+        "session-tools",
+        {"role": "tool", "tool_call_id": "call-1", "name": "clock", "content": {"time": "10:00"}},
+    )
+    await provider.append("session-tools", {"role": "assistant", "content": "現在 10:00"})
+
+    context = await provider.get_context("session-tools", [])
+    assert [m["role"] for m in context] == ["user", "assistant", "tool", "assistant"]
+    assert context[2]["tool_call_id"] == "call-1"

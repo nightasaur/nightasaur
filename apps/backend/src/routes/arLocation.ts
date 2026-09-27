@@ -1,26 +1,26 @@
 import { Router } from "express";
 import { arLocationController } from "../controllers/arLocation.js";
-import { authMiddleware } from "../middleware/auth.ts";
+import { adminMiddleware, authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// 所有路由都需要認證
+// All AR routes require authentication.
 router.use(authMiddleware);
 
-// 位置相關
+// Location data
 router.post("/location", arLocationController.updatePlayerLocation);
 router.get("/spawns/nearby", arLocationController.getNearbySpawns);
 router.get("/hotspots/nearby", arLocationController.getNearbyHotspots);
 
-// 探索相關
+// Exploration
 router.post("/visit", arLocationController.visitLocation);
 router.post("/capture", arLocationController.captureSpiritAR);
 router.get("/route", arLocationController.getExplorationRoute);
 
-// 統計相關
+// Statistics
 router.get("/stats", arLocationController.getPlayerExplorationStats);
 
-// 管理員功能
-router.post("/admin/generate-spawns", arLocationController.generateNewSpawns);
+// Administrative operations
+router.post("/admin/generate-spawns", adminMiddleware, arLocationController.generateNewSpawns);
 
 export default router;

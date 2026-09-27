@@ -17,20 +17,43 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest  # noqa: E402
 
 from agent.providers.base import ModelProvider  # noqa: E402
+from agent.tool_calls import ModelResponse  # noqa: E402
 
 
 class FakeModelProvider(ModelProvider):
-    """測試專用 ModelProvider，回傳固定回覆並記錄收到的 messages。"""
+    """測試專用 ModelProvider，回傳固定回覆並記錄收到的 messages/tools/options。
 
-    def __init__(self, reply: str = "fake-reply"):
+    - 預設行為（不傳 responses）：每次呼叫都回傳
+      `ModelResponse(content=self.reply)`，等同 v0.1 的純文字問答，不含任何
+      tool_calls —— 用於既有的無 tool 測試案例，維持完全不變的行為。
+    - 傳入 `responses`（一個 ModelResponse 列表）可以照順序腳本化多輪回覆，
+      模擬「先要求 tool call、再根據 tool 結果產生最終答案」之類的多輪流程；
+      呼叫次數超過 responses 長度時，重複回傳最後一個 response（方便撰寫
+      max-iteration 測試 —— 模型「一直要求同一個工具」）。
+    """
+
+    def __init__(
+        self,
+        reply: str = "fake-reply",
+        responses: list[ModelResponse] | None = None,
+    ):
         self.reply = reply
+        self.responses = responses
         self.received_messages: list[list[dict]] = []
+        self.received_tools: list[list] = []
         self.received_options: list[dict] = []
+        self.call_count = 0
 
-    async def generate(self, messages: list[dict], **options) -> str:
+    async def generate(self, messages: list[dict], tools=None, **options) -> ModelResponse:
         self.received_messages.append(messages)
+        self.received_tools.append(list(tools) if tools else [])
         self.received_options.append(options)
-        return self.reply
+        self.call_count += 1
+
+        if self.responses is not None:
+            index = min(self.call_count - 1, len(self.responses) - 1)
+            return self.responses[index]
+        return ModelResponse(content=self.reply)
 
     async def health_check(self) -> dict:
         return {"status": "ok", "model": "fake-model"}

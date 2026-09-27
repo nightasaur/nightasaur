@@ -1,3 +1,7 @@
+# Current security baseline status
+
+See [SECURITY_BASELINE.md](docs/SECURITY_BASELINE.md) for implemented controls, deployment prerequisites and remaining gaps. The historical guidance below does not certify implementation; JWT expiry is now one hour, while persistent logout revocation and distributed rate limiting remain incomplete.
+
 # Security Policy
 
 ## Supported Versions

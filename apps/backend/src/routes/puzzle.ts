@@ -1,28 +1,28 @@
 import { Router } from "express";
 import { puzzleController } from "../controllers/puzzle.js";
-import { authMiddleware } from "../middleware/auth.ts";
+import { adminMiddleware, authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// 所有路由都需要認證
+// All puzzle routes require authentication.
 router.use(authMiddleware);
 
-// 獲取可用的益智關卡
+// Available puzzles for an owned spirit
 router.get("/spirits/:spiritId/puzzles", puzzleController.getAvailablePuzzles);
 
-// 獲取每日益智
+// Daily puzzle
 router.get("/daily", puzzleController.getDailyPuzzle);
 
-// 嘗試解決益智
+// Puzzle attempt
 router.post("/spirits/:spiritId/puzzles/:puzzleId/attempt", puzzleController.attemptPuzzle);
 
-// 獲取精靈升級狀態
+// Owned spirit upgrades
 router.get("/spirits/:spiritId/upgrades", puzzleController.getSpiritUpgrades);
 
-// 獲取排行榜
+// Leaderboard
 router.get("/leaderboard", puzzleController.getLeaderboard);
 
-// 創建測試關卡（管理員用）
-router.post("/admin/test-puzzle", puzzleController.createTestPuzzle);
+// Administrative test fixture creation
+router.post("/admin/test-puzzle", adminMiddleware, puzzleController.createTestPuzzle);
 
 export default router;

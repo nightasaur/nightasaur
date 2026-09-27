@@ -1,4 +1,3 @@
-import { z } from "zod";
 
 // 精靈外觀系統配置
 export const APPEARANCE_SYSTEM_CONFIG = {

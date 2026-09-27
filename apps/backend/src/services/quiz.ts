@@ -1,6 +1,5 @@
 import { IELTS_WORDS } from "./ieltsVocab.js";
 import { IELTS_ARTICLES } from "./ieltsReading.js";
-import type { IeltsArticle } from "./ieltsReading.js";
 
 // IELTS vocabulary question generator
 function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
@@ -22,8 +21,7 @@ function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
       };
     } else {
       // 選出對應字彙 (中/日模式)
-      const zhFields = langIdx <= 1 ? "zhCN" : "ja";
-      const meaning = (word as any)[zhFields];
+      const meaning = langIdx === 0 ? word.zhTW : langIdx === 1 ? word.zhCN : word.ja;
       const wrongWords = IELTS_WORDS.filter(w => w.word !== word.word)
         .sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.word);
       const opts = [correct, ...wrongWords].sort(() => Math.random() - 0.5);
@@ -36,13 +34,16 @@ function* genIELTSVocabQs(langIdx: number): Generator<QuizQuestion> {
         language: LANG_NAMES[langIdx],
       };
     }
+  }
+}
+
 /** Generate IELTS reading comprehension questions */
 function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
   for (const article of IELTS_ARTICLES) {
-    for (const q of article.questions) {
+    for (const [questionIndex, q] of article.questions.entries()) {
       if (langIdx <= 1) {
         yield {
-          id: `ielts-read-${article.id}-${q.questionType}-${langIdx}`,
+          id: `ielts-read-${article.id}-${questionIndex}-${q.questionType}-${langIdx}`,
           category: "IELTS" as any,
           question: `${q.question} (${article.titleZH})`,
           options: q.options, answer: q.answer,
@@ -55,7 +56,7 @@ function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
       // English mode
       if (langIdx === 2) {
         yield {
-          id: `ielts-read-en-${article.id}-${q.questionType}`,
+          id: `ielts-read-en-${article.id}-${questionIndex}-${q.questionType}`,
           category: "IELTS" as any,
           question: `${q.question} (${article.title})`,
           options: q.options, answer: q.answer,
@@ -66,8 +67,6 @@ function* genIELTSReadingQs(langIdx: number): Generator<QuizQuestion> {
         };
       }
     }
-  }
-}
   }
 }
 // SPDX-License-Identifier: MIT
@@ -141,7 +140,6 @@ const DISADV: Record<string,string[]> = {
   MOON:["SHADOW"], NATURE:["FIRE","ICE"], THUNDER:["ILLUSION"], ICE:["FIRE"],
 };
 
-const STG: Record<string,number> = {HATCHLING:1, JUVENILE:5, ADULT:15, ULTIMATE:30, LEGENDARY:60};
 /** Generate element advantage questions */
 function* genElementQs(langIdx: number): Generator<QuizQuestion> {
   for (const elem of ELEMENTS) {
@@ -149,7 +147,7 @@ function* genElementQs(langIdx: number): Generator<QuizQuestion> {
     for (const target of ADV[elem] || []) {
       const tName = `${EMO[target]} ${el(target, langIdx)}`;
       const others = ELEMENTS.filter(e => e !== elem && e !== target).map(e => `${EMO[e]} ${el(e, langIdx)}`);
-      const opts = shuffle([...others, tName]).slice(0, 4);
+      const opts = shuffle([tName, ...shuffle(others).slice(0, 3)]);
       const q = ["克制哪種屬性？","克制品属性？","beats which element?","に勝つ属性は？"];
       const e = ["克制","克制","beats","に勝つ"];
       yield {
@@ -176,12 +174,12 @@ function* genMathQs(langIdx: number, level: number): Generator<QuizQuestion> {
     const plus = ["＋","+","+","＋"];
     const minus = ["－","-","-","－"];
     const q = isAdd ? `${a} ${plus[langIdx]} ${b} = ?` : `${Math.max(a,b)} ${minus[langIdx]} ${Math.min(a,b)} = ?`;
-    const opts = shuffle([ans, ans+1, ans-1, ans+2, ans*2].filter(x => x > 0)).slice(0, 4);
-    if (opts.length < 4) opts.push(ans+7);
-    const final = shuffle(opts).slice(0, 4);
+    const wrongAnswers = Array.from(new Set([ans+1, ans-1, ans+2, ans*2, ans+7].filter(x => x > 0 && x !== ans)));
+    const finalNumbers = shuffle([ans, ...shuffle(wrongAnswers).slice(0, 3)]);
+    const final = finalNumbers.map(String);
     yield {
       id: `math-${level}-${i}-${langIdx}`, category: "MATH" as any,
-      question: q, options: final, answer: final.indexOf(ans),
+      question: q, options: final, answer: finalNumbers.indexOf(ans),
       explanation: `= ${ans}`, level: level,
       difficulty: level > 30 ? 3 : level > 15 ? 2 : 1,
       language: LANG_NAMES[langIdx],
@@ -218,10 +216,11 @@ function* genSpiritQs(langIdx: number): Generator<QuizQuestion> {
   const title = langIdx <= 1 ? "精靈知識：" : langIdx === 2 ? "" : "精霊知識：";
   for (let i = 0; i < pool.length; i++) {
     const [q, opts, ans, exp] = pool[i];
+    const shuffledOptions = shuffle(opts);
     yield {
       id: `spirit-${i}-${langIdx}`, category: "SPIRIT" as any,
-      question: `${title}${q}`, options: shuffle(opts),
-      answer: shuffle(opts).indexOf(opts[ans]),
+      question: `${title}${q}`, options: shuffledOptions,
+      answer: shuffledOptions.indexOf(opts[ans]),
       explanation: exp, level: 1, difficulty: i === 4 ? 2 : 1,
       language: LANG_NAMES[langIdx],
     };
@@ -246,14 +245,16 @@ function* genLogicQs(langIdx: number, elem: string): Generator<QuizQuestion> {
       language: LANG_NAMES[langIdx],
     };
   }
-  const sq = ["A速度>B, B>C, 誰最慢？","A速度>B, B>C, 谁最慢？","A speed>B, B>C, who is slowest?","A速度>B, B>C、最も遅いのは？"];
-  const so = shuffle(["A","B","C","無法判斷"]).slice(0,4);
-  yield {
-    id: `logic-speed-${langIdx}`, category: "LOGIC" as any,
-    question: sq[langIdx], options: so, answer: so.indexOf("C"),
-    explanation: "C", level: 5, difficulty: 2,
-    language: LANG_NAMES[langIdx],
-  };
+  if (elem === ELEMENTS[0]) {
+    const sq = ["A速度>B, B>C, 誰最慢？","A速度>B, B>C, 谁最慢？","A speed>B, B>C, who is slowest?","A速度>B, B>C、最も遅いのは？"];
+    const so = shuffle(["A","B","C","無法判斷"]).slice(0,4);
+    yield {
+      id: `logic-speed-${langIdx}`, category: "LOGIC" as any,
+      question: sq[langIdx], options: so, answer: so.indexOf("C"),
+      explanation: "C", level: 5, difficulty: 2,
+      language: LANG_NAMES[langIdx],
+    };
+  }
 }
 
 /** Generate species/biology questions */
@@ -278,10 +279,11 @@ function* genSpeciesQs(langIdx: number): Generator<QuizQuestion> {
   const title = langIdx === 3 ? "生物知識：" : langIdx === 2 ? "" : "";
   for (let i = 0; i < pool.length; i++) {
     const [q, opts, ans, exp] = pool[i];
+    const shuffledOptions = shuffle(opts);
     yield {
       id: `species-${i}-${langIdx}`, category: "SPECIES" as any,
-      question: `${title}${q}`, options: shuffle(opts),
-      answer: shuffle(opts).indexOf(opts[ans]),
+      question: `${title}${q}`, options: shuffledOptions,
+      answer: shuffledOptions.indexOf(opts[ans]),
       explanation: exp, level: 1, difficulty: 1,
       language: LANG_NAMES[langIdx],
     };
@@ -353,11 +355,17 @@ export function generateQuestions(count: number, level: number, lang: Lang = "zh
     const isAdd = Math.random() > 0.4;
     const ans = isAdd ? a + b : Math.max(a, b) - Math.min(a, b);
     if (ans <= 0) continue;
-    const symbols = ["＋","+","+","＋"];const q = isAdd ? `${a} ${symbols[langIdx]} ${b} = ?` : `${Math.max(a,b)}  ${symbols[langIdx]}  ${Math.min(a,b)} = ?`;
+    const plusSymbols = ["＋", "+", "+", "＋"];
+    const minusSymbols = ["－", "-", "-", "－"];
+    const q = isAdd
+      ? `${a} ${plusSymbols[langIdx]} ${b} = ?`
+      : `${Math.max(a,b)} ${minusSymbols[langIdx]} ${Math.min(a,b)} = ?`;
+    const wrongAnswers = Array.from(new Set([ans+1, ans-1, ans+2, ans*2, ans-2, ans+7].filter(x => x > 0 && x !== ans)));
+    const optionNumbers = shuffle([ans, ...shuffle(wrongAnswers).slice(0, 3)]);
     extra.push({
       id: `extra-${level}-${i}`, category: "MATH" as any,
-      question: q, options: shuffle([ans, ans+1, ans-1, ans+2, ans*2, ans-2].filter(x => x > 0)),
-      answer: 0, explanation: `= ${ans}`, level,
+      question: q, options: optionNumbers.map(String),
+      answer: optionNumbers.indexOf(ans), explanation: `= ${ans}`, level,
       difficulty: level > 30 ? 3 : level > 15 ? 2 : 1,
       language: lang,
     });
@@ -375,18 +383,23 @@ export function generateQuestions(count: number, level: number, lang: Lang = "zh
   const shuffled = shuffle(filtered);
   const result = shuffled.slice(0, Math.min(count, shuffled.length));
 
-  // If we need more, generate fresh ones
+  // If the cached pool is too small, add real arithmetic questions.
   if (result.length < count) {
     for (let i = 0; i < count * 3 && result.length < count; i++) {
-      const qType = ["ELEMENT","MATH","SPIRIT","LOGIC","SPECIES"][Math.floor(Math.random()*5)];
-      const elem = ELEMENTS[Math.floor(Math.random()*ELEMENTS.length)];
+      const a = Math.floor(Math.random() * (10 + level)) + 1;
+      const b = Math.floor(Math.random() * (10 + level)) + 1;
+      const correct = a + b;
+      const wrong = Array.from(new Set([correct + 1, correct - 1, correct + 2, correct + 7]))
+        .filter(value => value > 0 && value !== correct);
+      const optionNumbers = shuffle([correct, ...shuffle(wrong).slice(0, 3)]);
       result.push({
-        id: `fresh-${level}-${Date.now()}-${i}`, category: qType as any,
-        question: lang === "en" ? `Quick question about ${elem}?` : `${EMO[elem]} 關於${el(elem, langIdx)}的問題？`,
-        options: shuffle(["A選項","B選項","C選項","D選項"]),
-        answer: 0,
-        explanation: lang === "en" ? "Correct!" : "正確！",
-        element: elem, level,
+        id: `fresh-math-${level}-${Date.now()}-${i}`,
+        category: "MATH",
+        question: `${a} ${["＋", "+", "+", "＋"][langIdx]} ${b} = ?`,
+        options: optionNumbers.map(String),
+        answer: optionNumbers.indexOf(correct),
+        explanation: `= ${correct}`,
+        level,
         difficulty: Math.floor(Math.random() * 3) + 1,
         language: lang,
       });

@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { SquadController } from "../controllers/squad.js";
-import { authMiddleware } from "../middleware/auth.ts";
+import { authMiddleware } from "../middleware/auth.js";
 
 const squadController = new SquadController();
 const router = Router();
 
-// 所有路由都需要認證
+// 所有路由都需要登入。
 router.use(authMiddleware);
 
 // 小隊管理
@@ -16,15 +16,13 @@ router.get("/", squadController.getSquad);
 router.post("/members", squadController.addSpiritToSquad);
 router.delete("/members/:spiritId", squadController.removeSpiritFromSquad);
 
-// 小隊操作
+// 主精靈切換
 router.post("/switch-active", squadController.switchActiveSpirit);
-router.post("/train", squadController.trainSquadSpirit);
 
-// 小隊協同活動
-router.post("/challenge/puzzle", squadController.squadPuzzleChallenge);
-router.post("/training/daily", squadController.squadDailyTraining);
+// 獎勵型訓練與挑戰端點暫不公開。重新啟用前必須由伺服器驗證事件、
+// 冷卻時間與一次性獎勵，不能信任客戶端提交的時長或答案。
 
-// 小隊自動化
+// 小隊快速操作
 router.post("/auto-create", squadController.autoCreateSquad);
 router.post("/quick-switch", squadController.quickSquadSwitch);
 

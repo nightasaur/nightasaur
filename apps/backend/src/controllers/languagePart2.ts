@@ -107,7 +107,7 @@ export class LanguageController {
       res.json({ 
         menu,
         currentPreference: preference,
-        lastUpdated: preference.updatedAt
+        lastUpdated: undefined
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

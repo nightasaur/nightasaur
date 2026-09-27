@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { languageService, SUPPORTED_LANGUAGES, DISPLAY_MODES, THEMES } from "../services/language.js";
+import { languageService } from "../services/language.js";
+import { routeParam } from "../utils/request.js";
 
 export class LanguageController {
   // 獲取用戶語言偏好設定
@@ -38,8 +39,7 @@ export class LanguageController {
       
       const result = await languageService.autoDetectLanguage(userId, acceptLanguage);
       res.json({ 
-        success: true, 
-        message: "語言已自動偵測",
+        success: true,
         ...result 
       });
     } catch (error: any) {
@@ -50,7 +50,8 @@ export class LanguageController {
   // 獲取翻譯
   async getTranslation(req: Request, res: Response) {
     try {
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       const { language = "zh-TW" } = req.query;
       
       const translation = await languageService.getTranslation(key, module, language as string);
@@ -69,7 +70,7 @@ export class LanguageController {
   // 批量獲取翻譯
   async getBatchTranslations(req: Request, res: Response) {
     try {
-      const { module } = req.params;
+      const module = routeParam(req, "module");
       const { keys, language = "zh-TW" } = req.body;
       
       if (!keys || !Array.isArray(keys)) {
@@ -87,7 +88,8 @@ export class LanguageController {
   // 獲取多語言翻譯
   async getMultiLanguageTranslations(req: Request, res: Response) {
     try {
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       
       const translations = await languageService.getMultiLanguageTranslations(key, module);
       
@@ -123,7 +125,7 @@ export class LanguageController {
   }
   
   // 獲取支援的語言列表
-  async getSupportedLanguages(req: Request, res: Response) {
+  async getSupportedLanguages(_req: Request, res: Response) {
     try {
       const languages = languageService.getSupportedLanguages();
       res.json({ languages });
@@ -133,7 +135,7 @@ export class LanguageController {
   }
   
   // 獲取顯示模式列表
-  async getDisplayModes(req: Request, res: Response) {
+  async getDisplayModes(_req: Request, res: Response) {
     try {
       const displayModes = languageService.getDisplayModes();
       res.json({ displayModes });
@@ -143,7 +145,7 @@ export class LanguageController {
   }
   
   // 獲取主題列表
-  async getThemes(req: Request, res: Response) {
+  async getThemes(_req: Request, res: Response) {
     try {
       const themes = languageService.getThemes();
       res.json({ themes });
@@ -184,8 +186,8 @@ export class LanguageController {
   // 生成雙語文本
   async generateBilingualText(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
-      const { key, module } = req.params;
+      const key = routeParam(req, "key");
+      const module = routeParam(req, "module");
       const { primaryLang, secondaryLang } = req.query;
       
       if (!primaryLang || !secondaryLang) {
@@ -359,7 +361,7 @@ export class LanguageController {
       res.json({ 
         menu,
         currentPreference: preference,
-        lastUpdated: preference.updatedAt
+        lastUpdated: undefined
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

@@ -8,7 +8,10 @@ COPY package.json package-lock.json tsconfig.base.json ./
 COPY apps/backend/package.json apps/backend/package.json
 COPY packages/shared/package.json packages/shared/package.json
 
-RUN npm install
+COPY apps/web/package.json apps/web/package.json
+COPY apps/mobile/package.json apps/mobile/package.json
+
+RUN npm ci --ignore-scripts
 
 COPY apps/backend apps/backend
 COPY packages/shared packages/shared
@@ -17,4 +20,5 @@ RUN cd apps/backend && npx prisma generate
 
 EXPOSE 3002
 
-CMD sh -c "cd apps/backend && npx prisma db push --accept-data-loss && cd /app && npx tsx apps/backend/src/index.ts"
+# Schema changes are a separate, reviewed operator action.
+CMD ["node", "--import", "tsx", "apps/backend/src/index.ts"]

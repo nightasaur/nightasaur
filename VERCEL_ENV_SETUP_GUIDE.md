@@ -81,7 +81,7 @@ OPENROUTER_API_KEY="your-openrouter-api-key"
 
 設定範例 (Vercel Postgres):
 ```env
-DATABASE_URL="postgresql://default:password@ep-cool-bird-123456.us-east-1.postgres.vercel-storage.com/verceldb"
+DATABASE_URL="<PASTE-MANAGED-DATABASE-CONNECTION-STRING>"
 ```
 
 ### 4. 安全建議

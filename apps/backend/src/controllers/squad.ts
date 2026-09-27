@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { squadService } from "../services/squad.js";
 import { gameLogicService } from "../services/gameLogic.js";
+import { routeParam } from "../utils/request.js";
 
 export class SquadController {
   // 創建小隊
@@ -66,7 +67,7 @@ export class SquadController {
   async removeSpiritFromSquad(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const { spiritId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
       
       if (!spiritId) {
         res.status(400).json({ error: "請提供精靈ID" });

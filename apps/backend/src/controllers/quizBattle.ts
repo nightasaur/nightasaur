@@ -3,11 +3,12 @@
 
 import { Request, Response, NextFunction } from "express";
 import { quizBattleService } from "../services/quizBattle.js";
+import { routeParam } from "../utils/request.js";
 
 export class QuizBattleController {
   async start(req: Request, res: Response, next: NextFunction) {
     try {
-      const { spiritId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
       const result = await quizBattleService.startBattle(spiritId);
       res.json(result);
     } catch (err) { next(err); }
@@ -15,7 +16,7 @@ export class QuizBattleController {
 
   async answer(req: Request, res: Response, next: NextFunction) {
     try {
-      const { spiritId } = req.params;
+      const spiritId = routeParam(req, "spiritId");
       const { answerIndex } = req.body;
       const result = await quizBattleService.answerQuestion(spiritId, answerIndex);
       res.json(result);

@@ -28,7 +28,7 @@ export default function Assistant() {
     try {
       const res = await assistantAPI.chat(msg, messages);
       setMessages((p) => [...p, { role: "assistant", content: res.data.response }]);
-    } catch { setMessages((p) => [...p, { role: "assistant", content: "⚠️ 連線失敗，AI 引擎尚未啟動。" }]); }
+    } catch { setMessages((p) => [...p, { role: "assistant", content: "⚠️ 暫時無法取得 AI 回覆，可能是服務忙碌或連線逾時。請稍後再試。" }]); }
     setSending(false);
   };
 
@@ -36,21 +36,21 @@ export default function Assistant() {
     if (!codeInput.trim()) return;
     setCodeResult("⏳ 分析中...");
     try { const res = await assistantAPI.code(codeInput, codeLang, codeTask); setCodeResult(res.data.result); }
-    catch { setCodeResult("⚠️ 連線失敗，AI 引擎尚未啟動。"); }
+    catch { setCodeResult("⚠️ 暫時無法取得 AI 回覆，可能是服務忙碌或連線逾時。請稍後再試。"); }
   };
 
   const sendTranslate = async () => {
     if (!transText.trim()) return;
     setTransResult("⏳ 翻譯中...");
     try { const res = await assistantAPI.translate(transText, transTarget); setTransResult(res.data.translation); }
-    catch { setTransResult("⚠️ 連線失敗，AI 引擎尚未啟動。"); }
+    catch { setTransResult("⚠️ 暫時無法取得 AI 回覆，可能是服務忙碌或連線逾時。請稍後再試。"); }
   };
 
   const sendDocument = async () => {
     if (!docInput.trim()) return;
     setDocResult("⏳ 分析中...");
     try { const res = await assistantAPI.document(docInput, docTask); setDocResult(res.data.result); }
-    catch { setDocResult("⚠️ 連線失敗，AI 引擎尚未啟動。"); }
+    catch { setDocResult("⚠️ 暫時無法取得 AI 回覆，可能是服務忙碌或連線逾時。請稍後再試。"); }
   };
 
   return (

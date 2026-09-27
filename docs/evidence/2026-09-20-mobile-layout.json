@@ -1,0 +1,118 @@
+{
+  "date": "2026-09-20",
+  "scope": "public_responsive_css_layout",
+  "candidate": "617724250afe89e4226cba7155a16229ecb0bc33",
+  "asset": "/assets/index-BcKK_9YK.js",
+  "harnessUrl": "https://www.nightasaur.com/_checks/mobile.html",
+  "checks": [
+    {
+      "page": "/",
+      "requestedWidth": 375,
+      "frameWidth": 375,
+      "viewportWidth": 360,
+      "contentWidth": 360,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/",
+      "requestedWidth": 390,
+      "frameWidth": 390,
+      "viewportWidth": 375,
+      "contentWidth": 375,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/",
+      "requestedWidth": 430,
+      "frameWidth": 430,
+      "viewportWidth": 415,
+      "contentWidth": 415,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/login",
+      "requestedWidth": 375,
+      "frameWidth": 375,
+      "viewportWidth": 375,
+      "contentWidth": 375,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/login",
+      "requestedWidth": 390,
+      "frameWidth": 390,
+      "viewportWidth": 390,
+      "contentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/login",
+      "requestedWidth": 430,
+      "frameWidth": 430,
+      "viewportWidth": 430,
+      "contentWidth": 430,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/register",
+      "requestedWidth": 375,
+      "frameWidth": 375,
+      "viewportWidth": 375,
+      "contentWidth": 375,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/register",
+      "requestedWidth": 390,
+      "frameWidth": 390,
+      "viewportWidth": 390,
+      "contentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/register",
+      "requestedWidth": 430,
+      "frameWidth": 430,
+      "viewportWidth": 430,
+      "contentWidth": 430,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/products/ielts-immersion",
+      "requestedWidth": 375,
+      "frameWidth": 375,
+      "viewportWidth": 360,
+      "contentWidth": 360,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/products/ielts-immersion",
+      "requestedWidth": 390,
+      "frameWidth": 390,
+      "viewportWidth": 375,
+      "contentWidth": 375,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/products/ielts-immersion",
+      "requestedWidth": 430,
+      "frameWidth": 430,
+      "viewportWidth": 415,
+      "contentWidth": 415,
+      "horizontalOverflow": false
+    }
+  ],
+  "menu": {
+    "width": 375,
+    "allFiveOptionsVisible": true,
+    "selectionVerified": [
+      "en-US",
+      "ko-KR",
+      "zh-TW"
+    ],
+    "linkClosesMenu": true
+  },
+  "normalNavigationRecovered": true,
+  "authenticatedMobileVerified": false,
+  "physicalDeviceVerified": false
+}

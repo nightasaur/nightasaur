@@ -2,6 +2,44 @@ import axios from "axios";
 import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
 
+const SOCIAL_CONTENT_PREFIX = "__NIGHTASAUR_SOCIAL_V1__:";
+
+interface StoredSocialContent {
+  content: string;
+  platform: "FACEBOOK" | "INSTAGRAM";
+  imageUrl?: string | null;
+  externalPostId?: string | null;
+}
+
+function encodeSocialContent(value: StoredSocialContent): string {
+  return `${SOCIAL_CONTENT_PREFIX}${JSON.stringify(value)}`;
+}
+
+function decodeSocialContent(value: string): StoredSocialContent | null {
+  if (!value.startsWith(SOCIAL_CONTENT_PREFIX)) return null;
+
+  try {
+    return JSON.parse(value.slice(SOCIAL_CONTENT_PREFIX.length)) as StoredSocialContent;
+  } catch {
+    return null;
+  }
+}
+
+function normalizePost<T extends { content: string }>(post: T) {
+  const stored = decodeSocialContent(post.content);
+  if (!stored) {
+    return { ...post, platform: "UNKNOWN", imageUrl: null, postId: null };
+  }
+
+  return {
+    ...post,
+    content: stored.content,
+    platform: stored.platform,
+    imageUrl: stored.imageUrl || null,
+    postId: stored.externalPostId || null,
+  };
+}
+
 export class SocialService {
   /**
    * 建立社群貼文（草稿或預約）
@@ -11,43 +49,64 @@ export class SocialService {
     spiritId?: string;
     content: string;
     imageUrl?: string;
-    platform: string;
+    platform: "FACEBOOK" | "INSTAGRAM";
     scheduledAt?: Date;
   }) {
+    if (params.spiritId && !await prisma.spirit.findFirst({ where: {
+      id: params.spiritId, userId: params.userId, isActive: true,
+    } })) throw Object.assign(new Error("精靈不存在"), { statusCode: 404 });
     const post = await prisma.socialPost.create({
       data: {
         userId: params.userId,
         spiritId: params.spiritId || null,
-        content: params.content,
-        imageUrl: params.imageUrl || null,
-        platform: params.platform,
+        content: encodeSocialContent({
+          content: params.content,
+          platform: params.platform,
+          imageUrl: params.imageUrl || null,
+        }),
         status: params.scheduledAt ? "SCHEDULED" : "DRAFT",
         scheduledAt: params.scheduledAt || null,
       },
     });
 
-    // 如果是立即發布，直接執行
-    if (!params.scheduledAt) {
-      await this.publishPost(post.id);
-    }
-
-    return post;
+    // Creating a draft never sends content to the platform account.
+    return normalizePost(post);
   }
 
   /**
    * 發布貼文到 FB / IG
    */
-  async publishPost(postId: string) {
-    const post = await prisma.socialPost.findUnique({ where: { id: postId } });
+  async publishPost(postId: string, actorId: string) {
+    if (!actorId) throw Object.assign(new Error("未登入"), { statusCode: 401 });
+    const actor = await prisma.user.findUnique({ where: { id: actorId } });
+    if (!actor?.isActive || actor.role !== "ADMIN") {
+      throw Object.assign(new Error("平台社群帳號僅限管理員發布"), { statusCode: 403 });
+    }
+    const post = await prisma.socialPost.findFirst({ where: { id: postId, userId: actorId } });
     if (!post) throw Object.assign(new Error("貼文不存在"), { statusCode: 404 });
+    if (process.env.SOCIAL_PUBLISH_ENABLED !== "true") {
+      throw Object.assign(new Error("社群發布尚未啟用"), { statusCode: 503 });
+    }
+    const stored = decodeSocialContent(post.content);
+    if (!stored) {
+      throw Object.assign(new Error("舊貼文缺少發布平台資訊，請重新建立貼文"), { statusCode: 400 });
+    }
 
+    if (!["FACEBOOK", "INSTAGRAM"].includes(stored.platform)) {
+      throw Object.assign(new Error("不支援的發布平台"), { statusCode: 400 });
+    }
+    const claimed = await prisma.socialPost.updateMany({
+      where: { id: postId, userId: actorId, status: { in: ["DRAFT", "SCHEDULED"] } },
+      data: { status: "PUBLISHING" },
+    });
+    if (claimed.count !== 1) throw Object.assign(new Error("貼文已發布或待人工確認，禁止重送"), { statusCode: 409 });
     try {
       let publishedPostId: string | null = null;
 
-      if (post.platform === "FACEBOOK") {
-        publishedPostId = await this.publishToFacebook(post.content, post.imageUrl);
-      } else if (post.platform === "INSTAGRAM") {
-        publishedPostId = await this.publishToInstagram(post.content, post.imageUrl);
+      if (stored.platform === "FACEBOOK") {
+        publishedPostId = await this.publishToFacebook(stored.content, stored.imageUrl);
+      } else if (stored.platform === "INSTAGRAM") {
+        publishedPostId = await this.publishToInstagram(stored.content, stored.imageUrl);
       }
 
       await prisma.socialPost.update({
@@ -55,7 +114,10 @@ export class SocialService {
         data: {
           status: "PUBLISHED",
           publishedAt: new Date(),
-          postId: publishedPostId,
+          content: encodeSocialContent({
+            ...stored,
+            externalPostId: publishedPostId,
+          }),
         },
       });
 
@@ -63,7 +125,8 @@ export class SocialService {
     } catch (error: any) {
       await prisma.socialPost.update({
         where: { id: postId },
-        data: { status: "FAILED" },
+        // A timeout may follow acceptance by the platform. Never auto-retry.
+        data: { status: "REVIEW_REQUIRED" },
       });
       throw error;
     }
@@ -189,20 +252,22 @@ export class SocialService {
    * 取得使用者貼文列表
    */
   async getUserPosts(userId: string) {
-    return prisma.socialPost.findMany({
+    const posts = await prisma.socialPost.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
+    return posts.map(normalizePost);
   }
 
   /**
    * 取得所有貼文（管理員用）
    */
   async getAllPosts() {
-    return prisma.socialPost.findMany({
+    const posts = await prisma.socialPost.findMany({
       orderBy: { createdAt: "desc" },
       include: { user: { select: { username: true } } },
     });
+    return posts.map(normalizePost);
   }
 }
 

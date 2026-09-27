@@ -45,7 +45,7 @@ echo "==========================================="
 echo ""
 echo "測試帳號:"
 echo "  📧 admin@nightasaur.com"
-echo "  🔑 admin123"
+echo "  🔑 RETIRED-CREDENTIAL-DO-NOT-USE"
 echo ""
 
 # 啟動服務器

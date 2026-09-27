@@ -53,7 +53,7 @@ cd apps/ai-engine && railway up --service nightasaur-ai
 | 變數 | 說明 | 範例 |
 |------|------|------|
 | `OLLAMA_URL` | Ollama 服務網址 | `http://your-vps:11434` |
-| `OLLAMA_MODEL` | LLM 模型 | `qwen2.5:3b` |
+| `OLLAMA_MODEL` | 經來源與授權審核的 LLM 模型識別碼 | 空值，停用文字推論 |
 
 ### 前端
 | 變數 | 說明 | 範例 |

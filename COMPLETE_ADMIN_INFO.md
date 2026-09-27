@@ -14,7 +14,7 @@
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```
@@ -36,7 +36,7 @@
 
 2. **密碼欄位**
    - 類型: password
-   - 預設值: admin123
+   - 預設值: RETIRED-CREDENTIAL-DO-NOT-USE
    - 必填: 是
    - 驗證: 最少6字符
 
@@ -73,7 +73,7 @@ npx tsx auth-server.ts
 ### 3. 使用管理員帳號登入
 ```
 電子郵件: admin@nightasaur.com
-密碼: admin123
+密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 ```
 
 ### 4. 忘記密碼功能
@@ -91,7 +91,7 @@ Content-Type: application/json
 
 {
   "email": "admin@nightasaur.com",
-  "password": "admin123"
+  "password": "RETIRED-CREDENTIAL-DO-NOT-USE"
 }
 ```
 
@@ -103,7 +103,7 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "username": "username",
-  "password": "password123"
+  "password": "<YOUR-UNIQUE-PASSWORD>"
 }
 ```
 
@@ -163,7 +163,7 @@ Content-Type: application/json
 
 2. **登入失敗**
    - 檢查電子郵件: admin@nightasaur.com
-   - 檢查密碼: admin123
+   - 檢查密碼: RETIRED-CREDENTIAL-DO-NOT-USE
    - 檢查大小寫
 
 3. **忘記密碼無效**
@@ -195,9 +195,9 @@ Content-Type: application/json
 ## 🧪 測試方法
 
 ### 自動測試
-```bash
-node quick-test.js
-```
+
+舊版會變更正式管理員密碼的腳本已移除。保留既有密碼；任何驗證只可使用
+隔離 fixture account，且不得把憑證寫入程式、日誌或 PR。
 
 ### 手動測試流程
 1. 訪問登入頁面
@@ -286,7 +286,7 @@ Nightasaur 登入系統已完整建立，包含：
 ```
 📧 電子郵件: admin@nightasaur.com
 👤 用戶名: admin
-🔑 密碼: admin123
+🔑 密碼: RETIRED-CREDENTIAL-DO-NOT-USE
 🎭 角色: 系統管理員
 📞 支援: service@nightasaur.com
 ```

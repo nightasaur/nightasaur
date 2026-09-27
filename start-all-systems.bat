@@ -107,7 +107,7 @@ echo 📋 管理員帳號：
 echo.
 echo    電子郵件：admin@nightasaur.com
 echo    用戶名：admin
-echo    密碼：admin123
+echo    密碼：RETIRED-CREDENTIAL-DO-NOT-USE
 echo    角色：系統管理員
 echo.
 echo 💡 使用建議：

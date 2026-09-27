@@ -121,7 +121,7 @@ railway up --service nightasaur-ai -d .
 ### 3.2 設定環境變數
 ```bash
 railway env set OLLAMA_URL=http://your-vps-ip:11434
-railway env set OLLAMA_MODEL=qwen2.5:3b
+# Text inference remains disabled until exact model provenance/license review.
 railway env set HOST=0.0.0.0
 railway env set PORT=8000
 ```
@@ -146,7 +146,7 @@ curl https://nightasaur-ai.up.railway.app/api/health
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
-ollama pull qwen2.5:3b
+# No automatic model download. See docs/MODEL_POLICY.md before selecting a model.
 ```
 
 ### 4.3 設定 Railway 連線

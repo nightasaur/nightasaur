@@ -48,14 +48,14 @@ export default function Privacy() {
         <h2 className="text-xl font-bold text-white mb-3">5. 您的權利</h2>
         <p className="text-white/60">
           您可以隨時要求查看、修改或刪除您的個人資料與精靈紀錄。
-          請聯繫管理員：admin@nightasaur.com
+          請聯繫管理員：privacy@nightasaur.com
         </p>
       </section>
 
       <section className="mb-8">
         <h2 className="text-xl font-bold text-white mb-3">6. 聯絡我們</h2>
         <p className="text-white/60">
-          如有任何隱私相關問題，請聯繫：admin@nightasaur.com
+          如有任何隱私相關問題，請聯繫：privacy@nightasaur.com
         </p>
       </section>
 

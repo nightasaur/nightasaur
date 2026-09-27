@@ -2,13 +2,12 @@ import prisma from "../config/prisma.js";
 
 export class GoogleMapsService {
   // Google Maps API 金鑰
-  private apiKey = process.env.GOOGLE_MAPS_API_KEY || "";
   
   // 使用 Google Places API 尋找附近的人潮聚集處
   async findNearbyPlaces(
     latitude: number,
     longitude: number,
-    radius: number = 1000,
+    _radius: number = 1000,
     type?: string
   ) {
     // 模擬 Google Places API 回應
@@ -43,7 +42,7 @@ export class GoogleMapsService {
     const places = [];
     const placeCount = 5 + Math.floor(Math.random() * 10);
     
-    const typeNames = {
+    const typeNames: Record<string, string[]> = {
       shopping_mall: ["購物中心", "百貨公司", "商場", "Outlet"],
       park: ["公園", "綠地", "森林公園", "河濱公園"],
       train_station: ["火車站", "捷運站", "高鐵站", "轉運站"],
@@ -54,7 +53,7 @@ export class GoogleMapsService {
       museum: ["博物館", "美術館", "展覽館", "文化中心"]
     };
     
-    const names = typeNames[type] || ["地點", "場所", "位置"];
+    const names = typeNames[type as keyof typeof typeNames] || ["地點", "場所", "位置"];
     
     for (let i = 0; i < placeCount; i++) {
       const latOffset = (Math.random() - 0.5) * 0.01;
@@ -123,7 +122,7 @@ export class GoogleMapsService {
   
   // 將 Google Place 類型映射到遊戲熱點類型
   private mapPlaceTypeToHotspotType(placeType: string): string {
-    const typeMapping = {
+    const typeMapping: Record<string, string> = {
       "shopping_mall": "SHOPPING",
       "department_store": "SHOPPING",
       "park": "PARK",
@@ -138,7 +137,7 @@ export class GoogleMapsService {
       "cafe": "SHOPPING"
     };
     
-    return typeMapping[placeType] || "SHOPPING";
+    return typeMapping[placeType as keyof typeof typeMapping] || "SHOPPING";
   }
   
   // 計算熱門程度
@@ -151,7 +150,7 @@ export class GoogleMapsService {
   
   // 根據熱點類型獲取生成類型
   private getSpawnTypesForHotspotType(hotspotType: string): string[] {
-    const spawnTypes = {
+    const spawnTypes: Record<string, string[]> = {
       SHOPPING: ["SHOPPING", "LUXURY", "MODERN", "TRENDY"],
       PARK: ["PARK", "NATURE", "RELAX", "SCENIC"],
       STATION: ["STATION", "TRANSPORT", "BUSY", "SPEED"],
@@ -159,12 +158,12 @@ export class GoogleMapsService {
       CAMPUS: ["CAMPUS", "EDUCATION", "YOUTH", "CREATIVE"]
     };
     
-    return spawnTypes[hotspotType] || ["SHOPPING"];
+    return spawnTypes[hotspotType as keyof typeof spawnTypes] || ["SHOPPING"];
   }
   
   // 生成高峰時段
   private generatePeakHours(hotspotType: string): number[] {
-    const peakHours = {
+    const peakHours: Record<string, number[]> = {
       SHOPPING: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
       PARK: [6, 7, 8, 9, 16, 17, 18, 19],
       STATION: [7, 8, 9, 17, 18, 19, 20],
@@ -172,11 +171,11 @@ export class GoogleMapsService {
       CAMPUS: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
     };
     
-    return peakHours[hotspotType] || [10, 11, 12, 13, 14, 15, 16];
+    return peakHours[hotspotType as keyof typeof peakHours] || [10, 11, 12, 13, 14, 15, 16];
   }
   
   // 從熱點創建生成點
-  private async createSpawnFromHotspot(hotspot: any, userId: string) {
+  private async createSpawnFromHotspot(hotspot: any, _userId: string) {
     try {
       const availableSpirits = this.getSpiritsByLocationType(hotspot.type);
       
@@ -208,7 +207,7 @@ export class GoogleMapsService {
   
   // 根據地點類型獲取精靈
   private getSpiritsByLocationType(locationType: string): Array<any> {
-    const spiritsByType = {
+    const spiritsByType: Record<string, Array<{ name: string; species: string; element: string }>> = {
       SHOPPING: [
         { name: "閃亮寶石獸", species: "Crystal", element: "✨" },
         { name: "金錢鼠", species: "Gold", element: "💰" },
@@ -241,7 +240,7 @@ export class GoogleMapsService {
       ]
     };
     
-    return spiritsByType[locationType] || [
+    return spiritsByType[locationType as keyof typeof spiritsByType] || [
       { name: "普通精靈", species: "Normal", element: "⭐" }
     ];
   }
@@ -261,7 +260,7 @@ export class GoogleMapsService {
     originLng: number,
     destinationLat: number,
     destinationLng: number,
-    mode: string = "walking"
+    _mode: string = "walking"
   ) {
     const distance = this.calculateDistance(originLat, originLng, destinationLat, destinationLng);
     const duration = Math.floor(distance / 1.4);
@@ -324,17 +323,19 @@ export class GoogleMapsService {
     // 保存到資料庫
     const createdHotspots = [];
     for (const hotspot of hotspots) {
-      const created = await prisma.hotspot.upsert({
+      const existing = await prisma.hotspot.findFirst({
         where: {
-          name_latitude_longitude: {
-            name: hotspot.name,
-            latitude: hotspot.latitude,
-            longitude: hotspot.longitude
-          }
-        },
-        update: hotspot,
-        create: hotspot
+          name: hotspot.name,
+          latitude: hotspot.latitude,
+          longitude: hotspot.longitude
+        }
       });
+      const created = existing
+        ? await prisma.hotspot.update({
+            where: { id: existing.id },
+            data: hotspot
+          })
+        : await prisma.hotspot.create({ data: hotspot });
       
       createdHotspots.push(created);
     }

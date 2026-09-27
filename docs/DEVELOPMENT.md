@@ -120,7 +120,7 @@ npm run dev:ai
 **Ollama（選擇性）：**
 ```bash
 ollama serve
-ollama pull qwen2.5:3b   # 下載繁體中文模型
+# 不自動下載模型；先完成 docs/MODEL_POLICY.md 的來源與授權審核。
 ```
 
 ### 一鍵啟動全部
@@ -254,7 +254,7 @@ curl -X POST http://localhost:3002/api/auth/register \
 # 登入
 curl -X POST http://localhost:3002/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@nightasaur.com","password":"demo1234"}'
+  -d '{"email":"demo@nightasaur.com","password":"RETIRED-CREDENTIAL-DO-NOT-USE"}'
 ```
 
 ---

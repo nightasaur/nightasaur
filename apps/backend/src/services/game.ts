@@ -28,7 +28,7 @@ export class GameService {
       const target = req.count || 1;
 
       const existing = await prisma.questProgress.findUnique({
-        where: { questId_userId: { questId: q.id, userId } },
+        where: { userId_questId: { userId, questId: q.id } },
       });
 
       if (existing?.claimed) continue;
@@ -37,7 +37,7 @@ export class GameService {
       const completed = newProgress >= target;
 
       await prisma.questProgress.upsert({
-        where: { questId_userId: { questId: q.id, userId } },
+        where: { userId_questId: { userId, questId: q.id } },
         create: { questId: q.id, userId, progress: newProgress, completed },
         update: { progress: newProgress, completed, completedAt: completed ? new Date() : null },
       });
@@ -48,7 +48,7 @@ export class GameService {
         if (reward.xp) awardedXp += reward.xp;
         if (reward.items) awardedItems.push(...reward.items);
         await prisma.questProgress.update({
-          where: { questId_userId: { questId: q.id, userId } },
+          where: { userId_questId: { userId, questId: q.id } },
           data: { claimed: true },
         });
       }
@@ -131,67 +131,37 @@ export class GameService {
     return prisma.userItem.findMany({ where: { userId }, include: { item: true } });
   }
 
-  // 完�?任�?
-  async completeQuest(userId: string, questId: string) {
-    const quest = await prisma.quest.findUnique({ where: { id: questId } });
-    if (!quest) throw new Error("Quest not found");
-    
-    const req = JSON.parse(quest.requirement || "{}");
-    await this.trackAction(userId, req.action || "GENERIC", req.count || 1);
-  }
-
   // Use item
   async useItem(userId: string, spiritId: string, itemId: string) {
-    const userItem = await prisma.userItem.findFirst({
-      where: { userId, itemId },
-      include: { item: true }
-    });
-    
-    if (!userItem || userItem.quantity < 1) {
-      throw new Error("Item not enough");
-    }
-    
-    // Reduce item quantity
-    await prisma.userItem.update({
-      where: { id: userItem.id },
-      data: { quantity: { decrement: 1 } }
-    });
-    
-    // Apply item effect
-    const effect = userItem.item.effect ? JSON.parse(userItem.item.effect) : {};
-    
-    if (effect.xp) {
-      // Add spirit experience
-      await prisma.spirit.update({
-        where: { id: spiritId },
-        data: { experience: { increment: effect.xp } }
+    return prisma.$transaction(async tx => {
+      const spirit = await tx.spirit.findFirst({
+        where: { id: spiritId, userId, isActive: true },
+        select: { id: true },
       });
-    }
-    
-    if (effect.evolveBoost) {
-      // Evolution boost
-      console.log(`Evolution boost: ${effect.evolveBoost}`);
-    }
-    
-    return { success: true, effect };
-  }
-
-  // Claim quest reward
-  async claimQuest(userId: string, questId: string) {
-    const p = await prisma.questProgress.findUnique({
-      where: { questId_userId: { questId, userId } },
+      if (!spirit) {
+        throw Object.assign(new Error("精靈不存在或不屬於您"), { statusCode: 404 });
+      }
+      const userItem = await tx.userItem.findFirst({
+        where: { userId, itemId },
+        include: { item: true },
+      });
+      if (!userItem) throw Object.assign(new Error("道具不足"), { statusCode: 400 });
+      const consumed = await tx.userItem.updateMany({
+        where: { id: userItem.id, userId, quantity: { gt: 0 } },
+        data: { quantity: { decrement: 1 } },
+      });
+      if (consumed.count !== 1) {
+        throw Object.assign(new Error("道具不足"), { statusCode: 400 });
+      }
+      const effect = userItem.item.effect ? JSON.parse(userItem.item.effect) : {};
+      if (typeof effect.xp === "number" && Number.isSafeInteger(effect.xp) && effect.xp > 0) {
+        await tx.spirit.update({
+          where: { id: spirit.id },
+          data: { experience: { increment: Math.min(effect.xp, 10_000) } },
+        });
+      }
+      return { success: true, effect };
     });
-    if (!p || !p.completed || p.claimed) return null;
-    const q = await prisma.quest.findUnique({ where: { id: questId } });
-    if (!q) return null;
-    const reward = JSON.parse(q.reward || "{}");
-    if (reward.xp) await this.addXp(userId, reward.xp);
-    if (reward.items) await this.grantItems(userId, reward.items);
-    await prisma.questProgress.update({
-      where: { questId_userId: { questId, userId } },
-      data: { claimed: true },
-    });
-    return reward;
   }
 }
 

@@ -1,22 +1,46 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.ts";
+import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
+import prisma from "../config/prisma.js";
 import { imageGenService } from "../services/imagegen.js";
 
 const router = Router();
 router.use(authMiddleware);
 
-// POST /api/generate/spirit/:id - 手動觸發精靈圖像生成
+// POST /api/generate/spirit/:id - 觸發精靈圖像生成
 router.post("/spirit/:id", async (req, res, next) => {
   try {
-    await imageGenService.generateSpiritImage(req.params.id);
-    res.json({ ok: true, message: "圖像生成任務已觸發" });
+    const owned = await prisma.spirit.findFirst({ where: {
+      id: req.params.id, userId: req.user!.userId, isActive: true,
+    } });
+    if (!owned) { res.status(404).json({ error: "精靈不存在" }); return; }
+    const pending = await prisma.generationTask.findFirst({where: {spiritId: owned.id, status: {in: ["PENDING", "PROCESSING"]}}});
+    if (!pending) await prisma.generationTask.create({data: {
+      spiritId: owned.id, userId: req.user!.userId, taskType: "GENERATE_SPIRIT_IMAGE",
+      inputPrompt: "Original procedural creature illustration", status: "PENDING",
+    }});
+    await imageGenService.generateSpiritImage(owned.id);
+    res.json({ ok: true, message: "生成任務已處理" });
   } catch (err) {
     next(err);
   }
 });
 
-// POST /api/generate/process - 手動觸發批次處理
-router.post("/process", async (_req, res, next) => {
+// Only the spirit owner can retrieve its persisted generated image.
+router.get("/spirit/:id", async (req, res, next) => {
+  try {
+    const owned = await prisma.spirit.findFirst({where: {id: req.params.id, userId: req.user!.userId, isActive: true}});
+    if (!owned) { res.status(404).json({error: "精靈不存在"}); return; }
+    const task = await prisma.generationTask.findFirst({where: {spiritId: owned.id,
+      taskType: {in: ["GENERATE_SPIRIT_IMAGE", "GENERATE_EVOLUTION_IMAGE"]}}, orderBy: {createdAt: "desc"},
+      select: {status: true, resultUrl: true, errorMsg: true, metadata: true}});
+    res.setHeader("Cache-Control", "private, no-store");
+    // Never expose old provider-internal URLs to the browser.
+    res.json({...task, resultUrl: task?.resultUrl?.startsWith("data:image/png;base64,") ? task.resultUrl : null});
+  } catch (error) { next(error); }
+});
+
+// POST /api/generate/process - 觸發批次生成
+router.post("/process", adminMiddleware, async (_req, res, next) => {
   try {
     const result = await imageGenService.processPendingTasks();
     res.json({ ok: true, ...result });

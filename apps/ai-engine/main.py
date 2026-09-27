@@ -1,12 +1,16 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Nightasaur Team
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import os
+import re
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from starlette.responses import JSONResponse
+from agent.providers.production_ollama import InferenceUnavailable, ProductionOllamaModelProvider
+from security import ServiceBoundary
 from config import HOST, PORT
 from routers import generation, dialogue, assistant
-from services.llm import llm_service
-from services.comfyui import comfyui_service
 
 app = FastAPI(
     title="Nightasaur AI Engine",
@@ -14,13 +18,39 @@ app = FastAPI(
     version="2.0.0",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(ServiceBoundary)
+
+
+@app.exception_handler(InferenceUnavailable)
+async def unavailable_handler(request, exc):
+    return JSONResponse({"detail": "AI inference unavailable", "code": exc.code}, status_code=503)
+
+
+class InferenceCheck(BaseModel):
+    challenge: str
+
+
+@app.post("/api/ops/verify-inference")
+async def verify_inference(request: InferenceCheck):
+    """Service-authenticated synthetic check; no user records or model text returned."""
+    from services.assistant_llm import assistant_llm_service
+    provider = assistant_llm_service.agent_core.model_provider
+    if not isinstance(provider, ProductionOllamaModelProvider):
+        raise HTTPException(503, "Strict production inference is not enabled")
+    if not re.fullmatch(r"[0-9a-f]{32}", request.challenge):
+        raise HTTPException(422, "A synthetic 32-character hexadecimal challenge is required")
+    result = await provider.generate([
+        {"role": "user", "content": "Repeat this code exactly: " + request.challenge}
+    ], temperature=0, num_predict=80, response_schema={
+        "type": "object", "properties": {"challenge": {"type": "string", "enum": [request.challenge]}},
+        "required": ["challenge"], "additionalProperties": False,
+    })
+    if request.challenge not in (result.content or ""):
+        raise InferenceUnavailable("challenge_not_reproduced")
+    return {"verified": True, "scope": "synthetic_inference_connectivity",
+            "model": provider.model, "digest": os.getenv("OLLAMA_EXPECTED_DIGEST", ""),
+            "candidate": os.getenv("RAILWAY_GIT_COMMIT_SHA", "unknown"),
+            "generated_tokens": result.raw["eval_count"]}
 
 app.include_router(generation.router, prefix="/api/generate", tags=["Generation"])
 app.include_router(dialogue.router, prefix="/api/dialogue", tags=["Dialogue"])
@@ -29,18 +59,14 @@ app.include_router(assistant.router, prefix="/api/assistant", tags=["Assistant"]
 
 @app.get("/api/health")
 async def health():
-    """AI Engine 健康檢查 + Ollama + ComfyUI"""
-    ollama_status = await llm_service.health_check()
-    comfyui_status = await comfyui_service.health_check()
+    """Public liveness only; provider details require private service access"""
     return {
         "status": "ok",
         "service": "Nightasaur AI Engine",
         "version": "3.0.0",
-        "ollama": ollama_status,
-        "comfyui": comfyui_status,
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=False)

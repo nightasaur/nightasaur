@@ -126,21 +126,17 @@ export class SquadService {
     
     const xpGained = this.calculateTrainingXp(duration, trainingType);
     
-    let training = await prisma.squadTraining.findUnique({
+    let training = await prisma.squadTraining.findFirst({
       where: {
-        squadId_spiritId_trainingType: {
-          squadId: squad.id,
-          spiritId,
-          trainingType
-        }
+        memberId: squadMember.id,
+        trainingType
       }
     });
     
     if (!training) {
       training = await prisma.squadTraining.create({
         data: {
-          squadId: squad.id,
-          spiritId,
+          memberId: squadMember.id,
           trainingType,
           xp: xpGained,
           lastTrained: new Date()
@@ -177,7 +173,7 @@ export class SquadService {
   
   // 計算訓練經驗值
   private calculateTrainingXp(duration: number, trainingType: string): number {
-    const baseXp = {
+    const baseXp: Record<string, number> = {
       COMBAT: 15,
       INTELLIGENCE: 12,
       AGILITY: 10,
@@ -235,7 +231,7 @@ export class SquadService {
       totalIntelligenceLevel: 0,
       totalAgilityLevel: 0,
       totalDefenseLevel: 0,
-      activeSpirit: null
+      activeSpirit: squad.members.find(member => member.isActive)?.spirit || null
     };
     
     if (squad.members.length > 0) {
@@ -253,10 +249,6 @@ export class SquadService {
         });
       });
       
-      const activeMember = squad.members.find(m => m.isActive);
-      if (activeMember) {
-        stats.activeSpirit = activeMember.spirit;
-      }
     }
     
     return stats;

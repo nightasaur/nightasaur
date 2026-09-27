@@ -88,7 +88,7 @@ Write-Host "📋 管理員帳號：" -ForegroundColor White
 Write-Host ""
 Write-Host "   電子郵件：admin@nightasaur.com" -ForegroundColor Yellow
 Write-Host "   用戶名：admin" -ForegroundColor Yellow
-Write-Host "   密碼：admin123" -ForegroundColor Yellow
+Write-Host "   密碼：RETIRED-CREDENTIAL-DO-NOT-USE" -ForegroundColor Yellow
 Write-Host "   角色：系統管理員" -ForegroundColor Yellow
 Write-Host ""
 

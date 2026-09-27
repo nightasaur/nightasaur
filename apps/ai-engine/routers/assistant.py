@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from typing import Optional
 from services.assistant_llm import assistant_llm_service
 
+from image_validation import read_validated_image
+
 router = APIRouter()
 
 
@@ -79,9 +81,6 @@ async def document_analysis(req: DocumentRequest):
 @router.post("/analyze-image")
 async def analyze_image(image: UploadFile = File(...)):
     """圖片分析（基礎版 — 描述圖片內容）"""
-    contents = await image.read()
-    # 將圖片轉為 base64 用 LLM 分析
-    import base64
-    b64 = base64.b64encode(contents).decode("utf-8")
-    result = await assistant_llm_service.analyze_image(b64)
-    return {"result": result}
+    contents = await read_validated_image(image)
+    # No reviewed vision provider exists; do not pretend text inference analyzes pixels.
+    raise HTTPException(503, "Image analysis is not enabled; no reviewed vision provider configured")

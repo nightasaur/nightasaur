@@ -1,4 +1,7 @@
-# CREDITS
+# CREDITS — declarations require review
+
+The historical tables below are unverified attribution leads, not permission to copy or commercial clearance. Consult [the versioned inventory](docs/PROVENANCE.md). In particular, GPL obligations are not satisfied merely by credit; model restrictions and proprietary assets require separate review. No third-party work inherits this repository's MIT license.
+
 
 ## Special Thanks
 
@@ -11,7 +14,7 @@ Nightasaur stands on the shoulders of giants. We gratefully acknowledge the foll
 | Name | License | Usage | Can Copy? |
 |------|---------|-------|-----------|
 | [Ollama](https://ollama.com) | **MIT** ✅ | Local LLM runner | ✅ Yes |
-| [Qwen 2.5 (3B)](https://github.com/QwenLM/Qwen) | **Apache 2.0** ✅ | Default language model | ✅ Yes |
+| Text inference model | No model selected or approved by this change | Disabled by default; project-prohibited model family remains blocked | Requires exact-version provenance and license review |
 | [Stable Diffusion SD 1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5) | **CreativeML Open RAIL-M** ⚠️ | Image generation base model | ⚠️ Attribution required |
 | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) | **GPL 3.0** ⚠️ | AI image generation pipeline | ⚠️ Must credit |
 

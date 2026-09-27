@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { gameLogicService } from "../services/gameLogic.js";
+import prisma from "../config/prisma.js";
 
 export class GameLogicController {
   // 執行遊戲循環

@@ -47,7 +47,8 @@ async def test_assistant_chat_endpoint_calls_service_with_matching_signature(
         assistant_llm_service.agent_core, "model_provider", fake_model_provider
     )
 
-    client = TestClient(main.app)
+    monkeypatch.setenv("AI_ENGINE_API_KEY", "unit-fixture-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    client = TestClient(main.app, headers={"Authorization": "Bearer unit-fixture-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ"})
     response = client.post(
         "/api/assistant/chat",
         json={"message": "你好嗎？", "history": []},
@@ -67,7 +68,8 @@ async def test_dialogue_chat_endpoint_still_works(monkeypatch, fake_model_provid
 
     monkeypatch.setattr(llm_service.agent_core, "model_provider", fake_model_provider)
 
-    client = TestClient(main.app)
+    monkeypatch.setenv("AI_ENGINE_API_KEY", "unit-fixture-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    client = TestClient(main.app, headers={"Authorization": "Bearer unit-fixture-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ"})
     response = client.post(
         "/api/dialogue/chat",
         json={

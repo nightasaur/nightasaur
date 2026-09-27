@@ -9,67 +9,75 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String
-  avatarUrl    String?
-  bio          String?
-  role         String   @default("PLAYER")
-  trainerXp    Int      @default(0)
-  trainerLevel Int      @default(1)
-  gems         Int      @default(0)
-  coins        Int      @default(0)
-  isActive     Boolean  @default(true)
-  activeSpiritId String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  LanguagePreference  LanguagePreference?
-  UserSettings        UserSettings?
-  PasswordResetToken  PasswordResetToken[]
-  Spirits             Spirit[]
-  UserItems           UserItem[]
-  Quests              QuestProgress[]
-  Sessions            Session[]
-  GenerationTasks     GenerationTask[]
-  Squad               Squad?
-  LearningSessions    LearningSession[]
-  LearningProgress    LearningProgress[]
+  id                    String                @id @default(cuid())
+  email                 String                @unique
+  username              String                @unique
+  passwordHash          String
+  avatarUrl             String?
+  bio                   String?
+  role                  String                @default("PLAYER")
+  trainerXp             Int                   @default(0)
+  trainerLevel          Int                   @default(1)
+  gems                  Int                   @default(0)
+  coins                 Int                   @default(0)
+  isActive              Boolean               @default(true)
+  activeSpiritId        String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  LanguagePreference    LanguagePreference?
+  UserSettings          UserSettings?
+  PasswordResetToken    PasswordResetToken[]
+  Spirits               Spirit[]
+  UserItems             UserItem[]
+  Quests                QuestProgress[]
+  Sessions              Session[]
+  GenerationTasks       GenerationTask[]
+  Squad                 Squad?
+  LearningSessions      LearningSession[]
+  UserAchievements      UserAchievement[]
+  UserLanguageHistories UserLanguageHistory[]
+  LearningProgress      LearningProgress[]
+  PlayerLocation        PlayerLocation?
+  SocialPosts           SocialPost[]
+  LocationVisits        LocationVisit[]
+  HatchingRecords       HatchingRecord[]
+  ARCaptures            ARCapture[]
+  EnglishConversations  EnglishConversation[]
+  EnglishLearningProgress EnglishLearningProgress[]
+  ActionLogs          ActionLog[]
 
   @@map("users")
 }
 
 model LanguagePreference {
-  id            String  @id @default(cuid())
-  userId        String  @unique
-  primaryLang   String  @default("zh-TW")
-  secondaryLang String?
-  displayMode   String  @default("SINGLE")
-  fontSize      Int     @default(16)
-  theme         String  @default("LIGHT")
-  autoDetect    Boolean @default(true)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  primaryLang      String  @default("zh-TW")
+  secondaryLang    String?
+  displayMode      String  @default("SINGLE")
+  fontSize         Int     @default(16)
+  theme            String  @default("LIGHT")
+  autoDetect       Boolean @default(true)
+  showRomanization Boolean @default(false)
+  showPinyin       Boolean @default(false)
+  showEnglishHint  Boolean @default(true)
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("language_preferences")
 }
 
 model UserSettings {
-  id        String  @id @default(cuid())
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  musicVolume    Int     @default(70)
-  soundVolume    Int     @default(80)
-  musicEnabled   Boolean @default(true)
-  soundEnabled   Boolean @default(true)
-  
-  vibrationEnabled Boolean @default(true)
-  vibrationStrength Int    @default(50)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  musicVolume       Int      @default(70)
+  soundVolume       Int      @default(80)
+  musicEnabled      Boolean  @default(true)
+  soundEnabled      Boolean  @default(true)
+  vibrationEnabled  Boolean  @default(true)
+  vibrationStrength Int      @default(50)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@map("user_settings")
 }
@@ -81,8 +89,7 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
 }
@@ -93,8 +100,7 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
@@ -114,13 +120,12 @@ model Squad {
 }
 
 model SquadMember {
-  id       String  @id @default(cuid())
-  squadId  String
-  spiritId String  @unique
-  position Int
-  isActive Boolean @default(false)
-  joinedAt DateTime @default(now())
-
+  id        String          @id @default(cuid())
+  squadId   String
+  spiritId  String          @unique
+  position  Int
+  isActive  Boolean         @default(false)
+  joinedAt  DateTime        @default(now())
   squad     Squad           @relation(fields: [squadId], references: [id], onDelete: Cascade)
   spirit    Spirit          @relation(fields: [spiritId], references: [id], onDelete: Cascade)
   trainings SquadTraining[]
@@ -129,64 +134,79 @@ model SquadMember {
 }
 
 model SquadTraining {
-  id           String   @id @default(cuid())
+  id           String      @id @default(cuid())
   memberId     String
   trainingType String
-  xp           Int      @default(0)
-  level        Int      @default(1)
-  lastTrained  DateTime @default(now())
-  createdAt    DateTime @default(now())
-
-  member SquadMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  xp           Int         @default(0)
+  level        Int         @default(1)
+  lastTrained  DateTime    @default(now())
+  createdAt    DateTime    @default(now())
+  member       SquadMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@map("squad_trainings")
 }
 
 model Spirit {
-  id            String   @id @default(cuid())
-  userId        String
-  name          String
-  element       String
-  species       String?
-  personality   String?
-  appearance    String?
-  stage         String   @default("EGG")
-  level         Int      @default(1)
-  experience    Int      @default(0)
-  stats         String   @default("{}")
-  skills        String   @default("[]")
-  customization String   @default("{}")
-  backstory     String?
-  isActive      Boolean  @default(true)
-  deletedAt     DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  evolutions Evolution[]
-  conversations Conversation[]
-  generationTasks GenerationTask[]
-  squadMember SquadMember?
-  learningSessions LearningSession[]
+  id                   String                 @id @default(cuid())
+  userId               String
+  name                 String
+  element              String
+  species              String?
+  personality          String?
+  appearance           String?
+  stage                String                 @default("EGG")
+  level                Int                    @default(1)
+  experience           Int                    @default(0)
+  stats                String                 @default("{}")
+  skills               String                 @default("[]")
+  customization        String                 @default("{}")
+  backstory            String?
+  
+  // 🖼️ 精靈圖片
+  imageUrl             String?                // 精靈圖片網址
+  
+  // 🎭 情緒狀態管理
+  displayIcon          String?                // 動態顯示圖標（情緒圖標）
+  currentEmotion       String?                // 當前情緒狀態
+  lastComfortAt        DateTime?              // 上次安慰時間
+  
+  isActive             Boolean                @default(true)
+  deletedAt            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evolutions           Evolution[]
+  conversations        Conversation[]
+  memories             SpiritMemory[]
+  generationTasks      GenerationTask[]
+  squadMember          SquadMember?
+  learningSessions     LearningSession[]
+  SpiritPuzzleProgress SpiritPuzzleProgress[]
+  HatchingRecord       HatchingRecord[]
+  HatchingInteraction  HatchingInteraction[]
+  SocialPost           SocialPost[]
+  LocationVisit        LocationVisit[]
+  ARCapture            ARCapture[]
+  upgrades             SpiritUpgrade[]
+  EnglishConversations EnglishConversation[]
 
   @@map("spirits")
 }
 
 // Item model
 model Item {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String     @id @default(cuid())
+  name        String     @unique
   description String?
   type        String
-  rarity      String   @default("COMMON")
+  rarity      String     @default("COMMON")
   effect      String?
   iconUrl     String?
-  price       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  UserItems UserItem[]
+  price       Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  UserItems   UserItem[]
 
   @@map("items")
 }
@@ -199,26 +219,57 @@ model UserItem {
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemId])
   @@map("user_items")
 }
 
-// Quest model
-model Quest {
+// LocationSpawn model for spirit spawn points
+model LocationSpawn {
   id          String   @id @default(cuid())
-  title       String
-  description String
-  type        String
-  difficulty  String   @default("EASY")
-  reward      String   @default("{}")
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  radius      Float    @default(100.0)
+  spawnRate   Float    @default(0.5)
+  element     String?
+  minLevel    Int      @default(1)
+  maxLevel    Int      @default(10)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  // AR 相關欄位
+  type             String?   // 地點類型
+  rarity           String    @default("COMMON") // 稀有度
+  availableSpirits String?   // JSON 格式的可用精靈列表
+  activeSpawn      String?   // JSON 格式的當前活躍精靈
+  spawnStartTime   DateTime? // 生成開始時間
+  spawnEndTime     DateTime? // 生成結束時間
+  cooldownHours    Int       @default(24) // 冷卻時間（小時）
+  
+  visits      LocationVisit[]
+  captures    ARCapture[]
+  
+  @@unique([name, latitude, longitude])
+  @@map("location_spawns")
+}
 
+// Quest model
+model Quest {
+  id            String          @id @default(cuid())
+  title         String
+  description   String
+  type          String
+  difficulty    String          @default("EASY")
+  requirement   String          @default("{}")
+  reward        String          @default("{}")
+  isActive      Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   QuestProgress QuestProgress[]
 
   @@map("quests")
@@ -226,30 +277,47 @@ model Quest {
 
 // QuestProgress model
 model QuestProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  questId   String
-  progress  Int      @default(0)
-  completed Boolean  @default(false)
-  claimed   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  userId      String
+  questId     String
+  progress    Int       @default(0)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  claimed     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest       Quest     @relation(fields: [questId], references: [id], onDelete: Cascade)
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  @@unique([userId, questId])
+  @@map("quest_progress")
+}
 
-  }
-
-model Evolution {
-  id         String   @id @default(cuid())
-  spiritId   String
-  fromStage  String
-  toStage    String
-  imageUrl   String?
-  triggeredBy String?
-  createdAt  DateTime @default(now())
+model SpiritUpgrade {
+  id          String   @id @default(cuid())
+  spiritId    String
+  upgradeType String
+  level       Int      @default(1)
+  xp          Int      @default(0)
+  unlockedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@unique([spiritId, upgradeType])
+  @@map("spirit_upgrades")
+}
+
+model Evolution {
+  id          String   @id @default(cuid())
+  spiritId    String
+  fromStage   String
+  toStage     String
+  imageUrl    String?
+  triggeredBy String?
+  createdAt   DateTime @default(now())
+  spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
 
   @@map("evolutions")
 }
@@ -261,68 +329,495 @@ model Conversation {
   aiResponse  String
   sentiment   String?
   createdAt   DateTime @default(now())
-
-  spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
 
   @@map("conversations")
 }
 
 model GenerationTask {
-  id         String   @id @default(cuid())
-  spiritId   String?
-  userId     String
-  taskType   String
+  id          String    @id @default(cuid())
+  spiritId    String?
+  userId      String
+  taskType    String
   inputPrompt String
-  resultUrl  String?
-  status     String   @default("PENDING")
-  errorMsg   String?
-  metadata   String?
-  queueJobId String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  resultUrl   String?
+  status      String    @default("PENDING")
+  errorMsg    String?
+  metadata    String?
+  queueJobId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   completedAt DateTime?
-
-  spirit Spirit? @relation(fields: [spiritId], references: [id], onDelete: SetNull)
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit      Spirit?   @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("generation_tasks")
 }
 
 // Learning models
 model LearningSession {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String
   spiritId        String?
   courseId        String
   totalQuestions  Int
-  currentQuestion Int      @default(0)
-  correctCount    Int      @default(0)
-  questions       String     // JSON string of questions with answers
-  answers         String?    // JSON string of user answers
-  completed       Boolean  @default(false)
+  currentQuestion Int       @default(0)
+  correctCount    Int       @default(0)
+  questions       String // JSON string of questions with answers
+  answers         String? // JSON string of user answers
+  completed       Boolean   @default(false)
   completedAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  spirit Spirit? @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit          Spirit?   @relation(fields: [spiritId], references: [id], onDelete: SetNull)
 
   @@map("learning_sessions")
 }
 
-model LearningProgress {
-  id            String   @id @default(cuid())
-  userId        String
-  category      String   // ELEMENT, SPIRIT, MATH, LOGIC, SPECIES, IELTS
-  completed     Int      @default(0)  // Number of completed courses in this category
-  correct       Int      @default(0)  // Total correct answers in this category
-  attempts      Int      @default(0)  // Total attempted questions in this category
-  lastCompleted DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+// Achievement models
+model Achievement {
+  id              String            @id @default(cuid())
+  code            String            @unique
+  title           String
+  description     String
+  emoji           String?
+  category        String
+  tier            String            @default("BRONZE")
+  requirement     String            @default("{}")
+  reward          String            @default("{}")
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  UserAchievement UserAchievement[]
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  progress      Int         @default(0)
+  unlocked      Boolean     @default(false)
+  unlockedAt    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+// Translation model
+model Translation {
+  id          String   @id @default(cuid())
+  key         String
+  module      String
+  zhTW        String
+  zhCN        String
+  enUS        String
+  jaJP        String?
+  koKR        String?
+  description String?
+  context     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([key, module])
+  @@map("translations")
+}
+
+// User Language History
+model UserLanguageHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  fromLang  String
+  toLang    String
+  action    String   @default("CHANGE")
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_language_history")
+}
+
+model LearningProgress {
+  id            String    @id @default(cuid())
+  userId        String
+  category      String // ELEMENT, SPIRIT, MATH, LOGIC, SPECIES, IELTS
+  completed     Int       @default(0) // Number of completed courses in this category
+  correct       Int       @default(0) // Total correct answers in this category
+  attempts      Int       @default(0) // Total attempted questions in this category
+  lastCompleted DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, category])
   @@map("learning_progress")
+}
+
+// DailyPuzzle model for daily puzzle challenges
+model DailyPuzzle {
+  id          String      @id @default(cuid())
+  puzzleId    String
+  date        DateTime
+  streakBonus Int?        @default(0)
+  puzzle      PuzzleLevel @relation(fields: [puzzleId], references: [id], onDelete: Cascade)
+
+  @@unique([date])
+  @@map("daily_puzzles")
+}
+
+// PuzzleLevel model for puzzle challenges
+model PuzzleLevel {
+  id                   String                 @id @default(cuid())
+  title                String
+  description          String
+  type                 String
+  difficulty           String                 @default("MEDIUM")
+  puzzleData           String
+  solution             String
+  reward               String
+  unlockLevel          Int                    @default(1)
+  timeLimit            Int                    @default(300)
+  attempts             Int                    @default(0)
+  completed            Int                    @default(0)
+  successRate          Float                  @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  dailyPuzzles         DailyPuzzle[]
+  spiritPuzzleProgress SpiritPuzzleProgress[]
+
+  @@map("puzzle_levels")
+}
+
+// SpiritPuzzleProgress model for tracking puzzle completion
+model SpiritPuzzleProgress {
+  id          String      @id @default(cuid())
+  spiritId    String
+  puzzleId    String
+  attempts    Int         @default(0)
+  completed   Boolean     @default(false)
+  bestTime    Int?
+  score       Int         @default(0)
+  lastAttempt DateTime
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  spirit      Spirit      @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  puzzle      PuzzleLevel @relation(fields: [puzzleId], references: [id], onDelete: Cascade)
+
+  @@unique([spiritId, puzzleId])
+  @@map("spirit_puzzle_progress")
+}
+
+// HatchingRecord model for egg hatching records
+model HatchingRecord {
+  id                 String    @id @default(cuid())
+  spiritId           String
+  userId             String
+  startTime          DateTime
+  endTime            DateTime?
+  status             String
+  initialTemperature Float
+  initialHumidity    Float
+  finalTemperature   Float?
+  finalHumidity      Float?
+  finalProgress      Float?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  spirit             Spirit    @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("hatching_records")
+}
+
+// HatchingInteraction model for hatching interactions
+model HatchingInteraction {
+  id              String   @id @default(cuid())
+  spiritId        String
+  interactionType String
+  progressBefore  Float
+  progressAfter   Float
+  temperature     Float
+  humidity        Float
+  intensity       Float?   @default(1.0)
+  createdAt       DateTime @default(now())
+  spirit          Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@map("hatching_interactions")
+}
+
+// SocialPost model for social sharing
+model SocialPost {
+  id          String    @id @default(cuid())
+  userId      String
+  spiritId    String?
+  content     String
+  imageUrl    String?
+  platform    String    @default("FACEBOOK")
+  postId      String?   // 外部平台貼文ID
+  status      String    @default("DRAFT")
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit      Spirit?   @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+
+  @@map("social_posts")
+}
+
+// PlayerLocation model for tracking player GPS location
+model PlayerLocation {
+  userId     String   @id
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  altitude   Float?
+  speed      Float?
+  heading    Float?
+  lastUpdate DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("player_locations")
+}
+
+// Hotspot model for popular locations
+model Hotspot {
+  id         String   @id @default(cuid())
+  name       String
+  latitude   Float
+  longitude  Float
+  type       String
+  popularity Int      @default(1)
+  radius     Int      @default(100)
+  spawnTypes String   @default("[]")
+  bonusRate  Float    @default(1.0)
+  peakHours  String   @default("[]")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([name, latitude, longitude])
+  @@map("hotspots")
+}
+
+
+
+// LocationVisit model for tracking location visits
+model LocationVisit {
+  id          String        @id @default(cuid())
+  userId      String
+  locationId  String
+  spiritId    String?
+  spiritFound Boolean       @default(false)
+  visitedAt   DateTime
+  createdAt   DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location    LocationSpawn @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  spirit      Spirit?       @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+
+  @@map("location_visits")
+}
+
+// English Training Conversation Models
+
+model EnglishConversation {
+  id              String   @id @default(cuid())
+  userId          String
+  spiritId        String?
+  topicId         String?
+  userMessage     String   // 使用者輸入的英文句子
+  aiResponse      String   // AI 回應的英文句子
+  
+  // 📥 情緒容器維度
+  detectedEmotion       String?  // 識別出的表面/深層情緒
+  emotionIntensity      Int?     // 情緒強度 0-10
+  emotionalValidation   String?  // 精靈的情緒接納語句
+  validationLocale      String?  // 接納語句的語言
+  
+  // 📊 真實性驗證維度
+  truthScore            Int?     // 真實性得分 40-100
+  
+  // 原有學習回饋
+  grammarFeedback String?  // 文法回饋
+  vocabularyHint  String?  // 單字提示
+  pronunciation   String?  // 發音建議
+  score           Int?     // 評分 1-100
+  correctedText   String?  // 修正後的句子
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit          Spirit?  @relation(fields: [spiritId], references: [id], onDelete: SetNull)
+  topic           EnglishTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  
+  @@map("english_conversations")
+}
+
+model EnglishTopic {
+  id          String   @id @default(cuid())
+  name        String   // 主題名稱
+  category    String   // 類別：daily, work, travel, business, social
+  description String   // 主題描述
+  difficulty  String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  prompts     String   // JSON 格式的對話提示
+  vocabulary  String?  // JSON 格式的相關單字
+  grammarTips String?  // JSON 格式的文法提示
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  conversations EnglishConversation[]
+  learningProgress EnglishLearningProgress[]
+  
+  @@map("english_topics")
+}
+
+model EnglishLearningProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  topicId         String
+  totalSessions   Int      @default(0)
+  completedSessions Int    @default(0)
+  totalMessages   Int      @default(0)
+  avgScore        Float    @default(0)
+  lastSessionAt   DateTime?
+  bestScore       Int?     // 最佳分數
+  streakDays      Int      @default(0) // 連續學習天數
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic           EnglishTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, topicId])
+  @@map("english_learning_progress")
+}
+
+// 審計日誌模型
+model ActionLog {
+  id          String   @id @default(cuid())
+  userId      String
+  actionType  String   // 行動類型，如 "ENGLISH_CHAT"
+  metadata    Json?    // 行動元數據
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("action_logs")
+}
+
+// ARCapture model for AR capture records
+model ARCapture {
+  id          String        @id @default(cuid())
+  userId      String
+  spiritId    String
+  locationId  String
+  latitude    Float
+  longitude   Float
+  arData      String
+  captureTime Int
+  accuracy    Float
+  xpEarned    Int
+  itemsFound  String
+  createdAt   DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spirit      Spirit        @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+  location    LocationSpawn @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("ar_captures")
+}
+
+// Registry for third-party open resources. Registration is not legal approval:
+// only records with ingestionStatus=CONTENT_APPROVED may have content chunks.
+model OpenSourceResource {
+  id                    String                   @id @default(cuid())
+  canonicalId           String                   @unique
+  name                  String
+  kind                  String
+  role                  String                   @default("AUXILIARY_OPEN_SOURCE")
+  sourceUrl             String
+  version               String?
+  licenseExpression     String                   @default("NOASSERTION")
+  licenseUrl            String?
+  attribution           String?
+  contentSha256         String?
+  contentIncluded       Boolean                  @default(false)
+  policyReviewStatus    String                   @default("REVIEW_REQUIRED")
+  legalReviewStatus     String                   @default("NOT_REVIEWED")
+  ingestionStatus       String                   @default("METADATA_ONLY")
+  decisionReason        String
+  attributionRequired   Boolean                  @default(false)
+  shareAlikeRequired    Boolean                  @default(false)
+  commercialUseAllowed  Boolean                  @default(false)
+  redistributionAllowed Boolean                  @default(false)
+  modificationAllowed   Boolean                  @default(false)
+  containsPersonalData  Boolean                  @default(false)
+  containsSensitiveData Boolean                  @default(false)
+  containsChildData     Boolean                  @default(false)
+  isAuthoritative       Boolean                  @default(false)
+  provenanceJson        String                   @default("{}")
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  chunks                OpenSourceContentChunk[]
+
+  @@index([kind, ingestionStatus])
+  @@index([licenseExpression])
+  @@map("open_source_resources")
+}
+
+model OpenSourceContentChunk {
+  id              String             @id @default(cuid())
+  resourceId      String
+  sequence        Int
+  role            String             @default("AUXILIARY_OPEN_SOURCE")
+  content         String
+  contentSha256   String
+  isAuthoritative Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  resource        OpenSourceResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, sequence])
+  @@index([resourceId])
+  @@map("open_source_content_chunks")
+}
+
+model AccountAudit {
+  id String @id @default(cuid())
+  actorId String
+  targetId String
+  action String
+  reason String
+  previousActive Boolean
+  resultingActive Boolean
+  createdAt DateTime @default(now())
+  @@index([targetId, createdAt])
+  @@map("account_audits")
+}
+
+model SpiritMemory {
+  id          String   @id @default(cuid())
+  spiritId    String
+  userId      String
+  content     String
+  category    String   @default("fact")
+  importance  Int      @default(5)
+  sourceConv  String?
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+  spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
+
+  @@index([spiritId, importance])
+  @@index([userId])
+  @@map("spirit_memories")
 }

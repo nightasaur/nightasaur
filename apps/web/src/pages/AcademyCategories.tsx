@@ -6,7 +6,7 @@ const categories = [
   { id: "math", name: "數學基礎", icon: "🧮", desc: "基礎數學運算和邏輯", count: 200 },
   { id: "logic", name: "邏輯推理", icon: "🧠", desc: "邏輯思維和問題解決", count: 180 },
   { id: "species", name: "物種分類", icon: "🐾", desc: "生物分類和生態知識", count: 100 },
-  { id: "ielts", name: "英語學習", icon: "🌍", desc: "雅思詞彙和閱讀理解", count: 250 },
+  { id: "ielts", name: "英語學習", icon: "🌍", desc: "日常英語、話題討論與閱讀理解", count: 250 },
 ];
 
 export default function AcademyCategories() {
