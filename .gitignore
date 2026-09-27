@@ -1,4 +1,4 @@
-# Dependencies
+﻿# Dependencies
 node_modules/
 .pnpm-store/
 
@@ -55,3 +55,5 @@ apps/ai-engine/models/
 apps/ai-engine/checkpoints/
 .vercel
 .env*
+!.env.example
+

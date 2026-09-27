@@ -1,0 +1,21 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Nightasaur AI Companion",
+  "version": "1.0.0",
+  "description": "nightasaur.com 載具 AI 擴充功能",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "http://localhost:3002/*",
+    "http://localhost:11434/*",
+    "https://nightasaur.com/*",
+    "https://ollama.nightasaur.com/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*",
+      "https://nightasaur.com/*"
+    ]
+  },
+  "action": { "default_popup": "popup.html" },
+  "background": { "service_worker": "background.js" }
+}

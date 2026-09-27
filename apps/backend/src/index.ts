@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import { config } from "./config/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -14,15 +14,16 @@ import squadRoutes from "./routes/squad.js";
 import arLocationRoutes from "./routes/arLocation.js";
 import languageRoutes from "./routes/language.js";
 import academyRoutes from "./routes/academy.js";
+import ollamaRoutes from "./routes/ollama.js";
 
 const app = express();
 
-// 中間件配置
+// 銝剝?隞園?蝵?
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// 健康檢查路由
+// ?亙熒瑼Ｘ頝舐
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -32,7 +33,7 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// API 路由配置
+// API 頝舐?蔭
 app.use("/api/auth", authRoutes);
 app.use("/api/spirits", spiritRoutes);
 app.use("/api/dialogue", dialogueRouter);
@@ -45,23 +46,25 @@ app.use("/api/squads", squadRoutes);
 app.use("/api/ar", arLocationRoutes);
 app.use("/api/language", languageRoutes);
 app.use("/api/academy", academyRoutes);
+app.use("/api/ollama", ollamaRoutes);
 
-// 錯誤處理中間件
+// ?航炊??銝剝?隞?
 app.use(errorHandler);
 
-// 啟動伺服器
+// ??隡箸???
 app.listen(config.port, () => {
   scheduler.start();
   console.log(`
-┌─────────────────────────────────────────┐
-│       🦖 Nightasaur Backend 🦖         │
-│       智慧精靈平台                      │
-├─────────────────────────────────────────┤
-│ Server : http://localhost:${config.port}       │
-│ API    : http://localhost:${config.port}/api   │
-│ Env    : ${config.nodeEnv.padEnd(20)}│
-└─────────────────────────────────────────┘
+????????????????????????????????????????????
+??      ?? Nightasaur Backend ??         ??
+??      ?箸蝎暸?撟喳                      ??
+????????????????????????????????????????????
+??Server : http://localhost:${config.port}       ??
+??API    : http://localhost:${config.port}/api   ??
+??Env    : ${config.nodeEnv.padEnd(20)}??
+????????????????????????????????????????????
   `);
 });
 
 export default app;
+
