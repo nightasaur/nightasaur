@@ -3,5 +3,4 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/backend/Dockerfile"
 
 [deploy]
-startCommand = "cd /app/apps/backend && npx tsx src/index.ts"
 restartPolicyType = "ON_FAILURE"
