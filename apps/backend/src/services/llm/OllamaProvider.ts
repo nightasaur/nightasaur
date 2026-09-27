@@ -1,8 +1,14 @@
 import type { LLMProvider, LLMMessage, LLMChatOptions } from "./types.js";
 
-const DEFAULT_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+// 支援兩種環境變數：OLLAMA_BASE_URL（首選）或 OLLAMA_URL（相容舊設定）
+const rawBaseUrl = process.env.OLLAMA_BASE_URL 
+  || process.env.OLLAMA_URL?.replace(/\/api\/(generate|chat).*$/, "")
+  || "http://localhost:11434";
+const DEFAULT_BASE_URL = rawBaseUrl.replace(/\/+$/, "");
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "qwen2.5:3b";
-const DEFAULT_TIMEOUT_MS = parseInt(process.env.OLLAMA_TIMEOUT_MS || "30000", 10);
+const DEFAULT_TIMEOUT_MS = parseInt(process.env.OLLAMA_TIMEOUT_MS || "120000", 10);
+const CF_CLIENT_ID = process.env.CF_ACCESS_CLIENT_ID || "";
+const CF_CLIENT_SECRET = process.env.CF_ACCESS_CLIENT_SECRET || "";
 
 export class OllamaProvider implements LLMProvider {
   readonly name = "ollama";
@@ -14,10 +20,20 @@ export class OllamaProvider implements LLMProvider {
     this.defaultModel = model || DEFAULT_MODEL;
   }
 
+  private buildHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (CF_CLIENT_ID && CF_CLIENT_SECRET) {
+      headers["CF-Access-Client-Id"] = CF_CLIENT_ID;
+      headers["CF-Access-Client-Secret"] = CF_CLIENT_SECRET;
+    }
+    return headers;
+  }
+
   async isAvailable(): Promise<boolean> {
     try {
       const res = await fetch(`${this.baseUrl}/api/tags`, {
-        signal: AbortSignal.timeout(2000),
+        headers: this.buildHeaders(),
+        signal: AbortSignal.timeout(5000),
       });
       return res.ok;
     } catch {
@@ -43,7 +59,7 @@ export class OllamaProvider implements LLMProvider {
 
     const res = await fetch(`${this.baseUrl}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.buildHeaders(),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(timeoutMs),
     });
