@@ -16,6 +16,15 @@ const ProductPage: React.FC = () => {
     }
   };
 
+  const handleBuy = () => {
+    const token = localStorage.getItem('nightasaur_token');
+    if (token) {
+      navigate('/my/invoices');
+    } else {
+      navigate('/login', { state: { returnTo: '/my/invoices' } });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <div className="container mx-auto px-4 py-12">
@@ -28,11 +37,9 @@ const ProductPage: React.FC = () => {
                   <span className="bg-green-500/20 text-green-300 px-4 py-2 rounded-lg text-sm font-bold">
                     Early Access / 登入即可體驗
                   </span>
-                  {product.salesStatus === 'preview' && (
-                    <span className="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-sm font-bold">
-                      正式付款尚未開放
-                    </span>
-                  )}
+                  <span className="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-sm font-bold">
+                    匯款購買
+                  </span>
                 </div>
                 <h2 className="text-2xl font-bold mb-6 text-purple-300">{product.name['zh-TW']}</h2>
 
@@ -51,14 +58,14 @@ const ProductPage: React.FC = () => {
                     onClick={handleStartLearning}
                     className="btn-primary px-8 py-4 text-xl font-bold flex items-center justify-center gap-3"
                   >
-                    <span className="text-2xl">🎓</span>
-                    開始 英語訓練對話
+                    <span className="text-2xl">📚</span>
+                    開始英語訓練對話
                   </button>
                   <button
-                    onClick={() => navigate('/checkout/ielts-immersion')}
+                    onClick={handleBuy}
                     className="btn-secondary px-8 py-4 text-lg font-bold"
                   >
-                    查看 30 天方案預覽
+                    💳 匯款購買
                   </button>
                 </div>
               </div>

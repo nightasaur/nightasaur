@@ -30,6 +30,8 @@ import AccountPage from "./pages/Account";
 import ProductPage from "./pages/products/IeltsImmersion";
 import CheckoutPage from "./pages/checkout/IeltsImmersion";
 import ReceiptPreviewPage from "./pages/receipts/Preview";
+import MyInvoices from "./pages/MyInvoices";
+import AdminPayments from "./pages/AdminPayments";
 
 const SessionContext = createContext({
   user: null as any,
@@ -41,11 +43,9 @@ const SessionContext = createContext({
 function SessionStatus({ pending = false }: { pending?: boolean }) {
   const { retry } = useContext(SessionContext);
   return <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-6 text-center">
-    <p role={pending ? "status" : "alert"}>{pending
-      ? "正在確認登入狀態… / Checking your session…"
-      : "暫時無法確認登入狀態，請重新連線後再試。 / Unable to verify your session. Please retry."}</p>
-    {!pending && <button className="btn-primary" onClick={retry}>重新連線 / Retry</button>}
-    <Link className="text-teal-300 underline" to="/">返回首頁 / Home</Link>
+    <p role={pending ? "status" : "alert"}>{pending ? "Checking your session..." : "Unable to verify your session. Please retry."}</p>
+    {!pending && <button className="btn-primary" onClick={retry}>Retry</button>}
+    <Link className="text-teal-300 underline" to="/">Home</Link>
   </div>;
 }
 
@@ -127,10 +127,10 @@ function AppContent() {
     <div className="min-h-screen relative z-10">
       <Navbar user={user} setUser={setUser} />
       <main className="pt-20">
-        {publicPage && loading && <p role="status" className="px-6 py-2 text-center text-white/60 text-sm">正在確認登入狀態，你可以繼續瀏覽。 / Checking your session; browsing remains available.</p>}
+        {publicPage && loading && <p role="status" className="px-6 py-2 text-center text-white/60 text-sm">??雓?豰??????????????擏??剛???隡ㄟ??皝???/ Checking your session; browsing remains available.</p>}
         {publicPage && authUnavailable && <div className="px-6 py-3 text-center text-sm">
-          <p role="alert">暫時無法確認登入狀態，公開頁面仍可使用。 / Session verification is unavailable; public pages remain available.</p>
-          <button className="text-teal-300 underline mt-2" onClick={verifySession}>重新連線 / Retry</button>
+          <p role="alert">??????????????????????頩??豯??擏郁?????/ Session verification is unavailable; public pages remain available.</p>
+          <button className="text-teal-300 underline mt-2" onClick={verifySession}>Retry</button>
         </div>}
         <Routes>
           <Route path="/" element={<LocalizedHome />} />
@@ -193,8 +193,10 @@ function AppContent() {
 
           {/* Front Office Routes */}
           <Route path="/admin/accounts" element={<ProtectedRoute><AdminAccounts /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
+          <Route path="/my/invoices" element={<ProtectedRoute><><SEO title="My Invoices | Nightasaur" canonical="https://www.nightasaur.com/my/invoices" /><MyInvoices /></></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><><SEO title="Account Settings | Nightasaur" canonical="https://www.nightasaur.com/account" /><AccountPage /></></ProtectedRoute>} />
-          <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur English Conversation Practice — 1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
+          <Route path="/products/ielts-immersion" element={<><SEO title="Nightasaur English Conversation Practice ??1 Month" canonical="https://www.nightasaur.com/products/ielts-immersion" /><ProductPage /></>} />
           <Route path="/checkout/ielts-immersion" element={<ProtectedRoute><><SEO title="Checkout | Nightasaur" canonical="https://www.nightasaur.com/checkout/ielts-immersion" /><CheckoutPage /></></ProtectedRoute>} />
           <Route path="/receipts/preview" element={<ProtectedRoute><><SEO title="Receipt Preview | Nightasaur" canonical="https://www.nightasaur.com/receipts/preview" /><ReceiptPreviewPage /></></ProtectedRoute>} />
         </Routes>
