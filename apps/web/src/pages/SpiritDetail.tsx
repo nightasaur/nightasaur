@@ -250,7 +250,7 @@ export default function SpiritDetail() {
           </div>
 
           <div className="glass-card flex flex-wrap sm:flex-nowrap gap-3 items-center">
-            <VoiceChat onSendText={send} />
+            <VoiceChat onSendText={send} lang="zh-TW" />
             <input value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key==="Enter" && send()}
               placeholder={t("聊天輸入", {name: s.name})}

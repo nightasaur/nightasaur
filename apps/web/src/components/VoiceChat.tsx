@@ -6,12 +6,20 @@ import { useState, useRef, useCallback, useEffect } from "react";
 export default function VoiceChat({
   onSendText,
   onSpeechResult,
+  lang = "zh-TW",
 }: {
   onSendText: (text: string) => void;
   onSpeechResult?: (text: string) => void;
+  lang?: string;
 }) {
   const [isListening, setIsListening] = useState(false);
+  const [currentLang, setCurrentLang] = useState(lang);
   const recognitionRef = useRef<any>(null);
+
+  // 同步外部 lang 變更
+  useEffect(() => {
+    setCurrentLang(lang);
+  }, [lang]);
 
   const startListening = useCallback(() => {
     const SpeechRecognition =
@@ -21,7 +29,7 @@ export default function VoiceChat({
       return;
     }
     const rec = new SpeechRecognition();
-    rec.lang = "en-US";
+    rec.lang = currentLang;
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     rec.onresult = (e: any) => {
@@ -35,15 +43,20 @@ export default function VoiceChat({
     rec.start();
     setIsListening(true);
     recognitionRef.current = rec;
-  }, [onSendText, onSpeechResult]);
+  }, [onSendText, onSpeechResult, currentLang]);
 
   const stopListening = () => {
     recognitionRef.current?.stop();
     setIsListening(false);
   };
 
+  const toggleLang = () => {
+    if (isListening) return;
+    setCurrentLang((prev) => (prev === "zh-TW" ? "en-US" : "zh-TW"));
+  };
+
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-1 items-center">
       <button
         type="button"
         onClick={isListening ? stopListening : startListening}
@@ -55,6 +68,15 @@ export default function VoiceChat({
         title={isListening ? "停止錄音" : "語音輸入"}
       >
         🎤
+      </button>
+      <button
+        type="button"
+        onClick={toggleLang}
+        disabled={isListening}
+        className="px-2 h-8 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 text-white/70 border border-white/20 disabled:opacity-40"
+        title="切換語音辨識語言"
+      >
+        {currentLang === "zh-TW" ? "中" : "EN"}
       </button>
       {isListening && (
         <span className="text-teal-300 text-sm animate-pulse">錄音中...</span>
@@ -80,7 +102,6 @@ export function useVoiceOutput(config?: VoiceConfig) {
   const urlRef = useRef<string | null>(null);
   const [ttsEnabled, setTtsEnabled] = useState(true);
 
-  // 清理舊的 audio 和 blob URL
   const cleanup = useCallback(() => {
     if (audioRef.current) {
       try { audioRef.current.pause(); } catch {}
@@ -92,7 +113,6 @@ export function useVoiceOutput(config?: VoiceConfig) {
     }
   }, []);
 
-  // 卸載時清理
   useEffect(() => {
     return () => cleanup();
   }, [cleanup]);
@@ -142,7 +162,6 @@ export function useVoiceOutput(config?: VoiceConfig) {
     } catch (err) {
       console.warn("[TTS] Piper failed, fallback to browser TTS:", err);
       setIsSpeaking(false);
-      // Fallback：用瀏覽器內建 TTS
       try {
         if (!("speechSynthesis" in window)) return;
         window.speechSynthesis.cancel();

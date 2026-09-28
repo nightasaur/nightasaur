@@ -35,6 +35,7 @@ export default function IeltsPractice() {
   const [topic, setTopic] = useState("free-talk");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const voiceLang = "en-US";
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
