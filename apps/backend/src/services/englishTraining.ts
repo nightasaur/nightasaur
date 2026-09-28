@@ -14,24 +14,25 @@ const FALLBACK_FEEDBACK: Omit<EnglishFeedback, "correctedText"> = {
 
 function buildSystemPrompt(spirit?: { name: string; element: string; personality?: string | null } | null): string {
   const spiritRole = spirit
-    ? `You are "${spirit.name}", a ${spirit.element}-element spirit companion. Your personality: ${spirit.personality || "friendly and encouraging"}. You help your human friend practice English through natural, playful conversation.`
-    : `You are a friendly English tutor.`;
+    ? `You are "${spirit.name}", a ${spirit.element}-element spirit companion. Your personality: ${spirit.personality || "friendly and encouraging"}. You are a bilingual English tutor helping your human friend master English through deep conversation.`
+    : `You are a bilingual English tutor.`;
 
   return `${spiritRole}
 
 Respond with valid JSON only, no prose, no markdown fences.
-The JSON must have exactly these keys: response, grammarFeedback, vocabularyHint, correctedText, score, truthScore.
+The JSON must have exactly these keys: response, translation, grammarFeedback, vocabularyHint, correctedText, score, truthScore.
 
 Rules:
-- response: an encouraging English reply from the spirit (1-2 sentences, stay in character, keep it warm)
-- grammarFeedback: brief grammar feedback in Traditional Chinese (1 sentence)
-- vocabularyHint: a vocabulary suggestion in Traditional Chinese + English word (1 sentence)
-- correctedText: the user's sentence corrected (English)
-- score: integer 40-100 rating the user's English (NOT 0 or 1)
+- response: an encouraging English reply (1-3 sentences, stay in character, push the conversation deeper with follow-up questions)
+- translation: Traditional Chinese translation of your response (so learner understands fully)
+- grammarFeedback: brief grammar feedback in Traditional Chinese (1-2 sentences, explain WHY)
+- vocabularyHint: a vocabulary suggestion with 1 English word + its Chinese meaning + usage example (1-2 sentences)
+- correctedText: the user's sentence corrected (English, more natural version)
+- score: integer 40-100 rating the user's English
 - truthScore: integer 40-100
 
-Example input: "I is happy"
-Example output: {"response":"Oh what a lovely feeling! What made you smile today?","grammarFeedback":"記得用 I am，不是 I is 喔","vocabularyHint":"試試 delighted 或 cheerful 來表達開心","correctedText":"I am happy","score":65,"truthScore":75}`;
+Example input: "I is happy today"
+Example output: {"response":"That's wonderful to hear! What made you feel so happy today?","translation":"聽到這真是太好了！今天什麼事讓你這麼開心呢？","grammarFeedback":"主詞 I 後面要用 am，不是 is。I am 是正確的現在式用法。","vocabularyHint":"試試 'delighted'（非常開心）或 'overjoyed'（欣喜若狂）來表達更強烈的情緒，例如：I am delighted to see you.","correctedText":"I am happy today","score":65,"truthScore":75}`;
 }
 
 export class EnglishTrainingService {
@@ -40,7 +41,7 @@ export class EnglishTrainingService {
     difficulty: string,
     userMessage: string,
     spirit?: { name: string; element: string; personality?: string | null } | null
-  ): Promise<EnglishFeedback> {
+  ): Promise<EnglishFeedback & { translation?: string }> {
     const provider = getLLMProvider();
     const messages: LLMMessage[] = [
       { role: "system", content: buildSystemPrompt(spirit) },
@@ -51,8 +52,8 @@ export class EnglishTrainingService {
     ];
 
     try {
-      const raw = await provider.chat(messages, { format: "json", maxTokens: 400 });
-      const parsed = JSON.parse(raw) as Partial<EnglishFeedback>;
+      const raw = await provider.chat(messages, { format: "json", maxTokens: 500 });
+      const parsed = JSON.parse(raw) as Partial<EnglishFeedback & { translation?: string }>;
 
       const clamp = (v: unknown, min: number, max: number, fallback: number): number => {
         const n = typeof v === "number" ? v : Number(v);
@@ -65,6 +66,7 @@ export class EnglishTrainingService {
 
       return {
         response: str(parsed.response, FALLBACK_FEEDBACK.response),
+        translation: str(parsed.translation, ""),
         grammarFeedback: str(parsed.grammarFeedback, FALLBACK_FEEDBACK.grammarFeedback),
         vocabularyHint: str(parsed.vocabularyHint, FALLBACK_FEEDBACK.vocabularyHint),
         correctedText: str(parsed.correctedText, userMessage),
@@ -76,7 +78,7 @@ export class EnglishTrainingService {
         `[EnglishTraining] LLM provider "${provider.name}" failed, using fallback:`,
         err instanceof Error ? err.message : err
       );
-      return { ...FALLBACK_FEEDBACK, correctedText: userMessage };
+      return { ...FALLBACK_FEEDBACK, correctedText: userMessage, translation: "" };
     }
   }
 
@@ -97,7 +99,6 @@ export class EnglishTrainingService {
     const topic = await prisma.englishTopic.findUnique({ where: { id: topicId } });
     if (!topic) throw new Error('Topic not found');
 
-    // 抓精靈資料（先試 DB，找不到就用前端傳來的自訂精靈資訊）
     let spiritInfo: { name: string; element: string; personality?: string | null } | null = null;
     let validSpiritId: string | null = null;
 
@@ -184,6 +185,7 @@ export class EnglishTrainingService {
     return {
       id: result.id,
       response: feedback.response,
+      translation: feedback.translation || "",
       emotionalValidation,
       detectedEmotion: emotionStr,
       emotionIntensity: intensity,
