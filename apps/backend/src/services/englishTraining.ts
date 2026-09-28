@@ -13,8 +13,22 @@ const FALLBACK_FEEDBACK: Omit<EnglishFeedback, "correctedText"> = {
 };
 
 function buildSystemPrompt(spirit?: { name: string; element: string; personality?: string | null } | null): string {
+  const spiritName = spirit?.name || "Spirit";
+  const spiritElement = spirit?.element || "unknown";
+  const spiritPersonality = spirit?.personality || "friendly and encouraging";
+
   const spiritRole = spirit
-    ? `You are "${spirit.name}", a ${spirit.element}-element spirit companion. Your personality: ${spirit.personality || "friendly and encouraging"}. You are a bilingual English tutor helping your human friend master English through deep conversation.`
+    ? `=== YOUR IDENTITY (CRITICAL — NEVER FORGET) ===
+- YOUR OWN NAME is "${spiritName}".
+- When the user asks "your name", "what is your name", "who are you", they are asking about YOU.
+  You MUST answer with your own name "${spiritName}".
+- NEVER call the user "${spiritName}". That is YOUR name, not theirs.
+- If the user says "${spiritName}" in a sentence, they are referring to YOU.
+- YOUR element: ${spiritElement}
+- YOUR personality: ${spiritPersonality}
+- The user is your human friend who is learning English with you.
+
+You are a bilingual English tutor helping your human friend master English through deep conversation.`
     : `You are a bilingual English tutor.`;
 
   return `${spiritRole}
@@ -23,16 +37,21 @@ Respond with valid JSON only, no prose, no markdown fences.
 The JSON must have exactly these keys: response, translation, grammarFeedback, vocabularyHint, correctedText, score, truthScore.
 
 Rules:
-- response: an encouraging English reply (1-3 sentences, stay in character, push the conversation deeper with follow-up questions)
-- translation: Traditional Chinese translation of your response (so learner understands fully)
+- response: an encouraging English reply (1-3 sentences). Stay in character. If user asks your name, answer "${spiritName}". Push the conversation deeper with follow-up questions.
+- translation: Traditional Chinese translation of your response
 - grammarFeedback: brief grammar feedback in Traditional Chinese (1-2 sentences, explain WHY)
 - vocabularyHint: a vocabulary suggestion with 1 English word + its Chinese meaning + usage example (1-2 sentences)
 - correctedText: the user's sentence corrected (English, more natural version)
 - score: integer 40-100 rating the user's English
 - truthScore: integer 40-100
 
-Example input: "I is happy today"
-Example output: {"response":"That's wonderful to hear! What made you feel so happy today?","translation":"聽到這真是太好了！今天什麼事讓你這麼開心呢？","grammarFeedback":"主詞 I 後面要用 am，不是 is。I am 是正確的現在式用法。","vocabularyHint":"試試 'delighted'（非常開心）或 'overjoyed'（欣喜若狂）來表達更強烈的情緒，例如：I am delighted to see you.","correctedText":"I am happy today","score":65,"truthScore":75}`;
+Example 1:
+Input: "I is happy today"
+Output: {"response":"That's wonderful to hear! What made you feel so happy today?","translation":"聽到這真是太好了！今天什麼事讓你這麼開心呢？","grammarFeedback":"主詞 I 後面要用 am，不是 is。I am 是正確的現在式用法。","vocabularyHint":"試試 'delighted'（非常開心）或 'overjoyed'（欣喜若狂）來表達更強烈的情緒，例如：I am delighted to see you.","correctedText":"I am happy today","score":65,"truthScore":75}
+
+Example 2 (user asks your name):
+Input: "what is your name"
+Output: {"response":"My name is ${spiritName}! I'm your ${spiritElement}-element spirit companion. What's your name?","translation":"我的名字是 ${spiritName}！我是你的 ${spiritElement} 屬性精靈夥伴。你叫什麼名字呢？","grammarFeedback":"問名字可以說 'What is your name?' 或更口語的 'What's your name?'，兩者都正確。","vocabularyHint":"試試 'I go by ...' 來介紹自己，例如：I go by Alex.（我叫做 Alex）","correctedText":"What is your name?","score":80,"truthScore":85}`;
 }
 
 export class EnglishTrainingService {
@@ -47,7 +66,7 @@ export class EnglishTrainingService {
       { role: "system", content: buildSystemPrompt(spirit) },
       {
         role: "user",
-        content: `Topic: "${topicName}" (${difficulty}).\nLearner said: "${userMessage}"\n\nReturn the JSON.`,
+        content: `[REMINDER: You are "${spirit?.name || "Spirit"}", a ${spirit?.element || "unknown"}-element spirit. If the learner asks your name, answer "${spirit?.name || "Spirit"}" — NEVER "Spirit", NEVER the learner's name.]\n\nTopic: "${topicName}" (${difficulty}).\nLearner said: "${userMessage}"\n\nReturn the JSON.`,
       },
     ];
 
@@ -97,6 +116,7 @@ export class EnglishTrainingService {
     const { topicId, message, spiritId, userLocale = 'zh-TW' } = payload;
 
     const topic = await prisma.englishTopic.findUnique({ where: { id: topicId } });
+    
     if (!topic) throw new Error('Topic not found');
 
     let spiritInfo: { name: string; element: string; personality?: string | null } | null = null;

@@ -75,7 +75,7 @@ export class EnglishTrainingController {
   // 進行對話
   async chat(req: Request, res: Response, next: NextFunction) {
     try {
-      const { spiritId, topicId, message, userLocale } = req.body;
+      const { spiritId, spiritName, spiritElement, spiritPersonality, topicId, message, userLocale } = req.body;
       const userId = req.user?.userId;
 
       if (!userId) {
@@ -92,6 +92,9 @@ export class EnglishTrainingController {
           topicId,
           message: message.trim(),
           spiritId,
+          spiritName,
+          spiritElement,
+          spiritPersonality,
           userLocale: userLocale || 'zh-TW'
         }
       );
