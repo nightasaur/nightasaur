@@ -4,13 +4,9 @@ import axios from "axios";
 const router = Router();
 
 const PIPER_ZH_URL = process.env.PIPER_URL || "http://host.docker.internal:5000";
-const PIPER_EN_URL = process.env.PIPER_EN_URL || "http://host.docker.internal:5001";
 const CF_CLIENT_ID = process.env.CF_ACCESS_CLIENT_ID || "";
 const CF_CLIENT_SECRET = process.env.CF_ACCESS_CLIENT_SECRET || "";
 
-// ============================================
-// 記憶體快取（最多 500 筆，30 分鐘過期）
-// ============================================
 const cache = new Map<string, { audio: Buffer; ts: number }>();
 const CACHE_TTL = 30 * 60 * 1000;
 const CACHE_MAX = 500;
@@ -49,32 +45,43 @@ function buildHeaders(url: string): Record<string, string> {
   return headers;
 }
 
-async function synthesize(text: string, lang: "zh" | "en"): Promise<Buffer> {
-  const url = lang === "zh" ? PIPER_ZH_URL : PIPER_EN_URL;
-  const headers = buildHeaders(url);
-
-  const response = await axios.get(`${url}/`, {
+async function synthesizeZh(text: string): Promise<Buffer> {
+  const headers = buildHeaders(PIPER_ZH_URL);
+  const response = await axios.get(`${PIPER_ZH_URL}/`, {
     params: { text: text.slice(0, 200) },
     headers,
     responseType: "arraybuffer",
     timeout: 30000,
   });
-
   return Buffer.from(response.data);
 }
 
 router.post("/", async (req, res, next) => {
   try {
-    const { text, lang: forcedLang } = req.body;
+    const { text } = req.body;
     if (!text || typeof text !== "string") {
       return res.status(400).json({ error: "text is required" });
     }
 
     const trimmed = text.trim().slice(0, 200);
-    const lang = forcedLang === "en" ? "en" : forcedLang === "zh" ? "zh" : detectLang(trimmed);
-    const cacheKey = `${lang}:${trimmed}`;
+    const lang = detectLang(trimmed);
 
-    // 1. 檢查快取
+    // ============================================
+    // 英文：告訴前端「用瀏覽器內建 TTS」
+    // ============================================
+    if (lang === "en") {
+      return res.status(200).json({
+        useBrowserTTS: true,
+        lang: "en-US",
+        text: trimmed,
+      });
+    }
+
+    // ============================================
+    // 中文：走 Piper
+    // ============================================
+    const cacheKey = `zh:${trimmed}`;
+
     const cached = getCached(cacheKey);
     if (cached) {
       res.set("Content-Type", "audio/wav");
@@ -83,17 +90,7 @@ router.post("/", async (req, res, next) => {
       return res.send(cached);
     }
 
-    // 2. 合成
-    let audio: Buffer;
-    try {
-      audio = await synthesize(trimmed, lang);
-    } catch (err: any) {
-      console.warn(`[TTS] ${lang} Piper failed:`, err.message);
-      const fallbackLang = lang === "zh" ? "en" : "zh";
-      audio = await synthesize(trimmed, fallbackLang);
-    }
-
-    // 3. 存快取
+    const audio = await synthesizeZh(trimmed);
     setCache(cacheKey, audio);
 
     res.set("Content-Type", "audio/wav");

@@ -88,7 +88,7 @@ export default function VoiceChat({
 export { VoiceChat };
 
 // ============================================
-// useVoiceOutput - 使用後端 Piper TTS
+// useVoiceOutput - 英文用瀏覽器、中文用 Piper
 // ============================================
 export interface VoiceConfig {
   pitch?: number;
@@ -117,14 +117,39 @@ export function useVoiceOutput(config?: VoiceConfig) {
     return () => cleanup();
   }, [cleanup]);
 
+  // 瀏覽器內建 TTS（英文用）
+  const speakWithBrowser = useCallback((text: string, lang: string) => {
+    if (!("speechSynthesis" in window)) {
+      setIsSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = config?.rate ?? 0.9;
+    u.pitch = config?.pitch ?? 1.0;
+
+    // 挑選對應語言的聲音
+    const voices = window.speechSynthesis.getVoices();
+    const voice =
+      voices.find((v) => v.lang === lang && v.localService) ||
+      voices.find((v) => v.lang === lang) ||
+      voices.find((v) => v.lang.startsWith(lang.split("-")[0]));
+    if (voice) u.voice = voice;
+
+    u.onstart = () => setIsSpeaking(true);
+    u.onend = () => setIsSpeaking(false);
+    u.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(u);
+  }, [config?.rate, config?.pitch]);
+
   const speak = useCallback(async (text: string) => {
     if (!text || !ttsEnabled) return;
 
     cleanup();
+    setIsSpeaking(true);
 
     try {
-      setIsSpeaking(true);
-
       const token = localStorage.getItem("nightasaur_token");
       const base = import.meta.env.VITE_API_URL || "http://localhost:3002/api";
 
@@ -137,10 +162,20 @@ export function useVoiceOutput(config?: VoiceConfig) {
         body: JSON.stringify({ text }),
       });
 
-      if (!response.ok) {
-        throw new Error("TTS failed: " + response.status);
+      if (!response.ok) throw new Error("TTS failed: " + response.status);
+
+      const contentType = response.headers.get("Content-Type") || "";
+
+      // 後端回傳 JSON → 用瀏覽器內建 TTS（英文）
+      if (contentType.includes("application/json")) {
+        const data = await response.json();
+        if (data.useBrowserTTS) {
+          speakWithBrowser(data.text || text, data.lang || "en-US");
+          return;
+        }
       }
 
+      // 後端回傳 WAV → 播放 Piper 音檔（中文）
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
@@ -160,22 +195,10 @@ export function useVoiceOutput(config?: VoiceConfig) {
       await audio.play();
 
     } catch (err) {
-      console.warn("[TTS] Piper failed, fallback to browser TTS:", err);
-      setIsSpeaking(false);
-      try {
-        if (!("speechSynthesis" in window)) return;
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = config?.lang || "zh-TW";
-        u.rate = config?.rate ?? 0.9;
-        u.pitch = config?.pitch ?? 1.0;
-        u.onstart = () => setIsSpeaking(true);
-        u.onend = () => setIsSpeaking(false);
-        u.onerror = () => setIsSpeaking(false);
-        window.speechSynthesis.speak(u);
-      } catch {}
+      console.warn("[TTS] failed, fallback to browser TTS:", err);
+      speakWithBrowser(text, config?.lang || "zh-TW");
     }
-  }, [config?.lang, config?.rate, config?.pitch, ttsEnabled, cleanup]);
+  }, [config?.lang, ttsEnabled, cleanup, speakWithBrowser]);
 
   const stopSpeaking = useCallback(() => {
     cleanup();
