@@ -6,6 +6,21 @@ import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
 import { STAGES, REQ, progression, growthValue } from "../utils/spiritPresentation";
 import { spiritText } from "../utils/spiritCopy";
 import { useLanguage } from "../contexts/LanguageContext";
+
+// 根據精靈元素決定聲音
+const VOICE_BY_ELEMENT: Record<string, { pitch: number; rate: number; lang: string }> = {
+  FIRE:     { pitch: 0.95, rate: 1.00, lang: "en-US" },  // 熱情、穩重
+  WATER:    { pitch: 1.05, rate: 0.85, lang: "en-US" },  // 柔和、慢
+  LIGHT:    { pitch: 1.25, rate: 1.05, lang: "en-US" },  // 高亢、活潑
+  SHADOW:   { pitch: 0.85, rate: 0.80, lang: "en-GB" },  // 低沉、神秘
+  STAR:     { pitch: 1.15, rate: 0.75, lang: "en-GB" },  // 夢幻、慢
+  MOON:     { pitch: 1.00, rate: 0.85, lang: "en-US" },  // 溫柔
+  NATURE:   { pitch: 1.00, rate: 0.75, lang: "en-US" },  // 恬靜、慢
+  THUNDER:  { pitch: 1.10, rate: 1.05, lang: "en-US" },  // 有力
+  ICE:      { pitch: 1.10, rate: 0.90, lang: "en-US" },  // 清冷
+  ILLUSION: { pitch: 1.20, rate: 0.95, lang: "en-US" },  // 調皮
+};
+
 const COLS: Record<string,string> = {
   FIRE:"from-orange-500 to-red-500", WATER:"from-cyan-400 to-blue-500",
   LIGHT:"from-yellow-300 to-amber-400", SHADOW:"from-violet-700 to-indigo-900",
@@ -20,6 +35,7 @@ const ICO: Record<string,string> = {
 const EXPS = ["😄开心","😤认真","😴慵懒","😎酷炫","🥺撒娇","🤩兴奋"];
 const OUTFITS = ["🧣探索背心", "🎓學習外套", "🎀創作圍巾", "🧢專注帽子", "🪖記憶頭盔", "⛓️協作披風"];
 const ACCS = ["💍學習徽章", "🔮創造水晶", "📿記憶護符", "🪶靈感羽毛", "🌟成長徽章"];
+
 export default function SpiritDetail() {
   const { currentLanguage } = useLanguage();
   const t = (key: string, values: Record<string, string | number> = {}) => spiritText(currentLanguage, key, values);
@@ -38,14 +54,23 @@ export default function SpiritDetail() {
   const [tab, setTab] = useState<"chat"|"customize">("chat");
   const [custom, setCustom] = useState<{outfit?:string;accessory?:string}>({});
   const [expression, setExpression] = useState("😄开心");
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const { speak, isSpeaking } = useVoiceOutput();
-const [animState, setAnimState] = useState<AnimState>("idle");
+
+  // 根據精靈元素決定聲音
+  const voiceConfig = s?.element ? (VOICE_BY_ELEMENT[s.element] || VOICE_BY_ELEMENT.FIRE) : VOICE_BY_ELEMENT.FIRE;
+  const { speak, isSpeaking } = useVoiceOutput(voiceConfig);
+
+  const [animState, setAnimState] = useState<AnimState>("idle");
+
+  // 說話時讓精靈彈跳 + 光暈
+  const speakAnim: AnimState = isSpeaking ? "happy" : "idle";
 
   useEffect(() => { if (id) {
     load();
     generationAPI.get(id).then(r => setArt(r.data)).catch(() => {});
   } }, [id]);
+
   const drawSpirit = async () => {
     if (!id || drawing) return;
     setDrawing(true); setArtError("");
@@ -57,6 +82,7 @@ const [animState, setAnimState] = useState<AnimState>("idle");
     } catch { setArtError(t("圖片生成暫時無法使用，請稍後再試。")); }
     finally { setDrawing(false); }
   };
+
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
   const load = async () => {
@@ -92,7 +118,7 @@ const [animState, setAnimState] = useState<AnimState>("idle");
 
   const deleteSpirit = async () => {
     if (!window.confirm(t("刪除確認", {name: s.name}))) return;
-    
+
     try {
       await spiritsAPI.delete(id!);
       alert(t("精靈已成功刪除"));
@@ -114,7 +140,9 @@ const [animState, setAnimState] = useState<AnimState>("idle");
       if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty dialogue response");
       setMsgs(p => [...p, { role: "assistant", content: reply, emotion: data.emotion, displayIcon: data.displayIcon }]);
       if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level, currentEmotion: data.emotion, displayIcon: data.displayIcon }));
-      speak(reply);
+      if (autoSpeak) {
+        speak(reply);
+      }
     } catch {
       setMsgs(p => [...p, { role: "assistant", content: t("感应中断了🦕") }]);
     }
@@ -129,11 +157,13 @@ const [animState, setAnimState] = useState<AnimState>("idle");
 
   const { index: ci, next: ns, required: nr, canEvolve: can } = progression(s.stage, s.level);
   const ec = COLS[s.element]||"from-teal-500 to-cyan-400";
-return (
+
+  return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="glass-card text-center mb-8">
         <SpiritSprite species={s.species} element={s.element} stage={s.stage}
-          outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={180} />
+          outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={180}
+          animState={speakAnim} />
         {art?.resultUrl && <img src={art.resultUrl} alt={s.name} className="w-64 max-w-full h-auto object-contain mx-auto rounded-2xl my-4" />}
         <button className="btn-primary my-3" disabled={drawing} onClick={drawSpirit}>{drawing ? t("生成中…") : t("生成精靈圖片")}</button>
         <p className="text-sm text-white/60">{t("原創程序式生成・依元素與成長階段繪製")}</p>
@@ -159,7 +189,8 @@ return (
           ))}
         </div>
       </div>
-<div className="flex gap-2 mb-6">
+
+      <div className="flex gap-2 mb-6">
         <button onClick={() => setTab("chat")} className={`flex-1 py-3 rounded-xl font-bold transition-all ${
           tab==="chat"?"bg-teal-500/30 border border-teal-400/50 text-white":"bg-white/5 text-white/40"
         }`}>{t("💬 陪伴你的精灵对话")}</button>
@@ -167,13 +198,33 @@ return (
           tab==="customize"?"bg-teal-500/30 border border-teal-400/50 text-white":"bg-white/5 text-white/40"
         }`}>{t("🎨 装扮精灵")}</button>
       </div>
-{tab === "chat" && (
+
+      {tab === "chat" && (
         <>
+          <div className="flex justify-center gap-2 mb-3 flex-wrap">
+            <button
+              onClick={() => setAutoSpeak(!autoSpeak)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                autoSpeak
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/40"
+                  : "bg-white/10 text-white/50 border border-white/20"
+              }`}
+            >
+              {autoSpeak ? "🔊 自動朗讀 ON" : "🔇 自動朗讀 OFF"}
+            </button>
+            {isSpeaking && (
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-300 border border-red-400/40 animate-pulse">
+                🔊 {t("精灵正在说话...")}
+              </span>
+            )}
+          </div>
+
           <div className="glass-card mb-4 min-h-[360px] max-h-[500px] overflow-y-auto">
             {msgs.length === 0 && (
               <div className="text-center text-white/30 py-16">
                 <SpiritSprite species={s.species} element={s.element} stage={s.stage}
-                  outfit={custom.outfit} accessory={custom.accessory} size={120} />
+                  outfit={custom.outfit} accessory={custom.accessory} size={120}
+                  animState={speakAnim} />
                 <p>{t("聊天提示", {name: s.name})}</p>
                 <p className="text-xs mt-2">{t("支援语音输入 🎤 与播放 🔊")}</p>
               </div>
@@ -197,6 +248,7 @@ return (
             <div ref={chatEndRef} />
             {isSpeaking && <div className="text-teal-300 text-sm animate-pulse text-center">{t("🔊 精灵正在说话...")}</div>}
           </div>
+
           <div className="glass-card flex flex-wrap sm:flex-nowrap gap-3 items-center">
             <VoiceChat onSendText={send} />
             <input value={input} onChange={e => setInput(e.target.value)}
@@ -210,12 +262,12 @@ return (
           </div>
         </>
       )}
-{tab === "customize" && (
+
+      {tab === "customize" && (
         <div className="glass-card space-y-6">
           <h3 className="text-xl font-bold text-white">{t("🎨 装扮你的精灵 — 纸娃娃系统")}</h3>
           <p className="text-white/60 text-sm">{t("取得方式：成長獎勵 / 每日學習 / 社群分享獲得配件")}</p>
 
-          {/* 大型预览 */}
           <div className="flex justify-center py-4">
             <SpiritSprite species={s.species} element={s.element} stage={s.stage}
               outfit={custom.outfit} accessory={custom.accessory} expression={expression} size={200}
@@ -225,7 +277,6 @@ return (
             {s.name} | {ICO[s.element]||"✨"} {s.element} | 🦕 {s.species || t("未設定物種")} | Lv.{s.level}
           </p>
 
-          {/* 動作互動按鈕 */}
           <div className="flex justify-center gap-2 mt-4 flex-wrap">
             {[
               { key: "happy", icon: "😄", label: "開心" },
@@ -266,7 +317,8 @@ return (
           </div>
         </div>
       )}
-<div className="glass-card mt-8">
+
+      <div className="glass-card mt-8">
         <h3 className="text-xl font-bold text-white mb-6">{t("📜 进化时间线")}</h3>
         <div className="flex items-center justify-between flex-wrap gap-2">
           {STAGES.map((st, i) => (

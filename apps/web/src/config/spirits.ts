@@ -7,6 +7,11 @@ export interface SpiritCharacter {
   color: string;
   personality: string;
   voiceStyle: string;
+  voice: {
+    pitch: number;   // 0.5 (低沉) - 1.5 (高亢)
+    rate: number;    // 0.7 (慢) - 1.2 (快)
+    lang: string;    // 偏好語言
+  };
 }
 
 export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
@@ -19,6 +24,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#22d3ee",
     personality: "Calm, patient, encouraging. Speaks gently like water.",
     voiceStyle: "calm and soothing",
+    voice: { pitch: 1.05, rate: 0.85, lang: "en-US" },
   },
   {
     id: "solaspike",
@@ -29,6 +35,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#fbbf24",
     personality: "Warm, cheerful, enthusiastic. Always sees the bright side.",
     voiceStyle: "bright and energetic",
+    voice: { pitch: 1.25, rate: 1.05, lang: "en-US" },
   },
   {
     id: "emberaptor",
@@ -39,6 +46,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#f97316",
     personality: "Passionate, bold, motivating. Pushes you to do your best.",
     voiceStyle: "passionate and bold",
+    voice: { pitch: 0.95, rate: 1.0, lang: "en-US" },
   },
   {
     id: "noctiwind",
@@ -49,6 +57,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#3b82f6",
     personality: "Mysterious, wise, thoughtful. Speaks in elegant phrases.",
     voiceStyle: "mysterious and elegant",
+    voice: { pitch: 0.85, rate: 0.8, lang: "en-GB" },
   },
   {
     id: "lumivor",
@@ -59,6 +68,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#a5f3fc",
     personality: "Pure, innocent, curious. Asks lots of questions.",
     voiceStyle: "innocent and curious",
+    voice: { pitch: 1.35, rate: 0.95, lang: "en-US" },
   },
   {
     id: "nebulodon",
@@ -69,6 +79,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#a855f7",
     personality: "Dreamy, imaginative, poetic. Talks about stars and dreams.",
     voiceStyle: "dreamy and poetic",
+    voice: { pitch: 1.15, rate: 0.75, lang: "en-GB" },
   },
   {
     id: "nightnight",
@@ -79,6 +90,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#10b981",
     personality: "Cozy, gentle, reassuring. Like a warm blanket.",
     voiceStyle: "cozy and gentle",
+    voice: { pitch: 1.0, rate: 0.75, lang: "en-US" },
   },
   {
     id: "flareon",
@@ -89,6 +101,7 @@ export const SPIRIT_CHARACTERS: SpiritCharacter[] = [
     color: "#ef4444",
     personality: "Brave, protective, loyal. A warrior with a soft heart.",
     voiceStyle: "brave and loyal",
+    voice: { pitch: 0.9, rate: 1.0, lang: "en-US" },
   },
 ];
 

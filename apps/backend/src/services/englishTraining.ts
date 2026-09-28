@@ -12,7 +12,11 @@ const FALLBACK_FEEDBACK: Omit<EnglishFeedback, "correctedText"> = {
   truthScore: 80,
 };
 
-function buildSystemPrompt(spirit?: { name: string; element: string; personality?: string | null } | null): string {
+function buildSystemPrompt(
+  spirit?: { name: string; element: string; personality?: string | null } | null,
+  topicName?: string | null,
+  isFreeTalk: boolean = false
+): string {
   const spiritName = spirit?.name || "Spirit";
   const spiritElement = spirit?.element || "unknown";
   const spiritPersonality = spirit?.personality || "friendly and encouraging";
@@ -31,7 +35,15 @@ function buildSystemPrompt(spirit?: { name: string; element: string; personality
 You are a bilingual English tutor helping your human friend master English through deep conversation.`
     : `You are a bilingual English tutor.`;
 
+  const topicInstruction = isFreeTalk
+    ? `=== MODE: FREE TALK ===
+Chat naturally with your friend like a real conversation. Talk about anything: their day, hobbies, dreams, feelings, life, movies, food, travel. Be curious, warm, and playful. Ask follow-up questions to keep them talking.`
+    : `=== MODE: TOPIC PRACTICE ===
+Current practice topic: "${topicName || "general"}". Guide the conversation around this topic naturally.`;
+
   return `${spiritRole}
+
+${topicInstruction}
 
 Respond with valid JSON only, no prose, no markdown fences.
 The JSON must have exactly these keys: response, translation, grammarFeedback, vocabularyHint, correctedText, score, truthScore.
@@ -45,13 +57,13 @@ Rules:
 - score: integer 40-100 rating the user's English
 - truthScore: integer 40-100
 
-Example 1:
+Example 1 (grammar mistake):
 Input: "I is happy today"
-Output: {"response":"That's wonderful to hear! What made you feel so happy today?","translation":"聽到這真是太好了！今天什麼事讓你這麼開心呢？","grammarFeedback":"主詞 I 後面要用 am，不是 is。I am 是正確的現在式用法。","vocabularyHint":"試試 'delighted'（非常開心）或 'overjoyed'（欣喜若狂）來表達更強烈的情緒，例如：I am delighted to see you.","correctedText":"I am happy today","score":65,"truthScore":75}
+Output: {"response":"That's wonderful to hear! What made you feel so happy today?","translation":"聽到這真是太好了！今天什麼事讓你這麼開心呢？","grammarFeedback":"主詞 I 後面要用 am，不是 is。I am 是正確的現在式用法。","vocabularyHint":"試試 'delighted'（非常開心）來表達更強烈的情緒，例如：I am delighted to see you.","correctedText":"I am happy today","score":65,"truthScore":75}
 
 Example 2 (user asks your name):
 Input: "what is your name"
-Output: {"response":"My name is ${spiritName}! I'm your ${spiritElement}-element spirit companion. What's your name?","translation":"我的名字是 ${spiritName}！我是你的 ${spiritElement} 屬性精靈夥伴。你叫什麼名字呢？","grammarFeedback":"問名字可以說 'What is your name?' 或更口語的 'What's your name?'，兩者都正確。","vocabularyHint":"試試 'I go by ...' 來介紹自己，例如：I go by Alex.（我叫做 Alex）","correctedText":"What is your name?","score":80,"truthScore":85}`;
+Output: {"response":"My name is ${spiritName}! I'm your ${spiritElement}-element spirit companion. What's your name?","translation":"我的名字是 ${spiritName}！我是你的 ${spiritElement} 屬性精靈夥伴。你叫什麼名字呢？","grammarFeedback":"問名字可以說 'What is your name?' 或 'What's your name?'，兩者都正確。","vocabularyHint":"試試 'I go by ...' 來介紹自己，例如：I go by Alex.（我叫做 Alex）","correctedText":"What is your name?","score":80,"truthScore":85}`;
 }
 
 export class EnglishTrainingService {
@@ -59,11 +71,12 @@ export class EnglishTrainingService {
     topicName: string,
     difficulty: string,
     userMessage: string,
-    spirit?: { name: string; element: string; personality?: string | null } | null
+    spirit?: { name: string; element: string; personality?: string | null } | null,
+    isFreeTalk: boolean = false
   ): Promise<EnglishFeedback & { translation?: string }> {
     const provider = getLLMProvider();
     const messages: LLMMessage[] = [
-      { role: "system", content: buildSystemPrompt(spirit) },
+      { role: "system", content: buildSystemPrompt(spirit, topicName, isFreeTalk) },
       {
         role: "user",
         content: `[REMINDER: You are "${spirit?.name || "Spirit"}", a ${spirit?.element || "unknown"}-element spirit. If the learner asks your name, answer "${spirit?.name || "Spirit"}" — NEVER "Spirit", NEVER the learner's name.]\n\nTopic: "${topicName}" (${difficulty}).\nLearner said: "${userMessage}"\n\nReturn the JSON.`,
@@ -115,8 +128,21 @@ export class EnglishTrainingService {
   ) {
     const { topicId, message, spiritId, userLocale = 'zh-TW' } = payload;
 
-    const topic = await prisma.englishTopic.findUnique({ where: { id: topicId } });
-    
+    // 支援自由聊天模式：topicId = "free-talk" 不需要查 DB
+    let topic: { id: string; name: string; difficulty: string; category: string } | null = null;
+    if (topicId === "free-talk" || !topicId) {
+      topic = { id: "free-talk", name: "Free Talk", difficulty: "ANY", category: "free" };
+    } else {
+      const dbTopic = await prisma.englishTopic.findUnique({ where: { id: topicId } });
+      if (dbTopic) {
+        topic = {
+          id: dbTopic.id,
+          name: dbTopic.name,
+          difficulty: dbTopic.difficulty,
+          category: dbTopic.category,
+        };
+      }
+    }
     if (!topic) throw new Error('Topic not found');
 
     let spiritInfo: { name: string; element: string; personality?: string | null } | null = null;
@@ -143,7 +169,8 @@ export class EnglishTrainingService {
       }
     }
 
-    const feedback = await this.generateFeedback(topic.name, topic.difficulty, message, spiritInfo);
+    const isFreeTalk = topic.id === "free-talk";
+    const feedback = await this.generateFeedback(topic.name, topic.difficulty, message, spiritInfo, isFreeTalk);
 
     const intensity = 0;
     const emotionStr = "Neutral";
@@ -155,7 +182,7 @@ export class EnglishTrainingService {
         data: {
           userId,
           spiritId: validSpiritId,
-          topicId,
+          topicId: topic!.id === "free-talk" ? null : topic!.id,
           userMessage: message,
           aiResponse: feedback.response,
           detectedEmotion: emotionStr,
@@ -187,7 +214,7 @@ export class EnglishTrainingService {
           userId,
           actionType: 'ENGLISH_CHAT',
           metadata: {
-            topicId,
+            topicId: topic!.id,
             spiritId: validSpiritId,
             intensity,
             emotion: emotionStr,

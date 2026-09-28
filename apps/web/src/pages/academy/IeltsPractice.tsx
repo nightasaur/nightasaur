@@ -18,6 +18,7 @@ type Message = {
 };
 
 const TOPICS = [
+  { id: "free-talk", name: "💬 Free Talk", zh: "自由聊天" },
   { id: "daily-coffee", name: "Ordering Coffee", zh: "點咖啡" },
   { id: "daily-directions", name: "Asking Directions", zh: "問路" },
   { id: "daily-smalltalk", name: "Small Talk", zh: "閒聊" },
@@ -31,7 +32,7 @@ const TOPICS = [
 export default function IeltsPractice() {
   const navigate = useNavigate();
   const [spirit, setSpirit] = useState<SpiritCharacter | null>(null);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState("free-talk");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -41,6 +42,7 @@ export default function IeltsPractice() {
   const [voiceSupported, setVoiceSupported] = useState(true);
   const [ttsSupported, setTtsSupported] = useState(true);
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [showTopicPicker, setShowTopicPicker] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -55,7 +57,6 @@ export default function IeltsPractice() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ===== 檢查瀏覽器支援 =====
   useEffect(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) setVoiceSupported(false);
@@ -65,25 +66,26 @@ export default function IeltsPractice() {
     }
   }, []);
 
-  // ===== 精靈 TTS 朗讀 =====
+  // ===== 精靈 TTS（使用精靈專屬聲音）=====
   const speak = (text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
+    // 使用精靈的聲音設定
+    utterance.lang = spirit?.voice.lang || "en-US";
+    utterance.rate = spirit?.voice.rate ?? 0.9;
+    utterance.pitch = spirit?.voice.pitch ?? 1.0;
     utterance.volume = 1.0;
 
-    // 挑選英文聲音（優先美式，其次英式，最後任意英文）
     const voices = window.speechSynthesis.getVoices();
-    const enVoice =
-      voices.find((v) => v.lang === "en-US" && v.localService) ||
+    const targetLang = spirit?.voice.lang || "en-US";
+    const voice =
+      voices.find((v) => v.lang === targetLang && v.localService) ||
+      voices.find((v) => v.lang === targetLang) ||
       voices.find((v) => v.lang === "en-US") ||
-      voices.find((v) => v.lang === "en-GB") ||
       voices.find((v) => v.lang.startsWith("en"));
-    if (enVoice) utterance.voice = enVoice;
+    if (voice) utterance.voice = voice;
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -99,7 +101,6 @@ export default function IeltsPractice() {
     setIsSpeaking(false);
   };
 
-  // 有新的精靈訊息 → 自動朗讀
   useEffect(() => {
     const last = messages[messages.length - 1];
     if (last && last.role === "spirit" && last.text && autoSpeak) {
@@ -115,7 +116,6 @@ export default function IeltsPractice() {
       return;
     }
 
-    // 停止 TTS 避免錄到精靈聲音
     stopSpeaking();
 
     const recognition = new SR();
@@ -198,7 +198,7 @@ export default function IeltsPractice() {
 
   // ===== 送出訊息 =====
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !spirit || !topic || loading) return;
+    if (!text.trim() || !spirit || loading) return;
     const userText = text.trim();
     setMessages((p) => [...p, { role: "user", text: userText }]);
     setInput("");
@@ -245,8 +245,10 @@ export default function IeltsPractice() {
     sendMessage(input);
   };
 
+  const currentTopic = TOPICS.find((t) => t.id === topic) || TOPICS[0];
+
   // ===== 選精靈畫面 =====
-  if (!spirit || !topic) {
+  if (!spirit) {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 max-w-5xl mx-auto">
         <button
@@ -256,41 +258,18 @@ export default function IeltsPractice() {
           ← 回 IELTS 學習中心
         </button>
         <h1 className="text-3xl font-bold text-white mb-2">精靈英語練習</h1>
-        <p className="text-white/50 mb-8">選一隻精靈陪你練英文</p>
+        <p className="text-white/50 mb-8">選一隻精靈陪你自由練英文</p>
 
-        <h2 className="text-white font-medium mb-4">1. 選精靈</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {SPIRIT_CHARACTERS.map((s) => (
             <button
               key={s.id}
               onClick={() => setSpirit(s)}
-              className={`rounded-2xl p-4 bg-white/5 border transition-all ${
-                spirit?.id === s.id
-                  ? "border-purple-400 ring-2 ring-purple-500/50"
-                  : "border-white/10 hover:border-white/30"
-              }`}
+              className="rounded-2xl p-4 bg-white/5 border border-white/10 hover:border-purple-400 hover:ring-2 hover:ring-purple-500/50 transition-all"
             >
               <img src={s.image} alt={s.name} className="w-full aspect-square rounded-xl mb-3 object-cover" />
               <div className="text-white font-medium text-sm">{s.name}</div>
               <div className="text-xs text-white/50">{s.elementZh}屬性</div>
-            </button>
-          ))}
-        </div>
-
-        <h2 className="text-white font-medium mb-4">2. 選主題</h2>
-        <div className="grid sm:grid-cols-2 gap-3 mb-8">
-          {TOPICS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTopic(t.id)}
-              className={`text-left rounded-xl p-4 bg-white/5 border transition-all ${
-                topic === t.id
-                  ? "border-emerald-400 ring-2 ring-emerald-500/50"
-                  : "border-white/10 hover:border-white/30"
-              }`}
-            >
-              <div className="text-white font-medium">{t.name}</div>
-              <div className="text-white/50 text-sm">{t.zh}</div>
             </button>
           ))}
         </div>
@@ -307,17 +286,43 @@ export default function IeltsPractice() {
             stopListening();
             stopSpeaking();
             setSpirit(null);
-            setTopic("");
             setMessages([]);
+            setTopic("free-talk");
           }}
           className="text-sm text-white/55 hover:text-white"
         >
-          ← 重選精靈 / 主題
+          ← 換精靈
         </button>
-        <div className="text-sm text-white/50">主題：{topic}</div>
+
+        <div className="relative">
+          <button
+            onClick={() => setShowTopicPicker(!showTopicPicker)}
+            className="text-sm text-white/70 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
+          >
+            {currentTopic.name} ▾
+          </button>
+          {showTopicPicker && (
+            <div className="absolute right-0 top-10 z-50 bg-slate-900/95 backdrop-blur border border-white/20 rounded-xl p-2 w-64 shadow-2xl">
+              {TOPICS.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    setTopic(t.id);
+                    setShowTopicPicker(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                    topic === t.id ? "bg-purple-600 text-white" : "text-white/70 hover:bg-white/10"
+                  }`}
+                >
+                  <div>{t.name}</div>
+                  <div className="text-xs text-white/50">{t.zh}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 精靈區 */}
       <div className="flex flex-col items-center mb-6">
         <div className="relative">
           <div
@@ -338,7 +343,6 @@ export default function IeltsPractice() {
           {isSpeaking ? "🔊 說話中..." : isListening ? "🎤 正在聽你說..." : "🎧 傾聽中..."}
         </div>
 
-        {/* 喇叭控制 */}
         {ttsSupported && (
           <div className="flex gap-2 mt-3">
             <button
@@ -363,11 +367,10 @@ export default function IeltsPractice() {
         )}
       </div>
 
-      {/* 對話記錄 */}
       <div className="bg-white/5 rounded-2xl p-5 mb-5 h-96 overflow-y-auto">
         {messages.length === 0 && (
           <div className="text-white/40 text-center py-12">
-            開始跟 {spirit.name} 練習英文吧！
+            開始跟 {spirit.name} 自由聊天吧！
             <br />
             <span className="text-xs mt-2 inline-block">
               💡 點麥克風說話，或直接打字
@@ -407,7 +410,6 @@ export default function IeltsPractice() {
         <div ref={chatEndRef} />
       </div>
 
-      {/* 輸入區 */}
       <div className="flex gap-2 items-center">
         <input
           type="text"

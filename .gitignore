@@ -57,3 +57,8 @@ apps/ai-engine/checkpoints/
 .env*
 !.env.example
 
+
+# Test audio files
+*.wav
+test.wav
+backend-test.wav
