@@ -56,6 +56,27 @@ export class DialogueService {
     // 檢索相關記憶
     const memories = await memoryService.retrieve(spiritId, message, 5).catch(() => []);
 
+    // ============================================
+    // Agent：先決定要用哪些工具，執行，再讓 LLM 推理
+    // ============================================
+    const { decideTools, executeTools, formatToolResults } = await import("./agent.js");
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const toolCtx = {
+      userId,
+      spiritId,
+      userRole: user?.role || "USER",
+      message,
+    };
+    const toolNames = await decideTools(message);
+    const toolResults = await executeTools(toolCtx, toolNames);
+    const toolContext = formatToolResults(toolResults);
+
+    if (toolNames.length > 0) {
+      console.log(`[Agent-Dialogue] role=${toolCtx.userRole} 使用工具: ${toolNames.join(", ")}`);
+    }
+
+    const messageWithTools = message + toolContext;
+
     const chatResult = await spiritDialogueService.chatWithEmotion({
       spirit: {
         id: spirit.id,
@@ -68,7 +89,7 @@ export class DialogueService {
         currentEmotion: spirit.currentEmotion,
       },
       userId,
-      message,
+      message: messageWithTools,
       history,
       language,
       englishFirst,
@@ -154,7 +175,6 @@ export class DialogueService {
 }
 
 // 元素與階段的輔助函式
-
 const ELEMENT_CN: Record<string, string> = {
   FIRE: "火焰",
   WATER: "水流",
@@ -167,7 +187,6 @@ const ELEMENT_CN: Record<string, string> = {
   THUNDER: "雷電",
   ICE: "寒冰",
 };
-
 
 function getElementLabel(e: string): string {
   return ELEMENT_CN[e] || e;

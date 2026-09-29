@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { decideTools, executeTools, formatToolResults } from "./agent.js";
 import { gameService } from './game.js';
 import { getLLMProvider, type LLMMessage, type EnglishFeedback } from './llm/index.js';
 
@@ -170,7 +171,24 @@ export class EnglishTrainingService {
     }
 
     const isFreeTalk = topic.id === "free-talk";
-    const feedback = await this.generateFeedback(topic.name, topic.difficulty, message, spiritInfo, isFreeTalk);
+        // ============================================
+    // Agent：先決定要用哪些工具，執行，再讓 LLM 推理
+    // ============================================
+    const toolNames = await decideTools(message);
+    const toolResults = await executeTools(toolNames);
+    const toolContext = formatToolResults(toolResults);
+
+    if (toolNames.length > 0) {
+      console.log(`[Agent] 使用工具: ${toolNames.join(", ")}`);
+    }
+
+    const feedback = await this.generateFeedback(
+      topic.name,
+      topic.difficulty,
+      message + toolContext,
+      spiritInfo,
+      isFreeTalk
+    );
 
     const intensity = 0;
     const emotionStr = "Neutral";

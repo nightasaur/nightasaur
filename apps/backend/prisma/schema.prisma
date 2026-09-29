@@ -44,7 +44,8 @@ model User {
   ARCaptures            ARCapture[]
   EnglishConversations  EnglishConversation[]
   EnglishLearningProgress EnglishLearningProgress[]
-  ActionLogs          ActionLog[]
+  ActionLogs            ActionLog[]
+  UserWoocommerce       UserWoocommerce?
 
   @@map("users")
 }
@@ -161,15 +162,10 @@ model Spirit {
   skills               String                 @default("[]")
   customization        String                 @default("{}")
   backstory            String?
-  
-  // ??江謇??????????
-  imageUrl             String?                // ??????????∴???
-  
-  // ??????????鞈察縑???
-  displayIcon          String?                // ???????????雓??????????
-  currentEmotion       String?                // ??????????
-  lastComfortAt        DateTime?              // ?鞊????????????
-  
+  imageUrl             String?
+  displayIcon          String?
+  currentEmotion       String?
+  lastComfortAt        DateTime?
   isActive             Boolean                @default(true)
   deletedAt            DateTime?
   createdAt            DateTime               @default(now())
@@ -193,7 +189,6 @@ model Spirit {
   @@map("spirits")
 }
 
-// Item model
 model Item {
   id          String     @id @default(cuid())
   name        String     @unique
@@ -211,7 +206,6 @@ model Item {
   @@map("items")
 }
 
-// UserItem model
 model UserItem {
   id        String   @id @default(cuid())
   userId    String
@@ -226,7 +220,6 @@ model UserItem {
   @@map("user_items")
 }
 
-// LocationSpawn model for spirit spawn points
 model LocationSpawn {
   id          String   @id @default(cuid())
   name        String
@@ -241,24 +234,20 @@ model LocationSpawn {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  // AR ???????
-  type             String?   // ?????皜∪?
-  rarity           String    @default("COMMON") // ??貔?????
-  availableSpirits String?   // JSON ???????????高??????
-  activeSpawn      String?   // JSON ???????行???雓???????
-  spawnStartTime   DateTime? // ?????????
-  spawnEndTime     DateTime? // ??????????
-  cooldownHours    Int       @default(24) // ?????????雓?????
-  
+  type             String?
+  rarity           String    @default("COMMON")
+  availableSpirits String?
+  activeSpawn      String?
+  spawnStartTime   DateTime?
+  spawnEndTime     DateTime?
+  cooldownHours    Int       @default(24)
   visits      LocationVisit[]
   captures    ARCapture[]
-  
+
   @@unique([name, latitude, longitude])
   @@map("location_spawns")
 }
 
-// Quest model
 model Quest {
   id            String          @id @default(cuid())
   title         String
@@ -275,7 +264,6 @@ model Quest {
   @@map("quests")
 }
 
-// QuestProgress model
 model QuestProgress {
   id          String    @id @default(cuid())
   userId      String
@@ -302,7 +290,6 @@ model SpiritUpgrade {
   unlockedAt  DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   spirit Spirit @relation(fields: [spiritId], references: [id], onDelete: Cascade)
 
   @@unique([spiritId, upgradeType])
@@ -354,7 +341,6 @@ model GenerationTask {
   @@map("generation_tasks")
 }
 
-// Learning models
 model LearningSession {
   id              String    @id @default(cuid())
   userId          String
@@ -363,8 +349,8 @@ model LearningSession {
   totalQuestions  Int
   currentQuestion Int       @default(0)
   correctCount    Int       @default(0)
-  questions       String // JSON string of questions with answers
-  answers         String? // JSON string of user answers
+  questions       String
+  answers         String?
   completed       Boolean   @default(false)
   completedAt     DateTime?
   createdAt       DateTime  @default(now())
@@ -375,7 +361,6 @@ model LearningSession {
   @@map("learning_sessions")
 }
 
-// Achievement models
 model Achievement {
   id              String            @id @default(cuid())
   code            String            @unique
@@ -410,7 +395,6 @@ model UserAchievement {
   @@map("user_achievements")
 }
 
-// Translation model
 model Translation {
   id          String   @id @default(cuid())
   key         String
@@ -429,7 +413,6 @@ model Translation {
   @@map("translations")
 }
 
-// User Language History
 model UserLanguageHistory {
   id        String   @id @default(cuid())
   userId    String
@@ -445,10 +428,10 @@ model UserLanguageHistory {
 model LearningProgress {
   id            String    @id @default(cuid())
   userId        String
-  category      String // ELEMENT, SPIRIT, MATH, LOGIC, SPECIES, IELTS
-  completed     Int       @default(0) // Number of completed courses in this category
-  correct       Int       @default(0) // Total correct answers in this category
-  attempts      Int       @default(0) // Total attempted questions in this category
+  category      String
+  completed     Int       @default(0)
+  correct       Int       @default(0)
+  attempts      Int       @default(0)
   lastCompleted DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -458,7 +441,6 @@ model LearningProgress {
   @@map("learning_progress")
 }
 
-// DailyPuzzle model for daily puzzle challenges
 model DailyPuzzle {
   id          String      @id @default(cuid())
   puzzleId    String
@@ -470,7 +452,6 @@ model DailyPuzzle {
   @@map("daily_puzzles")
 }
 
-// PuzzleLevel model for puzzle challenges
 model PuzzleLevel {
   id                   String                 @id @default(cuid())
   title                String
@@ -493,7 +474,6 @@ model PuzzleLevel {
   @@map("puzzle_levels")
 }
 
-// SpiritPuzzleProgress model for tracking puzzle completion
 model SpiritPuzzleProgress {
   id          String      @id @default(cuid())
   spiritId    String
@@ -513,7 +493,6 @@ model SpiritPuzzleProgress {
   @@map("spirit_puzzle_progress")
 }
 
-// HatchingRecord model for egg hatching records
 model HatchingRecord {
   id                 String    @id @default(cuid())
   spiritId           String
@@ -534,7 +513,6 @@ model HatchingRecord {
   @@map("hatching_records")
 }
 
-// HatchingInteraction model for hatching interactions
 model HatchingInteraction {
   id              String   @id @default(cuid())
   spiritId        String
@@ -550,7 +528,6 @@ model HatchingInteraction {
   @@map("hatching_interactions")
 }
 
-// SocialPost model for social sharing
 model SocialPost {
   id          String    @id @default(cuid())
   userId      String
@@ -558,7 +535,7 @@ model SocialPost {
   content     String
   imageUrl    String?
   platform    String    @default("FACEBOOK")
-  postId      String?   // ????????璈????ｆ??ID
+  postId      String?
   status      String    @default("DRAFT")
   scheduledAt DateTime?
   publishedAt DateTime?
@@ -570,7 +547,6 @@ model SocialPost {
   @@map("social_posts")
 }
 
-// PlayerLocation model for tracking player GPS location
 model PlayerLocation {
   userId     String   @id
   latitude   Float
@@ -587,7 +563,6 @@ model PlayerLocation {
   @@map("player_locations")
 }
 
-// Hotspot model for popular locations
 model Hotspot {
   id         String   @id @default(cuid())
   name       String
@@ -607,9 +582,6 @@ model Hotspot {
   @@map("hotspots")
 }
 
-
-
-// LocationVisit model for tracking location visits
 model LocationVisit {
   id          String        @id @default(cuid())
   userId      String
@@ -625,59 +597,48 @@ model LocationVisit {
   @@map("location_visits")
 }
 
-// English Training Conversation Models
-
 model EnglishConversation {
   id              String   @id @default(cuid())
   userId          String
   spiritId        String?
   topicId         String?
-  userMessage     String   // ??????????????????
-  aiResponse      String   // AI ???????????????
-  
-  // ?????????貔??鞊?雓都?
-  detectedEmotion       String?  // ??鞊ｆ窄???????????雓?????
-  emotionIntensity      Int?     // ????雓???0-10
-  emotionalValidation   String?  // ??????????????????
-  validationLocale      String?  // ?????撕????????朝
-  
-  // ?? ??????????撖??頩???
-  truthScore            Int?     // ??????????40-100
-  
-  // ??????????
-  grammarFeedback String?  // ??????
-  vocabularyHint  String?  // ???怏?????
-  pronunciation   String?  // ??????????
-  score           Int?     // ???? 1-100
-  correctedText   String?  // ????望?????????
-  
+  userMessage     String
+  aiResponse      String
+  detectedEmotion       String?
+  emotionIntensity      Int?
+  emotionalValidation   String?
+  validationLocale      String?
+  truthScore            Int?
+  grammarFeedback String?
+  vocabularyHint  String?
+  pronunciation   String?
+  score           Int?
+  correctedText   String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   spirit          Spirit?  @relation(fields: [spiritId], references: [id], onDelete: SetNull)
   topic           EnglishTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  
+
   @@map("english_conversations")
 }
 
 model EnglishTopic {
   id          String   @id @default(cuid())
-  name        String   // ?鞊????雓?
-  category    String   // ??皜∪?????ily, work, travel, business, social
-  description String   // ?鞊???????
-  difficulty  String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
-  prompts     String   // JSON ????????????
-  vocabulary  String?  // JSON ?????????奕????
-  grammarTips String?  // JSON ???????雓????
+  name        String
+  category    String
+  description String
+  difficulty  String   @default("BEGINNER")
+  prompts     String
+  vocabulary  String?
+  grammarTips String?
   isActive    Boolean  @default(true)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
   conversations EnglishConversation[]
   learningProgress EnglishLearningProgress[]
-  
+
   @@map("english_topics")
 }
 
@@ -690,32 +651,28 @@ model EnglishLearningProgress {
   totalMessages   Int      @default(0)
   avgScore        Float    @default(0)
   lastSessionAt   DateTime?
-  bestScore       Int?     // ????血?????
-  streakDays      Int      @default(0) // ????????????
+  bestScore       Int?
+  streakDays      Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   topic           EnglishTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  
+
   @@unique([userId, topicId])
   @@map("english_learning_progress")
 }
 
-// ?雓????????蝛??
 model ActionLog {
   id          String   @id @default(cuid())
   userId      String
-  actionType  String   // ??謜????皜∪??雓??? "ENGLISH_CHAT"
-  metadata    Json?    // ??謜?????丐???
+  actionType  String
+  metadata    Json?
   createdAt   DateTime @default(now())
-  
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@map("action_logs")
 }
 
-// ARCapture model for AR capture records
 model ARCapture {
   id          String        @id @default(cuid())
   userId      String
@@ -736,8 +693,6 @@ model ARCapture {
   @@map("ar_captures")
 }
 
-// Registry for third-party open resources. Registration is not legal approval:
-// only records with ingestionStatus=CONTENT_APPROVED may have content chunks.
 model OpenSourceResource {
   id                    String                   @id @default(cuid())
   canonicalId           String                   @unique
@@ -813,7 +768,7 @@ model SpiritMemory {
   category    String   @default("fact")
   importance  Int      @default(5)
   sourceConv  String?
-    embedding   String?
+  embedding   String?
   createdAt   DateTime @default(now())
   lastUsedAt  DateTime?
   spirit      Spirit   @relation(fields: [spiritId], references: [id], onDelete: Cascade)
@@ -844,4 +799,19 @@ model PaymentSubmission {
   @@index([userId])
   @@index([status])
   @@map("payment_submissions")
+}
+
+model UserWoocommerce {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  wooUrl     String
+  wooKey     String
+  wooSecret  String
+  shopName   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_woocommerce")
 }
