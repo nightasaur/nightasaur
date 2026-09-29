@@ -25,6 +25,8 @@ import AcademyCategories from "./pages/AcademyCategories";
 import IeltsLearningHub from "./pages/IeltsLearningHub";
 import IeltsAssessment from "./pages/IeltsAssessment";
 import IeltsPractice from "./pages/academy/IeltsPractice";
+import ArLearning from "./pages/ArLearning";
+
 import Assistant from "./pages/Assistant";
 import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import AccountPage from "./pages/Account";
@@ -188,6 +190,7 @@ function AppContent() {
             element={<ProtectedRoute><><SEO title="IELTS Assessment | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts/assessment" /><IeltsAssessment /></></ProtectedRoute>}
           />
           <Route path="/academy/category/ielts/practice" element={<ProtectedRoute><IeltsPractice /></ProtectedRoute>} />
+          <Route path="/ar" element={<ProtectedRoute><ArLearning /></ProtectedRoute>} />
           <Route
             path="/academy/category/:categoryId"
             element={<ProtectedRoute><><SEO title="Learning Category | Nightasaur" canonical="https://www.nightasaur.com/academy/categories" /><AcademyCategories /></></ProtectedRoute>}
