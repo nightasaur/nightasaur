@@ -69,6 +69,7 @@ export default function ArLearning() {
   const lastDetectRef = useRef<number>(0);
   const spokenObjectsRef = useRef<Set<string>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const [spirit, setSpirit] = useState<SpiritCharacter | null>(null);
   const [mode, setMode] = useState<Mode>("intro");
@@ -77,6 +78,7 @@ export default function ArLearning() {
   const [cameraReady, setCameraReady] = useState(false);
   const [modelReady, setModelReady] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentTask, setCurrentTask] = useState<typeof TASK_TARGETS[0] | null>(null);
@@ -86,7 +88,7 @@ export default function ArLearning() {
   const base = import.meta.env.VITE_API_URL || "http://localhost:3002/api";
 
   // ============================================
-  // TTS 播放（沿用後端分流）
+  // TTS 播放
   // ============================================
   const speak = useCallback(async (text: string) => {
     setIsSpeaking(true);
@@ -132,7 +134,7 @@ export default function ArLearning() {
   }, [token, base]);
 
   // ============================================
-  // 核心：走 englishTraining API（和英語訓練同步）
+  // 核心：走 englishTraining API
   // ============================================
   const sendToSpirit = useCallback(async (userText: string) => {
     if (!spirit || loading) return;
@@ -141,6 +143,9 @@ export default function ArLearning() {
     setLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
       const res = await fetch(`${base}/english-training/conversation/chat`, {
         method: "POST",
         headers: {
@@ -156,7 +161,10 @@ export default function ArLearning() {
           message: userText,
           userLocale: "zh-TW",
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const data = await res.json();
 
@@ -174,7 +182,8 @@ export default function ArLearning() {
         setLogs((p) => [...p, { role: "spirit", text: "(No response)" }]);
       }
     } catch (e: any) {
-      setLogs((p) => [...p, { role: "system", text: "連線失敗: " + e.message }]);
+      const msg = e.name === "AbortError" ? "精靈回應逾時" : e.message;
+      setLogs((p) => [...p, { role: "system", text: "連線失敗: " + msg }]);
     } finally {
       setLoading(false);
     }
@@ -283,7 +292,6 @@ export default function ArLearning() {
           });
         }
 
-        // 介紹模式：自動觸發
         if (filtered.length > 0 && mode === "intro" && !loading) {
           const top = filtered.find((d) => d.class !== "person") || filtered[0];
           if (!spokenObjectsRef.current.has(top.class)) {
@@ -352,15 +360,60 @@ export default function ArLearning() {
     [mode, quizTarget, checkQuizAnswer, sendToSpirit]
   );
 
+  const startListening = useCallback(async () => {
+    setError("");
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      setError("此瀏覽器不支援語音辨識，請使用 Chrome 或 Edge");
+      return;
+    }
+
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e: any) {
+      setError("麥克風權限被拒絕：" + e.message);
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e: any) => {
+      const text = e.results[0][0].transcript;
+      setIsListening(false);
+      handleVoiceInput(text);
+    };
+    rec.onerror = (e: any) => {
+      setIsListening(false);
+      if (e.error === "not-allowed") setError("請允許麥克風權限");
+      else if (e.error === "no-speech") setError("沒有偵測到語音，請再說一次");
+      else setError("語音辨識錯誤：" + e.error);
+    };
+    rec.onend = () => setIsListening(false);
+    rec.start();
+    recognitionRef.current = rec;
+    setIsListening(true);
+  }, [handleVoiceInput]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
+
   // ============================================
   // 清理
   // ============================================
   useEffect(() => {
     return () => {
       stopCamera();
+      stopListening();
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     };
-  }, [stopCamera]);
+  }, [stopCamera, stopListening]);
 
   // ============================================
   // 選精靈畫面
@@ -401,7 +454,7 @@ export default function ArLearning() {
     <div className="min-h-screen pt-24 pb-6 px-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => { stopCamera(); setSpirit(null); setLogs([]); }}
+          onClick={() => { stopCamera(); stopListening(); setSpirit(null); setLogs([]); }}
           className="text-sm text-white/55 hover:text-white"
         >
           ← 換精靈
@@ -412,8 +465,9 @@ export default function ArLearning() {
       </div>
 
       {error && (
-        <div className="bg-red-500/20 border border-red-400/40 text-red-200 p-3 rounded-xl mb-4 text-sm">
-          {error}
+        <div className="bg-red-500/20 border border-red-400/40 text-red-200 p-3 rounded-xl mb-4 text-sm flex justify-between items-center">
+          <span>{error}</span>
+          <button onClick={() => setError("")} className="text-red-200 hover:text-white ml-2">✕</button>
         </div>
       )}
 
@@ -496,7 +550,6 @@ export default function ArLearning() {
         </button>
       )}
 
-      {/* 對話記錄（含 feedback） */}
       <div className="bg-white/5 rounded-2xl p-4 mb-4 h-64 overflow-y-auto text-sm">
         {logs.length === 0 && (
           <div className="text-white/40 text-center py-8">
@@ -532,26 +585,16 @@ export default function ArLearning() {
         <div ref={chatEndRef} />
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={() => {
-            const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            if (!SR) { setError("此瀏覽器不支援語音辨識"); return; }
-            const rec = new SR();
-            rec.lang = "en-US";
-            rec.interimResults = false;
-            rec.onresult = (e: any) => {
-              const text = e.results[0][0].transcript;
-              handleVoiceInput(text);
-            };
-            rec.start();
-          }}
-          disabled={loading}
-          className="flex-1 py-3 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold disabled:opacity-50"
-        >
-          🎤 說話
-        </button>
-      </div>
+      <button
+        onClick={isListening ? stopListening : startListening}
+        className={`w-full py-3 rounded-xl font-bold transition-colors ${
+          isListening
+            ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+            : "bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white"
+        }`}
+      >
+        {isListening ? "⏹ 停止錄音" : "🎤 說話"}
+      </button>
     </div>
   );
 }
