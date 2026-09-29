@@ -98,6 +98,13 @@ export default function IeltsLearningHub() {
           >
             🐉 精靈對話練習
           </button>
+          <button
+            type="button"
+            onClick={() => navigate("/ar")}
+            className="mt-4 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-medium hover:opacity-90 transition-opacity"
+          >
+            🌍 AR 情境英語（手機）
+          </button>
         </div>
 
         <div className="glass-card p-6">

@@ -15,16 +15,17 @@ interface NavbarProps {
 
 const PUBLIC_NAV_COPY: Record<string, {
   ielts: string;
+  ar: string;
   login: string;
   register: string;
   openMenu: string;
   closeMenu: string;
 }> = {
-  "zh-TW": { ielts: "英語訓練對話", login: "登入", register: "註冊", openMenu: "開啟選單", closeMenu: "關閉選單" },
-  "zh-CN": { ielts: "英语训练对话", login: "登录", register: "注册", openMenu: "打开菜单", closeMenu: "关闭菜单" },
-  "en-US": { ielts: "English Conversation Practice", login: "Login", register: "Register", openMenu: "Open menu", closeMenu: "Close menu" },
-  "ja-JP": { ielts: "英会話トレーニング", login: "ログイン", register: "登録", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
-  "ko-KR": { ielts: "영어 회화 연습", login: "로그인", register: "가입", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기" },
+  "zh-TW": { ielts: "英語訓練對話", ar: "AR 情境英語", login: "登入", register: "註冊", openMenu: "開啟選單", closeMenu: "關閉選單" },
+  "zh-CN": { ielts: "英语训练对话", ar: "AR 情境英语", login: "登录", register: "注册", openMenu: "打开菜单", closeMenu: "关闭菜单" },
+  "en-US": { ielts: "English Conversation", ar: "AR English", login: "Login", register: "Register", openMenu: "Open menu", closeMenu: "Close menu" },
+  "ja-JP": { ielts: "英会話トレーニング", ar: "AR英会話", login: "ログイン", register: "登録", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
+  "ko-KR": { ielts: "영어 회화 연습", ar: "AR 영어", login: "로그인", register: "가입", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기" },
 };
 
 export default function Navbar({ user, setUser }: NavbarProps) {
@@ -78,6 +79,13 @@ export default function Navbar({ user, setUser }: NavbarProps) {
             🎓 {publicCopy.ielts}
           </Link>
 
+          <Link
+            to="/ar"
+            className="text-cyan-300 hover:text-cyan-200 transition text-sm font-medium whitespace-nowrap"
+          >
+            🌍 {publicCopy.ar}
+          </Link>
+
           <div className="shrink-0">
             <LanguageSwitcher compact={true} />
           </div>
@@ -117,6 +125,14 @@ export default function Navbar({ user, setUser }: NavbarProps) {
               className="px-3 py-3 rounded-lg text-yellow-300 hover:bg-white/5 transition text-sm font-medium"
             >
               🎓 {publicCopy.ielts}
+            </Link>
+
+            <Link
+              to="/ar"
+              onClick={closeMobile}
+              className="px-3 py-3 rounded-lg text-cyan-300 hover:bg-white/5 transition text-sm font-medium"
+            >
+              🌍 {publicCopy.ar}
             </Link>
 
             {user ? (
