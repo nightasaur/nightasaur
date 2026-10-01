@@ -74,7 +74,6 @@ async function synthesizeZh(text: string): Promise<Buffer> {
     throw new Error(`Piper 連線失敗 (HTTP ${status}): ${msg}`);
   }
 }
-}
 
 router.post("/", async (req, res, next) => {
   try {
