@@ -3,7 +3,8 @@ import axios from "axios";
 
 const router = Router();
 
-const PIPER_ZH_URL = process.env.PIPER_URL || "http://host.docker.internal:5000";
+// ⚠️ 注意：絕對不要在 Railway 上使用 host.docker.internal，請確保 Railway 的 PIPER_URL 變數已正確設定
+const PIPER_ZH_URL = process.env.PIPER_URL || "";
 const CF_CLIENT_ID = process.env.CF_ACCESS_CLIENT_ID || "";
 const CF_CLIENT_SECRET = process.env.CF_ACCESS_CLIENT_SECRET || "";
 
@@ -38,6 +39,7 @@ function detectLang(text: string): "zh" | "en" {
 
 function buildHeaders(url: string): Record<string, string> {
   const headers: Record<string, string> = {};
+  // 只要 URL 裡面有 nightasaur.com 就帶上 CF Access Header
   if (url.includes("nightasaur.com") && CF_CLIENT_ID && CF_CLIENT_SECRET) {
     headers["CF-Access-Client-Id"] = CF_CLIENT_ID;
     headers["CF-Access-Client-Secret"] = CF_CLIENT_SECRET;
@@ -46,14 +48,32 @@ function buildHeaders(url: string): Record<string, string> {
 }
 
 async function synthesizeZh(text: string): Promise<Buffer> {
+  if (!PIPER_ZH_URL) {
+    throw new Error("PIPER_URL 未設定");
+  }
+  
   const headers = buildHeaders(PIPER_ZH_URL);
-  const response = await axios.get(`${PIPER_ZH_URL}/`, {
-    params: { text: text.slice(0, 200) },
-    headers,
-    responseType: "arraybuffer",
-    timeout: 30000,
-  });
-  return Buffer.from(response.data);
+  console.log(`[TTS] 正在呼叫 Piper (POST): ${PIPER_ZH_URL}/synthesize, 文字: ${text.slice(0, 10)}...`);
+  
+  try {
+    // 👇 改用 POST 请求，中文通过 JSON Body 传输，完美避开 URL 编码问题
+    const response = await axios.post(
+      `${PIPER_ZH_URL}/synthesize`, 
+      { text: text.slice(0, 200) },
+      {
+        headers: { ...headers, "Content-Type": "application/json" },
+        responseType: "arraybuffer",
+        timeout: 30000,
+      }
+    );
+    return Buffer.from(response.data);
+  } catch (error: any) {
+    // 把更詳細的錯誤拋出來，方便在 Railway Logs 看到
+    const status = error.response?.status || "無回應";
+    const msg = error.response?.data ? JSON.stringify(error.response.data).slice(0, 100) : error.message;
+    throw new Error(`Piper 連線失敗 (HTTP ${status}): ${msg}`);
+  }
+}
 }
 
 router.post("/", async (req, res, next) => {
@@ -90,17 +110,27 @@ router.post("/", async (req, res, next) => {
       return res.send(cached);
     }
 
-    const audio = await synthesizeZh(trimmed);
-    setCache(cacheKey, audio);
+    try {
+      const audio = await synthesizeZh(trimmed);
+      setCache(cacheKey, audio);
 
-    res.set("Content-Type", "audio/wav");
-    res.set("Cache-Control", "public, max-age=1800");
-    res.set("X-Cache", "MISS");
-    res.send(audio);
+      res.set("Content-Type", "audio/wav");
+      res.set("Cache-Control", "public, max-age=1800");
+      res.set("X-Cache", "MISS");
+      res.send(audio);
+    } catch (piperError: any) {
+      // 如果 Piper 掛了，優雅降級，告訴前端用瀏覽器唸中文
+      console.warn(`[TTS] Piper 失敗，降級使用瀏覽器 TTS: ${piperError.message}`);
+      return res.status(200).json({
+        useBrowserTTS: true,
+        lang: "zh-TW",
+        text: trimmed,
+      });
+    }
 
   } catch (error: any) {
-    console.error("Piper TTS error:", error.message);
-    res.status(500).json({ error: "TTS failed: " + error.message });
+    console.error("TTS 路由發生非預期錯誤:", error.message);
+    res.status(500).json({ error: "TTS 處理失敗: " + error.message });
   }
 });
 
