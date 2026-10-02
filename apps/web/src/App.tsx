@@ -85,6 +85,10 @@ function AppContent() {
   const { pathname } = useLocation();
   const publicPage = ["/", "/login", "/register", "/privacy", "/products/ielts-immersion"].includes(pathname);
 
+  // 👇 沉浸模式路由：不显示顶部 Navbar，改用 SpiritWorldShell 的 ☰ 和 📷
+  const immersiveRoutes = ["/account"];
+  const isImmersive = immersiveRoutes.some(r => pathname === r || pathname.startsWith(r + "/"));
+
   const setUser = useCallback((nextUser: any) => {
     verification.current += 1;
     setUserState(nextUser);
@@ -128,11 +132,11 @@ function AppContent() {
   return (
     <SessionContext.Provider value={{ user, loading, unavailable: authUnavailable, retry: verifySession }}>
     <div className="min-h-screen relative z-10">
-      <Navbar user={user} setUser={setUser} />
-      <main className="pt-20">
-        {publicPage && loading && <p role="status" className="px-6 py-2 text-center text-white/60 text-sm">??雓?豰??????????????擏??剛???隡ㄟ??皝???/ Checking your session; browsing remains available.</p>}
+      {!isImmersive && <Navbar user={user} setUser={setUser} />}
+      <main className={isImmersive ? "" : "pt-20"}>
+        {publicPage && loading && <p role="status" className="px-6 py-2 text-center text-white/60 text-sm">????鞊堆????謅????????????????????∵????????/ Checking your session; browsing remains available.</p>}
         {publicPage && authUnavailable && <div className="px-6 py-3 text-center text-sm">
-          <p role="alert">??????????????????????頩??豯??擏郁?????/ Session verification is unavailable; public pages remain available.</p>
+          <p role="alert">????????????謅?????????????拆蹓??鞊??????謜????/ Session verification is unavailable; public pages remain available.</p>
           <button className="text-teal-300 underline mt-2" onClick={verifySession}>Retry</button>
         </div>}
         <Routes>
