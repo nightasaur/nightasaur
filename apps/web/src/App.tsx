@@ -86,7 +86,7 @@ function AppContent() {
   const publicPage = ["/", "/login", "/register", "/privacy", "/products/ielts-immersion"].includes(pathname);
 
   // 👇 沉浸模式路由：不显示顶部 Navbar，改用 SpiritWorldShell 的 ☰ 和 📷
-  const immersiveRoutes = ["/account"];
+  const immersiveRoutes = ["/account", "/spirits", "/ar"];
   const isImmersive = immersiveRoutes.some(r => pathname === r || pathname.startsWith(r + "/"));
 
   const setUser = useCallback((nextUser: any) => {
