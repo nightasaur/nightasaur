@@ -17,11 +17,13 @@ export default function SpiritWorldShell({
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [background, setBackground] = useState<"ar" | "night">(
-    initialBackground === "none" ? "night" : "night"
-  );
+  const [cameraOn, setCameraOn] = useState(false);
+  const [cameraError, setCameraError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
+  // textarea 自动增高
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -31,6 +33,44 @@ export default function SpiritWorldShell({
     el.style.height = Math.min(el.scrollHeight, lineHeight * maxLines) + "px";
   }, [input]);
 
+  // 相机清理
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
+  const toggleCamera = async () => {
+    setCameraError("");
+    if (cameraOn && streamRef.current) {
+      // 关闭相机
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+      if (videoRef.current) videoRef.current.srcObject = null;
+      setCameraOn(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: 640, height: 480 },
+        audio: false,
+      });
+      streamRef.current = stream;
+      // video 一直存在于 DOM，这里能直接设置
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        try { await videoRef.current.play(); } catch {}
+      }
+      setCameraOn(true);
+    } catch (e: any) {
+      setCameraError("相機啟動失敗：" + e.message);
+      setCameraOn(false);
+    }
+  };
+
   const handleSend = () => {
     const text = input.trim();
     if (!text) return;
@@ -38,38 +78,48 @@ export default function SpiritWorldShell({
     setInput("");
   };
 
-  const toggleBackground = () => {
-    setBackground((b) => (b === "ar" ? "night" : "ar"));
-  };
-
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* ① 背景层（background=none 时由子组件自己渲染背景） */}
+      {/* ① 背景层（gradient 模式才有） */}
       {initialBackground !== "none" && (
-        <div className="fixed inset-0 -z-10">
-          {background === "ar" ? (
-            <div className="w-full h-full bg-black flex items-center justify-center text-white/40 text-sm">
-              [AR 相機畫面 — 待接 WebRTC]
-            </div>
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
-          )}
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-black">
+          {/* video 永远渲染，用 opacity 控制显示，避免 ref 拿不到的 bug */}
+          <video
+            ref={videoRef}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+              cameraOn ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            playsInline
+            muted
+          />
         </div>
       )}
 
-      {/* ② 顶部按钮 */}
+      {/* ② 相机切换按钮 */}
       {initialBackground !== "none" && (
         <button
-          onClick={toggleBackground}
-          aria-label="切換背景"
-          className="fixed top-4 left-4 z-40 w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xl flex items-center justify-center"
+          onClick={toggleCamera}
+          aria-label={cameraOn ? "關閉相機" : "開啟相機"}
+          className={`fixed top-4 left-4 z-40 w-12 h-12 rounded-2xl backdrop-blur-md border text-xl flex items-center justify-center transition ${
+            cameraOn
+              ? "bg-teal-500/40 border-teal-400/60 text-white"
+              : "bg-white/10 border-white/20 text-white"
+          }`}
         >
-          {background === "ar" ? "🌙" : "📷"}
+          {cameraOn ? "🌙" : "📷"}
         </button>
       )}
 
+      {/* 相机错误提示 */}
+      {cameraError && (
+        <div className="fixed top-20 left-4 right-4 z-40 bg-red-500/20 border border-red-400/40 text-red-200 px-4 py-2 rounded-xl text-sm">
+          {cameraError}
+        </div>
+      )}
+
+      {/* ③ 汉堡按钮 */}
       <button
         onClick={() => setMenuOpen(true)}
         aria-label="開啟選單"
@@ -78,12 +128,12 @@ export default function SpiritWorldShell({
         ☰
       </button>
 
-      {/* ③ 主内容区 */}
+      {/* ④ 主内容 */}
       <main className={`relative z-10 pt-20 ${hideInput ? "pb-6" : "pb-40"}`}>
         {children}
       </main>
 
-      {/* ④ 底部半透明对话框（hideInput 时隐藏） */}
+      {/* ⑤ 底部对话框 */}
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
           <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
@@ -114,13 +164,10 @@ export default function SpiritWorldShell({
         </div>
       )}
 
-      {/* ⑤ 汉堡菜单 */}
+      {/* ⑥ 汉堡菜单 */}
       {menuOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            onClick={closeMenu}
-          />
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={closeMenu} />
           <aside className="fixed top-0 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-slate-950/95 backdrop-blur-xl border-l border-white/10 overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <span className="text-white font-bold text-lg">🌙 Nightasaur</span>
@@ -136,7 +183,6 @@ export default function SpiritWorldShell({
               <Link to="/dashboard" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">📊 總覽</Link>
               <Link to="/account" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">👤 帳號</Link>
               <Link to="/my/invoices" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🧾 我的發票</Link>
-
               <div className="mt-4 pt-4 border-t border-amber-500/20">
                 <div className="px-4 py-1 text-xs text-amber-400/70 mb-1">管理員</div>
                 <Link to="/admin/accounts" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">🛡️ 帳號管理</Link>
