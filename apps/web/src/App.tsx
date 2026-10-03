@@ -11,7 +11,6 @@ import SEO from "./components/SEO";
 import Home, { HOME_METADATA } from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
 import Spirits from "./pages/Spirits";
 import CreateSpirit from "./pages/CreateSpirit";
 import SpiritDetail from "./pages/SpiritDetail";
@@ -144,10 +143,7 @@ function AppContent() {
           <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
           <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
           <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />
-          <Route
-            path="/dashboard"
-            element={<ProtectedRoute><><SEO title="Dashboard | Nightasaur" canonical="https://www.nightasaur.com/dashboard" /><Dashboard /></></ProtectedRoute>}
-          />
+          <Route path="/dashboard" element={<Navigate to="/spirits" replace />} />
           <Route
             path="/spirits"
             element={<ProtectedRoute><><SEO title="My Spirits | Nightasaur" canonical="https://www.nightasaur.com/spirits" /><Spirits /></></ProtectedRoute>}
