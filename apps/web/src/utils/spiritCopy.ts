@@ -14,6 +14,13 @@ export const spiritCopy: Record<string, string[]> = {
     "スピリット",
     "스피릿"
   ],
+  "Spirit World": [
+    "精靈世界",
+    "精灵世界",
+    "Spirit World",
+    "精霊ワールド",
+    "스피릿 월드"
+  ],
   "Assistant": [
     "助手",
     "助手",

@@ -62,3 +62,6 @@ apps/ai-engine/checkpoints/
 *.wav
 test.wav
 backend-test.wav
+
+# Ollama model (local only)
+Modelfile

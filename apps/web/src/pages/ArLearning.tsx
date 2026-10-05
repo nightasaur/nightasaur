@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import * as tf from "@tensorflow/tfjs";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import { SPIRIT_CHARACTERS, type SpiritCharacter } from "../config/spirits";
+import SpiritWorldShell from "../components/SpiritWorldShell";
+import SpiritAvatar from "../components/SpiritAvatar";
 
 type Mode = "intro" | "quiz" | "task";
 
@@ -420,30 +422,39 @@ export default function ArLearning() {
   // ============================================
   if (!spirit) {
     return (
-      <div className="min-h-screen pt-24 pb-12 px-4 max-w-5xl mx-auto">
-        <button
-          onClick={() => navigate("/academy/category/ielts")}
-          className="text-sm text-white/55 hover:text-white mb-6"
-        >
-          ← 回學習中心
-        </button>
-        <h1 className="text-3xl font-bold text-white mb-2">🌍 AR 情境英語</h1>
-        <p className="text-white/50 mb-8">選一隻精靈，用手機鏡頭認識世界</p>
+      <SpiritWorldShell
+        hideInput
+        background="gradient"
+        cameraOn={cameraReady}
+        onCameraToggle={cameraReady ? stopCamera : startCamera}
+      >
+        <div className="px-4 max-w-5xl mx-auto">
+          <button
+            onClick={() => navigate("/academy/category/ielts")}
+            className="text-sm text-white/55 hover:text-white mb-6"
+          >
+            ← 回學習中心
+          </button>
+          <h1 className="text-3xl font-bold text-white mb-2">🌍 AR 情境英語</h1>
+          <p className="text-white/50 mb-8">選一隻精靈，用手機鏡頭認識世界</p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {SPIRIT_CHARACTERS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSpirit(s)}
-              className="rounded-2xl p-4 bg-white/5 border border-white/10 hover:border-purple-400 hover:ring-2 hover:ring-purple-500/50 transition-all"
-            >
-              <img src={s.image} alt={s.name} className="w-full aspect-square rounded-xl mb-3 object-cover" />
-              <div className="text-white font-medium text-sm">{s.name}</div>
-              <div className="text-xs text-white/50">{s.elementZh}屬性</div>
-            </button>
-          ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {SPIRIT_CHARACTERS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSpirit(s)}
+                className="rounded-2xl p-4 bg-white/5 border border-white/10 hover:border-purple-400 hover:ring-2 hover:ring-purple-500/50 transition-all"
+              >
+                <div className="flex justify-center mb-3">
+  <SpiritAvatar spirit={s} size={80} />
+</div>
+                <div className="text-white font-medium text-sm">{s.name}</div>
+                <div className="text-xs text-white/50">{s.elementZh}屬性</div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </SpiritWorldShell>
     );
   }
 
@@ -451,150 +462,152 @@ export default function ArLearning() {
   // AR 主畫面
   // ============================================
   return (
-    <div className="min-h-screen pt-24 pb-6 px-4 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => { stopCamera(); stopListening(); setSpirit(null); setLogs([]); }}
-          className="text-sm text-white/55 hover:text-white"
-        >
-          ← 換精靈
-        </button>
-        <div className="text-sm text-white/50">
-          {modelReady ? "🤖 模型就緒" : "⏳ 載入模型..."}
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-500/20 border border-red-400/40 text-red-200 p-3 rounded-xl mb-4 text-sm flex justify-between items-center">
-          <span>{error}</span>
-          <button onClick={() => setError("")} className="text-red-200 hover:text-white ml-2">✕</button>
-        </div>
-      )}
-
-      <div className="flex flex-col items-center mb-4">
-        <div className="relative">
-          <div
-            className="absolute inset-0 rounded-full blur-2xl transition-opacity"
-            style={{ background: spirit.color, opacity: isSpeaking ? 0.5 : 0.15 }}
-          />
-          <img
-            src={spirit.image}
-            alt={spirit.name}
-            className={`relative w-24 h-24 rounded-full object-cover transition-all duration-300 ${
-              isSpeaking ? "animate-bounce scale-110" : "scale-100"
-            }`}
-            style={{ filter: isSpeaking ? `drop-shadow(0 0 20px ${spirit.color})` : "none" }}
-          />
-        </div>
-        <div className="mt-2 text-white font-bold">{spirit.name}</div>
-      </div>
-
-      <div className="relative bg-black rounded-2xl overflow-hidden mb-4" style={{ aspectRatio: "4/3" }}>
-        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-
-        {!cameraReady && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white">
-            <button
-              onClick={startCamera}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 font-bold mb-3"
-              disabled={!modelReady}
-            >
-              {modelReady ? "📷 開啟相機" : "⏳ 模型載入中..."}
-            </button>
-            <p className="text-white/50 text-sm">請允許相機權限</p>
-          </div>
-        )}
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        {[
-          { id: "intro", label: "📖 介紹" },
-          { id: "quiz", label: "❓ 問答" },
-          { id: "task", label: "🎯 任務" },
-        ].map((m) => (
+    <SpiritWorldShell
+      hideInput
+      background="none"
+      cameraOn={cameraReady}
+      onCameraToggle={cameraReady ? stopCamera : startCamera}
+    >
+      <div className="px-4 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
           <button
-            key={m.id}
-            onClick={() => {
-              setMode(m.id as Mode);
-              spokenObjectsRef.current.clear();
-              setQuizTarget(null);
-              setCurrentTask(null);
-            }}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
-              mode === m.id
-                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                : "bg-white/10 text-white/60 hover:bg-white/20"
-            }`}
+            onClick={() => { stopCamera(); stopListening(); setSpirit(null); setLogs([]); }}
+            className="text-sm text-white/55 hover:text-white"
           >
-            {m.label}
+            ← 換精靈
           </button>
-        ))}
-      </div>
+          <div className="text-sm text-white/50">
+            {modelReady ? "🤖 模型就緒" : "⏳ 載入模型..."}
+          </div>
+        </div>
 
-      {cameraReady && mode === "quiz" && !quizTarget && (
-        <button
-          onClick={startQuiz}
-          className="w-full mb-4 py-3 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold"
-        >
-          ❓ 出題（對著物體按）
-        </button>
-      )}
-
-      {cameraReady && mode === "task" && !currentTask && (
-        <button
-          onClick={startTask}
-          className="w-full mb-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold"
-        >
-          🎯 開始任務
-        </button>
-      )}
-
-      <div className="bg-white/5 rounded-2xl p-4 mb-4 h-64 overflow-y-auto text-sm">
-        {logs.length === 0 && (
-          <div className="text-white/40 text-center py-8">
-            {mode === "intro" && "鏡頭對準物體，精靈會介紹它"}
-            {mode === "quiz" && "按「出題」讓精靈問你問題"}
-            {mode === "task" && "按「開始任務」接受挑戰"}
+        {error && (
+          <div className="bg-red-500/20 border border-red-400/40 text-red-200 p-3 rounded-xl mb-4 text-sm flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={() => setError("")} className="text-red-200 hover:text-white ml-2">✕</button>
           </div>
         )}
-        {logs.map((m, i) => (
-          <div key={i} className={`mb-3 ${m.role === "user" ? "text-right" : ""}`}>
+
+        <div className="flex flex-col items-center mb-4">
+          <div className="relative">
             <div
-              className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 ${
-                m.role === "user"
-                  ? "bg-purple-600 text-white"
-                  : m.role === "system"
-                  ? "bg-yellow-500/20 text-yellow-200 text-xs"
-                  : "bg-white/10 text-white/90"
+              className="absolute inset-0 rounded-full blur-2xl transition-opacity"
+              style={{ background: spirit.color, opacity: isSpeaking ? 0.5 : 0.15 }}
+            />
+            <img
+              src={spirit.image}
+              alt={spirit.name}
+              className={`relative w-24 h-24 rounded-full object-cover transition-all duration-300 ${
+                isSpeaking ? "animate-bounce scale-110" : "scale-100"
+              }`}
+              style={{ filter: isSpeaking ? `drop-shadow(0 0 20px ${spirit.color})` : "none" }}
+            />
+          </div>
+          <div className="mt-2 text-white font-bold">{spirit.name}</div>
+        </div>
+
+        <div className="relative bg-black rounded-2xl overflow-hidden mb-4" style={{ aspectRatio: "4/3" }}>
+          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+
+          {!cameraReady && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white pointer-events-none">
+              <p className="text-4xl mb-3">📷</p>
+              <p className="text-white/70 text-sm">點左上角相機圖示開啟鏡頭</p>
+              {!modelReady && <p className="text-white/40 text-xs mt-2">⏳ 模型載入中...</p>}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          {[
+            { id: "intro", label: "📖 介紹" },
+            { id: "quiz", label: "❓ 問答" },
+            { id: "task", label: "🎯 任務" },
+          ].map((m) => (
+            <button
+              key={m.id}
+              onClick={() => {
+                setMode(m.id as Mode);
+                spokenObjectsRef.current.clear();
+                setQuizTarget(null);
+                setCurrentTask(null);
+              }}
+              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+                mode === m.id
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  : "bg-white/10 text-white/60 hover:bg-white/20"
               }`}
             >
-              {m.text}
-            </div>
-            {m.feedback && (
-              <div className="mt-1 text-xs text-white/60 space-y-0.5 max-w-[85%] inline-block text-left">
-                {m.feedback.translation && <div className="text-emerald-300">🌏 {m.feedback.translation}</div>}
-                {m.feedback.grammar && <div>📝 {m.feedback.grammar}</div>}
-                {m.feedback.vocabulary && <div>💡 {m.feedback.vocabulary}</div>}
-                {m.feedback.score !== undefined && <div>⭐ {m.feedback.score}/100</div>}
-              </div>
-            )}
-          </div>
-        ))}
-        {loading && <div className="text-white/40 text-xs">精靈思考中...</div>}
-        <div ref={chatEndRef} />
-      </div>
+              {m.label}
+            </button>
+          ))}
+        </div>
 
-      <button
-        onClick={isListening ? stopListening : startListening}
-        className={`w-full py-3 rounded-xl font-bold transition-colors ${
-          isListening
-            ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
-            : "bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white"
-        }`}
-      >
-        {isListening ? "⏹ 停止錄音" : "🎤 說話"}
-      </button>
-    </div>
+        {cameraReady && mode === "quiz" && !quizTarget && (
+          <button
+            onClick={startQuiz}
+            className="w-full mb-4 py-3 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold"
+          >
+            ❓ 出題（對著物體按）
+          </button>
+        )}
+
+        {cameraReady && mode === "task" && !currentTask && (
+          <button
+            onClick={startTask}
+            className="w-full mb-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold"
+          >
+            🎯 開始任務
+          </button>
+        )}
+
+        <div className="bg-white/5 rounded-2xl p-4 mb-4 h-64 overflow-y-auto text-sm">
+          {logs.length === 0 && (
+            <div className="text-white/40 text-center py-8">
+              {mode === "intro" && "鏡頭對準物體，精靈會介紹它"}
+              {mode === "quiz" && "按「出題」讓精靈問你問題"}
+              {mode === "task" && "按「開始任務」接受挑戰"}
+            </div>
+          )}
+          {logs.map((m, i) => (
+            <div key={i} className={`mb-3 ${m.role === "user" ? "text-right" : ""}`}>
+              <div
+                className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 ${
+                  m.role === "user"
+                    ? "bg-purple-600 text-white"
+                    : m.role === "system"
+                    ? "bg-yellow-500/20 text-yellow-200 text-xs"
+                    : "bg-white/10 text-white/90"
+                }`}
+              >
+                {m.text}
+              </div>
+              {m.feedback && (
+                <div className="mt-1 text-xs text-white/60 space-y-0.5 max-w-[85%] inline-block text-left">
+                  {m.feedback.translation && <div className="text-emerald-300">🌏 {m.feedback.translation}</div>}
+                  {m.feedback.grammar && <div>📝 {m.feedback.grammar}</div>}
+                  {m.feedback.vocabulary && <div>💡 {m.feedback.vocabulary}</div>}
+                  {m.feedback.score !== undefined && <div>⭐ {m.feedback.score}/100</div>}
+                </div>
+              )}
+            </div>
+          ))}
+          {loading && <div className="text-white/40 text-xs">精靈思考中...</div>}
+          <div ref={chatEndRef} />
+        </div>
+
+        <button
+          onClick={isListening ? stopListening : startListening}
+          className={`w-full py-3 rounded-xl font-bold transition-colors ${
+            isListening
+              ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+              : "bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white"
+          }`}
+        >
+          {isListening ? "⏹ 停止錄音" : "🎤 說話"}
+        </button>
+      </div>
+    </SpiritWorldShell>
   );
 }

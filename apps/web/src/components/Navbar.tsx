@@ -52,7 +52,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
     <>
       {adminLabel && <Link to="/admin/accounts" onClick={closeMobile} className="text-amber-300 text-sm">🛡️ {adminLabel}</Link>}
       <Link to="/dashboard" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Dashboard")}</Link>
-      <Link to="/spirits" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">💞 {t("Spirit")}</Link>
+      <Link to="/spirits" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🔮 {t("Spirit World")}</Link>
       <Link to="/assistant" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🤖 {t("Assistant")}</Link>
       <Link to="/academy" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">📚 {t("Learning")}</Link>
       <Link to="/social" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🌍 {t("Social")}</Link>
@@ -72,20 +72,6 @@ export default function Navbar({ user, setUser }: NavbarProps) {
         </Link>
 
         <div className="hidden lg:flex items-center gap-4 min-w-0">
-          <Link
-            to="/products/ielts-immersion"
-            className="text-yellow-300 hover:text-yellow-200 transition text-sm font-medium whitespace-nowrap"
-          >
-            🎓 {publicCopy.ielts}
-          </Link>
-
-          <Link
-            to="/ar"
-            className="text-cyan-300 hover:text-cyan-200 transition text-sm font-medium whitespace-nowrap"
-          >
-            🌍 {publicCopy.ar}
-          </Link>
-
           <div className="shrink-0">
             <LanguageSwitcher compact={true} />
           </div>
@@ -119,22 +105,6 @@ export default function Navbar({ user, setUser }: NavbarProps) {
       {mobileOpen && (
         <div className="lg:hidden border-t border-white/10 bg-slate-950/95 backdrop-blur-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-1">
-            <Link
-              to="/products/ielts-immersion"
-              onClick={closeMobile}
-              className="px-3 py-3 rounded-lg text-yellow-300 hover:bg-white/5 transition text-sm font-medium"
-            >
-              🎓 {publicCopy.ielts}
-            </Link>
-
-            <Link
-              to="/ar"
-              onClick={closeMobile}
-              className="px-3 py-3 rounded-lg text-cyan-300 hover:bg-white/5 transition text-sm font-medium"
-            >
-              🌍 {publicCopy.ar}
-            </Link>
-
             {user ? (
               <>
                 <div className="px-3 py-2 text-xs text-white/40 truncate">{t("登入")}：{user.username}</div>
