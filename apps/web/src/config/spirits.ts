@@ -3,14 +3,15 @@ export interface SpiritCharacter {
   name: string;
   element: string;
   elementZh: string;
-  image: string;
+  image?: string;       // 有真图时才填
+  emoji?: string;       // 无真图时显示 emoji（保留字段，8 只不使用）
   color: string;
   personality: string;
   voiceStyle: string;
   voice: {
-    pitch: number;   // 0.5 (低沉) - 1.5 (高亢)
-    rate: number;    // 0.7 (慢) - 1.2 (快)
-    lang: string;    // 偏好語言
+    pitch: number;
+    rate: number;
+    lang: string;
   };
 }
 
