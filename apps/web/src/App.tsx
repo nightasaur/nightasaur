@@ -190,7 +190,7 @@ function AppContent() {
             element={<ProtectedRoute><><SEO title="IELTS Assessment | Nightasaur" canonical="https://www.nightasaur.com/academy/category/ielts/assessment" /><IeltsAssessment /></></ProtectedRoute>}
           />
           <Route path="/academy/category/ielts/practice" element={<ProtectedRoute><IeltsPractice /></ProtectedRoute>} />
-          <Route path="/ar" element={<ProtectedRoute><ArLearning /></ProtectedRoute>} />
+          <Route path="/ar" element={<Navigate to="/spirits" replace />} />
           <Route
             path="/academy/category/:categoryId"
             element={<ProtectedRoute><><SEO title="Learning Category | Nightasaur" canonical="https://www.nightasaur.com/academy/categories" /><AcademyCategories /></></ProtectedRoute>}

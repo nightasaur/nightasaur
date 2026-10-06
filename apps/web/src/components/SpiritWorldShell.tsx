@@ -1,11 +1,14 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import SpiritWorldMap from "./SpiritWorldMap";
 
 interface SpiritWorldShellProps {
   children: ReactNode;
   onSend?: (text: string) => void;
   hideInput?: boolean;
-  background?: "gradient" | "none";
+  background?: "gradient" | "map" | "none";
+  cameraOn?: boolean;
+  onCameraToggle?: () => void;
 }
 
 export default function SpiritWorldShell({
@@ -13,17 +16,20 @@ export default function SpiritWorldShell({
   onSend,
   hideInput = false,
   background: initialBackground = "gradient",
+  cameraOn: externalCameraOn,
+  onCameraToggle: externalCameraToggle,
 }: SpiritWorldShellProps) {
-  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cameraOn, setCameraOn] = useState(false);
+  const [internalCameraOn, setInternalCameraOn] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // textarea 自动增高
+  const useExternalCamera = typeof externalCameraToggle === "function";
+  const cameraOn = useExternalCamera ? !!externalCameraOn : internalCameraOn;
+
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -33,24 +39,26 @@ export default function SpiritWorldShell({
     el.style.height = Math.min(el.scrollHeight, lineHeight * maxLines) + "px";
   }, [input]);
 
-  // 相机清理
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
       }
     };
   }, []);
 
-  const toggleCamera = async () => {
+  const handleCameraToggle = async () => {
+    if (useExternalCamera) {
+      externalCameraToggle?.();
+      return;
+    }
     setCameraError("");
-    if (cameraOn && streamRef.current) {
-      // 关闭相机
-      streamRef.current.getTracks().forEach(t => t.stop());
+    if (internalCameraOn && streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       if (videoRef.current) videoRef.current.srcObject = null;
-      setCameraOn(false);
+      setInternalCameraOn(false);
       return;
     }
     try {
@@ -59,15 +67,14 @@ export default function SpiritWorldShell({
         audio: false,
       });
       streamRef.current = stream;
-      // video 一直存在于 DOM，这里能直接设置
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         try { await videoRef.current.play(); } catch {}
       }
-      setCameraOn(true);
+      setInternalCameraOn(true);
     } catch (e: any) {
       setCameraError("相機啟動失敗：" + e.message);
-      setCameraOn(false);
+      setInternalCameraOn(false);
     }
   };
 
@@ -79,28 +86,48 @@ export default function SpiritWorldShell({
   };
 
   const closeMenu = () => setMenuOpen(false);
+  const showCameraButton = initialBackground !== "none" || useExternalCamera;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* ① 背景层（gradient 模式才有） */}
+      {/* ① 背景層 */}
       {initialBackground !== "none" && (
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-black">
-          {/* video 永远渲染，用 opacity 控制显示，避免 ref 拿不到的 bug */}
-          <video
-            ref={videoRef}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-              cameraOn ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
-            playsInline
-            muted
-          />
+        <div className="fixed inset-0 z-0">
+          {/* 地圖背景（相機開時淡出） */}
+          {initialBackground === "map" && (
+            <div
+              className={`absolute inset-0 transition-opacity duration-300 ${
+                cameraOn ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+              style={{ height: "100vh", width: "100vw" }}
+            >
+              <SpiritWorldMap />
+            </div>
+          )}
+
+          {/* 深色漸層背景（gradient 模式用） */}
+          {initialBackground === "gradient" && (
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
+          )}
+
+          {/* 相機 video：不管 map 還是 gradient 都要渲染，相機開時顯示 */}
+          {!useExternalCamera && (
+            <video
+              ref={videoRef}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                cameraOn ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+              playsInline
+              muted
+            />
+          )}
         </div>
       )}
 
-      {/* ② 相机切换按钮 */}
-      {initialBackground !== "none" && (
+      {/* ② 相機切換按鈕 */}
+      {showCameraButton && (
         <button
-          onClick={toggleCamera}
+          onClick={handleCameraToggle}
           aria-label={cameraOn ? "關閉相機" : "開啟相機"}
           className={`fixed top-4 left-4 z-40 w-12 h-12 rounded-2xl backdrop-blur-md border text-xl flex items-center justify-center transition ${
             cameraOn
@@ -112,14 +139,13 @@ export default function SpiritWorldShell({
         </button>
       )}
 
-      {/* 相机错误提示 */}
       {cameraError && (
         <div className="fixed top-20 left-4 right-4 z-40 bg-red-500/20 border border-red-400/40 text-red-200 px-4 py-2 rounded-xl text-sm">
           {cameraError}
         </div>
       )}
 
-      {/* ③ 汉堡按钮 */}
+      {/* ③ 漢堡按鈕 */}
       <button
         onClick={() => setMenuOpen(true)}
         aria-label="開啟選單"
@@ -128,12 +154,12 @@ export default function SpiritWorldShell({
         ☰
       </button>
 
-      {/* ④ 主内容 */}
+      {/* ④ 主內容 */}
       <main className={`relative z-10 pt-20 ${hideInput ? "pb-6" : "pb-40"}`}>
         {children}
       </main>
 
-      {/* ⑤ 底部对话框 */}
+      {/* ⑤ 底部對話框 */}
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
           <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
@@ -164,7 +190,7 @@ export default function SpiritWorldShell({
         </div>
       )}
 
-      {/* ⑥ 汉堡菜单 */}
+      {/* ⑥ 漢堡菜單（移除 AR 情境英語 連結） */}
       {menuOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={closeMenu} />
@@ -175,7 +201,6 @@ export default function SpiritWorldShell({
             </div>
             <nav className="flex flex-col p-4 gap-1">
               <Link to="/spirits" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🔮 精靈</Link>
-              <Link to="/ar" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🌍 AR 情境英語</Link>
               <Link to="/academy/category/ielts" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🎓 IELTS 訓練</Link>
               <Link to="/academy" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">📚 學習中心</Link>
               <Link to="/assistant" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🤖 助手</Link>
