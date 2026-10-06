@@ -65,3 +65,6 @@ backend-test.wav
 
 # Ollama model (local only)
 Modelfile
+
+# Local CI debug dumps
+.ci-debug/
