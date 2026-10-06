@@ -68,3 +68,6 @@ Modelfile
 
 # Local CI debug dumps
 .ci-debug/
+
+# ComfyUI local clone (not a tracked submodule)
+/ComfyUI/
