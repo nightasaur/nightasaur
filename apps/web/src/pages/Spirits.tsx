@@ -81,7 +81,7 @@ export default function Spirits() {
   };
 
   return (
-    <SpiritWorldShell onSend={handleSend}>
+    <SpiritWorldShell onSend={handleSend} background="map">
       <div className="max-w-4xl mx-auto">
         {/* 標題列 */}
         <div className="flex justify-between items-center mb-4">
