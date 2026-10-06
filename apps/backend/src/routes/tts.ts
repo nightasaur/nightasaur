@@ -75,7 +75,7 @@ async function synthesizeZh(text: string): Promise<Buffer> {
   }
 }
 
-router.post("/", async (req, res, next) => {
+router.post("/", async (req, res, _next) => {
   try {
     const { text } = req.body;
     if (!text || typeof text !== "string") {
@@ -116,7 +116,7 @@ router.post("/", async (req, res, next) => {
       res.set("Content-Type", "audio/wav");
       res.set("Cache-Control", "public, max-age=1800");
       res.set("X-Cache", "MISS");
-      res.send(audio);
+      return res.send(audio);
     } catch (piperError: any) {
       // 如果 Piper 掛了，優雅降級，告訴前端用瀏覽器唸中文
       console.warn(`[TTS] Piper 失敗，降級使用瀏覽器 TTS: ${piperError.message}`);
@@ -129,7 +129,7 @@ router.post("/", async (req, res, next) => {
 
   } catch (error: any) {
     console.error("TTS 路由發生非預期錯誤:", error.message);
-    res.status(500).json({ error: "TTS 處理失敗: " + error.message });
+    return res.status(500).json({ error: "TTS 失敗: " + error.message });
   }
 });
 

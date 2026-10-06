@@ -175,7 +175,15 @@ export class EnglishTrainingService {
     // Agent：先決定要用哪些工具，執行，再讓 LLM 推理
     // ============================================
     const toolNames = await decideTools(message);
-    const toolResults = await executeTools(toolNames);
+    const toolResults = await executeTools(
+      {
+        userId,
+        spiritId: validSpiritId || "",
+        userRole: "USER",
+        message,
+      },
+      toolNames
+    );
     const toolContext = formatToolResults(toolResults);
 
     if (toolNames.length > 0) {

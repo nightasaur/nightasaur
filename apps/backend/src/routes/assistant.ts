@@ -60,14 +60,14 @@ for (const operation of ["chat", "code", "translate", "document"]) {
       }
       const reply = await callOllama(message);
       // 不同端點回傳不同欄位名，前端會讀對應的
-      res.json({
+      return res.json({
         response: reply,
         result: reply,
         translation: reply,
       });
     } catch (error: any) {
       console.error("Assistant error:", error.message);
-      next(Object.assign(new Error("AI 服務暫時無法使用"), { statusCode: 503 }));
+      return next(Object.assign(new Error("AI 服務暫時無法使用"), { statusCode: 503 }));
     }
   });
 }

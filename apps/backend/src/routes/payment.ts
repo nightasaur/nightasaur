@@ -9,7 +9,8 @@ import { generateInvoicePdf, sendInvoiceEmail } from "../services/invoiceService
 const router = Router();
 
 // ============================================
-// ?Ｙ?瘚偌??NTS-YYYYMM-NNNN嚗??遢??嚗?// ============================================
+// ?Ｙ?瘚偌??NTS-YYYYMM-NNNN嚗??遢??嚗?
+// ============================================
 function generateInvoiceNumber(prefix: string = "NTS"): string {
   const now = new Date();
   const yyyy = now.getUTCFullYear();
@@ -21,6 +22,14 @@ function generateInvoiceNumber(prefix: string = "NTS"): string {
   return `${prefix}-${yyyy}${mm}${dd}${hh}${min}${ss}`;
 }
 const prisma = new PrismaClient();
+
+// Express 的 req.query.X 类型是 string | string[] | ParsedQs...
+// 这个 helper 统一取出纯 string，避免 Prisma 类型不匹配
+const firstString = (v: unknown): string | undefined => {
+  if (typeof v === "string") return v;
+  if (Array.isArray(v) && typeof v[0] === "string") return v[0];
+  return undefined;
+};
 
 const uploadDir = "uploads/payments";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -65,8 +74,8 @@ router.post("/submit", authMiddleware, upload.single("proof"), async (req, res, 
         proofNote: proofNote || null,
       },
     });
-    res.json({ success: true, submission });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submission });
+  } catch (err) { return next(err); }
 });
 
 router.get("/my-submissions", authMiddleware, async (req, res, next) => {
@@ -75,14 +84,14 @@ router.get("/my-submissions", authMiddleware, async (req, res, next) => {
     const list = await prisma.paymentSubmission.findMany({
       where: { userId }, orderBy: { createdAt: "desc" }, take: 20,
     });
-    res.json({ success: true, submissions: list });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submissions: list });
+  } catch (err) { return next(err); }
 });
 
 router.get("/invoices/:id/download", authMiddleware, async (req, res, next) => {
   try {
     const userId = (req as any).user?.userId;
-    const { id } = req.params;
+    const id = firstString(req.params.id) ?? "";
     const submission = await prisma.paymentSubmission.findFirst({
       where: { id, userId, status: "APPROVED" },
     });
@@ -102,24 +111,24 @@ router.get("/invoices/:id/download", authMiddleware, async (req, res, next) => {
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="invoice-${submission.invoiceNumber || id}.pdf"`);
-    res.send(pdfBuffer);
-  } catch (err) { next(err); }
+    return res.send(pdfBuffer);
+  } catch (err) { return next(err); }
 });
 
 router.get("/admin/list", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
-    const status = (req.query.status as string) || "PENDING";
+    const status = firstString(req.query.status) || "PENDING";
     const list = await prisma.paymentSubmission.findMany({
       where: status === "ALL" ? {} : { status },
       orderBy: { createdAt: "desc" }, take: 100,
     });
-    res.json({ success: true, submissions: list });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submissions: list });
+  } catch (err) { return next(err); }
 });
 
 router.get("/admin/invoices/:id/download", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = firstString(req.params.id) ?? "";
     const submission = await prisma.paymentSubmission.findUnique({ where: { id } });
     if (!submission || submission.status !== "APPROVED") return res.status(404).json({ error: "not found" });
 
@@ -137,14 +146,14 @@ router.get("/admin/invoices/:id/download", authMiddleware, adminMiddleware, asyn
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="invoice-${submission.invoiceNumber || id}.pdf"`);
-    res.send(pdfBuffer);
-  } catch (err) { next(err); }
+    return res.send(pdfBuffer);
+  } catch (err) { return next(err); }
 });
 
 router.post("/admin/:id/approve", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const adminId = (req as any).user?.userId;
-    const { id } = req.params;
+    const id = firstString(req.params.id) ?? "";
     const { adminNote } = req.body;
 
     const submission = await prisma.paymentSubmission.findUnique({ where: { id } });
@@ -183,35 +192,36 @@ router.post("/admin/:id/approve", authMiddleware, adminMiddleware, async (req, r
       }
     } catch (e) { console.error("Invoice error:", e); }
 
-    res.json({ success: true, submission: updated, invoiceNumber });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submission: updated, invoiceNumber });
+  } catch (err) { return next(err); }
 });
 
 router.post("/admin/:id/reject", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const adminId = (req as any).user?.userId;
-    const { id } = req.params;
+    const id = firstString(req.params.id) ?? "";
     const { adminNote } = req.body;
     const updated = await prisma.paymentSubmission.update({
       where: { id },
       data: { status: "REJECTED", adminNote: adminNote || null, reviewedAt: new Date(), reviewedBy: adminId },
     });
-    res.json({ success: true, submission: updated });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submission: updated });
+  } catch (err) { return next(err); }
 });
 
 
 // ============================================
-// ???? Invoice?謅?????蝘??????????頦敞??謕?????畾?????減??PDF??// ============================================
+// ??? Invoice?謅?????蝘???????????頦敞??謕?????畾?????減??PDF??
+// ============================================
 router.get("/preview-invoice", authMiddleware, async (req, res, next) => {
   try {
     const userId = (req as any).user?.userId;
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: "user not found" });
 
-    const passportName = (req.query.name as string) || user.username || "SAMPLE USER";
+    const passportName = firstString(req.query.name) || user.username || "SAMPLE USER";
     const now = new Date();
-      const sampleInvoiceNumber = generateInvoiceNumber("SAMPLE");
+    const sampleInvoiceNumber = generateInvoiceNumber("SAMPLE");
 
     const pdfBuffer = await generateInvoicePdf({
       invoiceNumber: sampleInvoiceNumber,
@@ -226,13 +236,14 @@ router.get("/preview-invoice", authMiddleware, async (req, res, next) => {
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="invoice-sample.pdf"`);
-    res.send(pdfBuffer);
-  } catch (err) { next(err); }
+    return res.send(pdfBuffer);
+  } catch (err) { return next(err); }
 });
 
 
 // ============================================
-// ??踝???賂??????螂?箏???????蹌???⊿?????// ============================================
+// ??踝???賂??????螂?箏???????蹌???⊿????
+// ============================================
 router.post("/confirm-purchase", authMiddleware, async (req, res, next) => {
   try {
     const userId = (req as any).user?.userId;
@@ -265,8 +276,8 @@ router.post("/confirm-purchase", authMiddleware, async (req, res, next) => {
       },
     });
 
-    res.json({ success: true, submission, invoiceNumber });
-  } catch (err) { next(err); }
+    return res.json({ success: true, submission, invoiceNumber });
+  } catch (err) { return next(err); }
 });
 
 export default router;

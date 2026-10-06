@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
     }
 
     const fullPrompt = `${SYSTEM_PROMPT}\n\n使用者說: ${prompt}\n靈靈回應:`;
-    const isCloudflare = OLLAMA_URL.includes("nightasaur.com");
+  
 
     const response = await axios.post(
       OLLAMA_URL,
@@ -66,18 +66,18 @@ router.post("/", async (req, res) => {
       return res.status(500).json({ success: false, error: "AI 回應格式錯誤" });
     }
 
-    res.json({
+    return res.json({
       success: true,
       response: parsed.response?.trim() || "(無回應)",
       model: parsed.model || DEFAULT_MODEL,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Ollama proxy error:", error.message);
     if (error.response) {
       console.error("上游狀態碼:", error.response.status);
       console.error("上游回應前 300 字:", String(error.response.data).slice(0, 300));
     }
-    res.status(error.response?.status || 500).json({
+    return res.status(error.response?.status || 500).json({
       success: false,
       error: error.message,
     });

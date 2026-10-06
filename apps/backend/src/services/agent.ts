@@ -29,7 +29,7 @@ const OLLAMA_INTERNAL = process.env.OLLAMA_INTERNAL_URL || "http://ollama:11434"
 function extractSearchKeyword(message: string): string | null {
   if (!message) return null;
   // 移除常見的問句詞
-  let kw = message
+  const kw = message
     .replace(/有賣|有卖|有嗎|有吗|有沒有|有没有|我想找|想找|搜尋|搜索|找一下|請找|请找/g, "")
     .replace(/嗎|吗|\?|？|。|，|,|的|商品|产品|產品|product|item/g, "")
     .trim();
