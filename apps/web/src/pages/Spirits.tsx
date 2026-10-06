@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import * as tf from "@tensorflow/tfjs";
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import { spiritsAPI, dialogueAPI } from "../api/client";
 import SpiritSprite from "../components/SpiritSprite";
 import SpiritWorldShell from "../components/SpiritWorldShell";
 import { useVoiceOutput } from "../components/VoiceChat";
-
 import { spiritText } from "../utils/spiritCopy";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -12,6 +13,32 @@ interface ChatMessage {
   role: "user" | "spirit";
   text: string;
 }
+
+const OBJECT_ZH: Record<string, string> = {
+  person: "人", bicycle: "腳踏車", car: "車子", motorcycle: "機車",
+  airplane: "飛機", bus: "公車", train: "火車", truck: "卡車",
+  boat: "船", "traffic light": "紅綠燈", "fire hydrant": "消防栓",
+  "stop sign": "停止標誌", "parking meter": "停車計時器", bench: "長椅",
+  bird: "鳥", cat: "貓", dog: "狗", horse: "馬", sheep: "羊",
+  cow: "牛", elephant: "大象", bear: "熊", zebra: "斑馬",
+  giraffe: "長頸鹿", backpack: "背包", umbrella: "雨傘",
+  handbag: "手提包", tie: "領帶", suitcase: "行李箱",
+  frisbee: "飛盤", skis: "滑雪板", snowboard: "單板滑雪",
+  "sports ball": "球", kite: "風箏", "baseball bat": "棒球棒",
+  "baseball glove": "棒球手套", skateboard: "滑板", surfboard: "衝浪板",
+  "tennis racket": "網球拍", bottle: "瓶子", "wine glass": "酒杯",
+  cup: "杯子", fork: "叉子", knife: "刀子", spoon: "湯匙",
+  bowl: "碗", banana: "香蕉", apple: "蘋果", sandwich: "三明治",
+  orange: "橘子", broccoli: "花椰菜", carrot: "紅蘿蔔",
+  "hot dog": "熱狗", pizza: "披薩", donut: "甜甜圈", cake: "蛋糕",
+  chair: "椅子", couch: "沙發", "potted plant": "盆栽", bed: "床",
+  "dining table": "餐桌", toilet: "馬桶", tv: "電視",
+  laptop: "筆電", mouse: "滑鼠", remote: "遙控器", keyboard: "鍵盤",
+  "cell phone": "手機", microwave: "微波爐", oven: "烤箱",
+  toaster: "烤麵包機", sink: "水槽", refrigerator: "冰箱",
+  book: "書", clock: "時鐘", vase: "花瓶", scissors: "剪刀",
+  "teddy bear": "泰迪熊", "hair drier": "吹風機", toothbrush: "牙刷",
+};
 
 export default function Spirits() {
   const { currentLanguage } = useLanguage();
@@ -23,8 +50,16 @@ export default function Spirits() {
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // 👇 TTS hook（中文走 Piper、英文走浏览器）
-  const { speak, stopSpeaking, isSpeaking } = useVoiceOutput({
+  // AI 識別
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
+  const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
+  const [detections, setDetections] = useState<any[]>([]);
+  const [modelLoading, setModelLoading] = useState(true);
+  const animationRef = useRef<number | null>(null);
+  const lastDetectRef = useRef<number>(0);
+  const spokenObjectsRef = useRef<Set<string>>(new Set());
+
+  const { speak, stopSpeaking } = useVoiceOutput({
     lang: currentLanguage === "en-US" ? "en-US" : "zh-TW",
   });
 
@@ -38,6 +73,28 @@ export default function Spirits() {
       .catch(console.error);
   }, []);
 
+  // 載入 TensorFlow 模型
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        console.log("[Spirits] 開始載入 TensorFlow 模型…");
+        await tf.ready();
+        const m = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+        if (!cancelled) {
+          console.log("[Spirits] 模型載入成功");
+          setModel(m);
+          setModelLoading(false);
+        }
+      } catch (e) {
+        console.error("[Spirits] 模型載入失敗", e);
+        setModelLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
   // 對話自動滾到底
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,50 +103,122 @@ export default function Spirits() {
   const currentSpirit = spirits.find(s => s.id === currentId);
 
   // 發送訊息
-  const handleSend = async (text: string) => {
+  const handleSend = useCallback(async (text: string) => {
     if (!currentId || sending) return;
-    stopSpeaking(); // 打斷上一段語音
+    stopSpeaking();
     setMessages(prev => [...prev, { role: "user", text }]);
     setSending(true);
     try {
       const res = await dialogueAPI.chat(currentId, text);
       const reply =
-        res.data?.reply ||
-        res.data?.message ||
-        res.data?.content ||
-        res.data?.response ||
-        "（精靈沉默不語）";
+        res.data?.reply || res.data?.message || res.data?.content ||
+        res.data?.response || "（精靈沉默不語）";
       setMessages(prev => [...prev, { role: "spirit", text: reply }]);
-
-      // 👇 精靈回覆後自動朗讀
       speak(reply);
     } catch (err: any) {
       console.error("[Dialogue]", err);
-      const errMsg = err?.response?.data?.error || err?.message || "連線失敗，請稍後再試";
+      const errMsg = err?.response?.data?.error || err?.message || "連線失敗";
       setMessages(prev => [...prev, { role: "spirit", text: `⚠️ ${errMsg}` }]);
     } finally {
       setSending(false);
     }
-  };
+  }, [currentId, sending, speak, stopSpeaking]);
 
-  // 切換精靈 → 清空對話 + 停止朗讀
+  // 物件識別循環
+  useEffect(() => {
+    if (!videoEl || !model) return;
+
+    console.log("[Spirits] 開始識別循環");
+
+    const detect = async () => {
+      const now = Date.now();
+      if (now - lastDetectRef.current < 800) {
+        animationRef.current = requestAnimationFrame(detect);
+        return;
+      }
+      lastDetectRef.current = now;
+
+      try {
+        const results = await model.detect(videoEl);
+        const filtered = results.filter(r => r.score > 0.6);
+        setDetections(filtered);
+
+        if (filtered.length > 0 && !sending && currentId) {
+          const top = filtered.find(d => d.class !== "person") || filtered[0];
+          if (!spokenObjectsRef.current.has(top.class)) {
+            spokenObjectsRef.current.add(top.class);
+            const zh = OBJECT_ZH[top.class] || top.class;
+            console.log("[Spirits] 發現新物體:", top.class, zh);
+            handleSend(`I see a ${top.class} (${zh}). Teach me this word.`);
+          }
+        }
+      } catch (e) {
+        console.warn("[Spirits] detect error", e);
+      }
+      animationRef.current = requestAnimationFrame(detect);
+    };
+
+    detect();
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [videoEl, model, sending, currentId, handleSend]);
+
+  // 相機 ready 回調
+  const handleCameraReady = useCallback((video: HTMLVideoElement | null) => {
+    console.log("[Spirits] camera ready:", !!video);
+    setVideoEl(video);
+    if (!video) {
+      setDetections([]);
+      spokenObjectsRef.current.clear();
+    }
+  }, []);
+
   const switchSpirit = (id: string) => {
     if (id === currentId) return;
     stopSpeaking();
     setCurrentId(id);
     setMessages([]);
+    spokenObjectsRef.current.clear();
   };
 
   return (
-    <SpiritWorldShell onSend={handleSend} background="map">
+    <SpiritWorldShell
+      onSend={handleSend}
+      background="map"
+      onCameraReady={handleCameraReady}
+    >
       <div className="max-w-4xl mx-auto">
-        {/* 標題列 */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-black">{t("我的精灵小队")}</h1>
-          <Link to="/spirits/new" className="btn-primary text-sm px-4 py-2">
-            {t("+ 孵化精灵")}
-          </Link>
+          <div className="flex gap-2 items-center">
+            {modelLoading && (
+              <span className="text-xs text-white/40 animate-pulse">AI 載入中…</span>
+            )}
+            <Link to="/spirits/new" className="btn-primary text-sm px-4 py-2">
+              {t("+ 孵化精灵")}
+            </Link>
+          </div>
         </div>
+
+        {/* AI 識別結果標籤 */}
+        {videoEl && detections.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {detections.slice(0, 5).map((d, i) => (
+              <span
+                key={i}
+                className="px-3 py-1 rounded-full text-xs font-bold"
+                style={{
+                  background: "#22d3ee33",
+                  border: "1px solid #22d3ee66",
+                  color: "#a5f3fc",
+                }}
+              >
+                {d.class} · {Math.round(d.score * 100)}%
+              </span>
+            ))}
+          </div>
+        )}
 
         {spirits.length === 0 ? (
           <div className="glass-card text-center py-12">
@@ -98,7 +227,6 @@ export default function Spirits() {
           </div>
         ) : (
           <>
-            {/* 精靈橫向選擇列 */}
             <div className="flex gap-3 overflow-x-auto pb-3 mb-6">
               {spirits.map((sp: any) => (
                 <button
@@ -121,7 +249,6 @@ export default function Spirits() {
               ))}
             </div>
 
-            {/* 對話歷史 */}
             <div className="space-y-3 pb-2">
               {messages.length === 0 && currentSpirit && (
                 <div className="text-center py-10 text-white/30 text-sm">
@@ -133,13 +260,10 @@ export default function Spirits() {
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[80%] px-4 py-3 rounded-2xl whitespace-pre-wrap break-words ${
-                      m.role === "user"
-                        ? "bg-teal-500/30 text-white"
-                        : "bg-white/10 text-white/90"
+                      m.role === "user" ? "bg-teal-500/30 text-white" : "bg-white/10 text-white/90"
                     }`}
                   >
                     {m.text}
-                    {/* 精靈泡泡右下角加 🔊 按鈕，可重播 */}
                     {m.role === "spirit" && (
                       <button
                         onClick={() => speak(m.text)}
