@@ -9,7 +9,6 @@ interface SpiritWorldShellProps {
   background?: "gradient" | "map" | "none";
   cameraOn?: boolean;
   onCameraToggle?: () => void;
-  onCameraReady?: (video: HTMLVideoElement | null) => void;
 }
 
 export default function SpiritWorldShell({
@@ -19,7 +18,6 @@ export default function SpiritWorldShell({
   background: initialBackground = "gradient",
   cameraOn: externalCameraOn,
   onCameraToggle: externalCameraToggle,
-  onCameraReady,
 }: SpiritWorldShellProps) {
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,7 +39,6 @@ export default function SpiritWorldShell({
     el.style.height = Math.min(el.scrollHeight, lineHeight * maxLines) + "px";
   }, [input]);
 
-  // 內部相機清理
   useEffect(() => {
     return () => {
       if (streamRef.current) {
@@ -50,16 +47,6 @@ export default function SpiritWorldShell({
       }
     };
   }, []);
-
-  // 通知外部：相機 ready 或關閉
-  useEffect(() => {
-    if (!onCameraReady) return;
-    if (cameraOn && !useExternalCamera) {
-      onCameraReady(videoRef.current);
-    } else if (!cameraOn) {
-      onCameraReady(null);
-    }
-  }, [cameraOn, useExternalCamera, onCameraReady]);
 
   const handleCameraToggle = async () => {
     if (useExternalCamera) {
@@ -103,23 +90,25 @@ export default function SpiritWorldShell({
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* ① 背景層 */}
       {initialBackground !== "none" && (
         <div className="fixed inset-0 z-0">
-          {initialBackground === "map" && (
+          {/* 地圖背景：相機開時徹底 unmount，省效能 */}
+          {initialBackground === "map" && !cameraOn && (
             <div
-              className={`absolute inset-0 transition-opacity duration-300 ${
-                cameraOn ? "opacity-0 pointer-events-none" : "opacity-100"
-              }`}
+              className="absolute inset-0"
               style={{ height: "100vh", width: "100vw" }}
             >
               <SpiritWorldMap />
             </div>
           )}
 
+          {/* 深色漸層背景（gradient 模式用） */}
           {initialBackground === "gradient" && (
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
           )}
 
+          {/* 相機 video：map / gradient 都要渲染，相機開時顯示 */}
           {!useExternalCamera && (
             <video
               ref={videoRef}
@@ -133,6 +122,7 @@ export default function SpiritWorldShell({
         </div>
       )}
 
+      {/* ② 相機切換按鈕 */}
       {showCameraButton && (
         <button
           onClick={handleCameraToggle}
@@ -153,6 +143,7 @@ export default function SpiritWorldShell({
         </div>
       )}
 
+      {/* ③ 漢堡按鈕 */}
       <button
         onClick={() => setMenuOpen(true)}
         aria-label="開啟選單"
@@ -161,10 +152,12 @@ export default function SpiritWorldShell({
         ☰
       </button>
 
+      {/* ④ 主內容 */}
       <main className={`relative z-10 pt-20 ${hideInput ? "pb-6" : "pb-40"}`}>
         {children}
       </main>
 
+      {/* ⑤ 底部對話框 */}
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
           <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
@@ -195,6 +188,7 @@ export default function SpiritWorldShell({
         </div>
       )}
 
+      {/* ⑥ 漢堡菜單 */}
       {menuOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={closeMenu} />
