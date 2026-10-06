@@ -6,18 +6,22 @@ interface SpiritWorldShellProps {
   children: ReactNode;
   onSend?: (text: string) => void;
   hideInput?: boolean;
+  beforeInput?: ReactNode;
   background?: "gradient" | "map" | "none";
   cameraOn?: boolean;
   onCameraToggle?: () => void;
+  onCameraReady?: (video: HTMLVideoElement | null) => void;
 }
 
 export default function SpiritWorldShell({
   children,
   onSend,
   hideInput = false,
+  beforeInput,
   background: initialBackground = "gradient",
   cameraOn: externalCameraOn,
   onCameraToggle: externalCameraToggle,
+  onCameraReady,
 }: SpiritWorldShellProps) {
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,6 +51,11 @@ export default function SpiritWorldShell({
       }
     };
   }, []);
+
+  // 通知外部：相機開啟/關閉時把 video 元素（或 null）傳出去
+  useEffect(() => {
+    onCameraReady?.(cameraOn ? videoRef.current : null);
+  }, [cameraOn, onCameraReady]);
 
   const handleCameraToggle = async () => {
     if (useExternalCamera) {
@@ -161,28 +170,33 @@ export default function SpiritWorldShell({
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
           <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="對精靈說點什麼…"
-              rows={1}
-              className="w-full bg-transparent text-white placeholder-white/40 outline-none resize-none leading-6"
-              style={{ maxHeight: "168px" }}
-            />
-            <div className="flex justify-end mt-1">
-              <button
-                onClick={handleSend}
-                className="px-4 py-1.5 rounded-xl bg-teal-500/80 hover:bg-teal-500 text-white text-sm transition"
-              >
-                傳送
-              </button>
+            <div className="flex items-end gap-2">
+              {beforeInput && <div className="shrink-0">{beforeInput}</div>}
+              <div className="flex-1 min-w-0">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder="對精靈說點什麼…"
+                  rows={1}
+                  className="w-full bg-transparent text-white placeholder-white/40 outline-none resize-none leading-6"
+                  style={{ maxHeight: "168px" }}
+                />
+                <div className="flex justify-end mt-1">
+                  <button
+                    onClick={handleSend}
+                    className="px-4 py-1.5 rounded-xl bg-teal-500/80 hover:bg-teal-500 text-white text-sm transition"
+                  >
+                    傳送
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
