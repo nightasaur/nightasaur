@@ -156,6 +156,38 @@ export const adminAccountsAPI = {
  action: (id:string,data:{action:"BAN"|"RESTORE"|"REVOKE_SESSIONS";reason:string}) => api.post(`/admin/accounts/${encodeURIComponent(id)}/actions`,data),
  history: (id:string) => api.get(`/admin/accounts/${encodeURIComponent(id)}/history`),
 };
+export interface SubscriptionPlan {
+  id: string;
+  amountTwd: number;
+  label: string;
+}
+
+export interface MySubscription {
+  id: string;
+  planId: string;
+  amountTwd: number;
+  status: "ACTIVE" | "CANCELLED" | "PAST_DUE";
+  nextBillingAt: string;
+  lastBilledAt: string | null;
+  transactions?: Array<{
+    id: string;
+    amountTwd: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
+export const subscriptionAPI = {
+  listPlans: () => api.get<SubscriptionPlan[]>("/subscriptions/plans"),
+  me: () => api.get<MySubscription | null>("/subscriptions/me"),
+  subscribe: (data: {
+    prime: string;
+    planId: string;
+    cardholder: { phone_number: string; name: string; email: string };
+  }) => api.post("/subscriptions/subscribe", data, { timeout: 40000 }),
+  cancel: () => api.post("/subscriptions/cancel"),
+};
+
 export const npcAPI = {
   /** 取 9 隻 NPC 靜態資料（圖鑑用） */
   list: () => api.get("/npcs"),

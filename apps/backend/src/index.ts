@@ -20,6 +20,8 @@ import adminAccountsRoutes from "./routes/adminAccounts.js";
 import paymentRoutes from "./routes/payment.js";
 import englishTrainingRoutes from "./routes/englishTraining.js";
 import ttsRoutes from "./routes/tts.js";
+import npcRoutes from "./routes/npcs.js";
+import subscriptionRoutes from "./routes/subscriptions.js";
 const app = express();
 if (!Number.isSafeInteger(config.trustProxyHops) || config.trustProxyHops < 0) {
   throw new Error("TRUST_PROXY_HOPS must be a non-negative integer");
@@ -45,6 +47,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/spirits", spiritRoutes);
 app.use("/api/dialogue", dialogueRouter);
+app.use("/api/npcs", npcRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/social/posts", socialRouter);
 app.use("/api/generate", generateRoutes);
 app.use("/api/game", gameRoutes);

@@ -34,6 +34,7 @@ import CheckoutPage from "./pages/checkout/IeltsImmersion";
 import ReceiptPreviewPage from "./pages/receipts/Preview";
 import MyInvoices from "./pages/MyInvoices";
 import AdminPayments from "./pages/AdminPayments";
+import Pricing from "./pages/Pricing";
 
 const SessionContext = createContext({
   user: null as any,
@@ -140,6 +141,7 @@ function AppContent() {
         </div>}
         <Routes>
           <Route path="/" element={<LocalizedHome />} />
+          <Route path="/pricing" element={<><SEO title="Pricing | Nightasaur" canonical="https://www.nightasaur.com/pricing" /><Pricing /></>} />
           <Route path="/privacy" element={<><SEO title="Privacy Policy | Nightasaur" canonical="https://www.nightasaur.com/privacy" /><Privacy /></>} />
           <Route path="/login" element={<><SEO title="Login | Nightasaur" canonical="https://www.nightasaur.com/login" /><Login setUser={setUser} /></>} />
           <Route path="/register" element={<><SEO title="Create Your Spirit | Nightasaur" canonical="https://www.nightasaur.com/register" /><Register setUser={setUser} /></>} />

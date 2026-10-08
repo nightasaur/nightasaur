@@ -46,6 +46,8 @@ model User {
   EnglishLearningProgress EnglishLearningProgress[]
   ActionLogs            ActionLog[]
   UserWoocommerce       UserWoocommerce?
+  NpcSpawns             NpcSpawn[]
+  Subscription          UserSubscription?
 
   @@map("users")
 }
@@ -814,4 +816,56 @@ model UserWoocommerce {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_woocommerce")
+}
+
+model NpcSpawn {
+  id          String    @id @default(cuid())
+  userId      String
+  npcKey      String
+  latitude    Float
+  longitude   Float
+  spawnedAt   DateTime  @default(now())
+  expiresAt   DateTime
+  encounterAt DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("npc_spawns")
+}
+
+model UserSubscription {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  planId        String
+  amountTwd     Int
+  cardKey       String
+  cardToken     String
+  status        String   @default("ACTIVE")  // ACTIVE | CANCELLED | PAST_DUE
+  nextBillingAt DateTime
+  lastBilledAt  DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions SubscriptionTransaction[]
+
+  @@index([status, nextBillingAt])
+  @@map("user_subscriptions")
+}
+
+model SubscriptionTransaction {
+  id               String   @id @default(cuid())
+  subscriptionId   String
+  tappayRecTradeId String?
+  amountTwd        Int
+  status           String   // SUCCESS | FAILED
+  errorMsg         String?
+  isFirstCharge    Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  subscription UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+  @@map("subscription_transactions")
 }
