@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -7,10 +7,14 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
+import { npcAPI } from "../api/client";
+import NpcEncounterDialog from "./NpcEncounterDialog";
+
 // 用 any 繞過 react-leaflet 型別載入問題
 const MapContainerAny = MapContainer as any;
 const TileLayerAny = TileLayer as any;
 const MarkerAny = Marker as any;
+const PopupAny = Popup as any;
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -18,6 +22,9 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
+const ENCOUNTER_M = 50;
+const DEBUG_FALLBACK: [number, number] = [25.033, 121.5654];
 
 // 玩家位置：發光青色圓點
 const userIcon = L.divIcon({
@@ -33,42 +40,173 @@ const userIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-// 依螢幕寬度決定初始 zoom
+// 龍 marker：圓形裁圖 + 元素色邊框
+function npcIcon(image: string, element: string): L.DivIcon {
+  const colors: Record<string, string> = {
+    FIRE: "#f97316", WATER: "#06b6d4", LIGHT: "#fbbf24",
+    SHADOW: "#8b5cf6", STAR: "#a855f7", ILLUSION: "#ec4899",
+    MOON: "#94a3b8", NATURE: "#10b981", THUNDER: "#eab308", ICE: "#38bdf8",
+  };
+  const c = colors[element] || "#14b8a6";
+  return L.divIcon({
+    className: "",
+    html: `<div style="
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 3px solid ${c};
+      box-shadow: 0 0 12px ${c}, 0 0 24px ${c}80;
+      background-image: url('${image}');
+      background-size: cover;
+      background-position: center;
+    "></div>`,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+  });
+}
+
 function getInitialZoom(): number {
   if (typeof window === "undefined") return 15;
-  const w = window.innerWidth;
-  if (w < 768) return 15;   // 手機
-  return 16;                // 平板 / 桌機
+  return window.innerWidth < 768 ? 15 : 16;
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+interface Spawn {
+  id: string;
+  npcKey: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  meta?: { key: string; name: string; element: string; image: string; personality: string };
 }
 
 export default function SpiritWorldMap() {
-  console.log("[Map] SpiritWorldMap 被渲染了");
-
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const [spawns, setSpawns] = useState<Spawn[]>([]);
+  const [encounter, setEncounter] = useState<Spawn | null>(null);
+  const [gpsError, setGpsError] = useState(false);
   const [zoom] = useState<number>(getInitialZoom());
+  const triggeredRef = useRef<Set<string>>(new Set());
+  const userPosRef = useRef<[number, number] | null>(null);
+  const initialFetchDone = useRef(false);
 
   useEffect(() => {
-    console.log("[Map] useEffect 開始定位，初始 zoom =", zoom);
-    const fallback: [number, number] = [25.033, 121.5654]; // 台北 101
+    userPosRef.current = userPos;
+  }, [userPos]);
 
+  // 定位（持續追蹤）
+  useEffect(() => {
     if (!navigator.geolocation) {
-      console.log("[Map] 瀏覽器不支援 geolocation，用 fallback");
-      setUserPos(fallback);
+      if (import.meta.env.DEV) setUserPos(DEBUG_FALLBACK);
+      else setGpsError(true);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        console.log("[Map] 定位成功:", pos.coords.latitude, pos.coords.longitude);
-        setUserPos([pos.coords.latitude, pos.coords.longitude]);
-      },
-      (err) => {
-        console.log("[Map] 定位失敗，用 fallback:", err.message);
-        setUserPos(fallback);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
+    const onSuccess = (pos: GeolocationPosition) => {
+      setGpsError(false);
+      setUserPos([pos.coords.latitude, pos.coords.longitude]);
+    };
+    const onError = () => {
+      if (import.meta.env.DEV) {
+        setUserPos(DEBUG_FALLBACK);
+      } else {
+        setGpsError(true);
+      }
+    };
+
+    const watchId = navigator.geolocation.watchPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 15000,
+    });
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  // 首次拿到位置 → 拉 nearby；之後每 30 分鐘重拉一次
+  useEffect(() => {
+    if (!userPos || initialFetchDone.current) return;
+    initialFetchDone.current = true;
+
+    const fetchNearby = () => {
+      const p = userPosRef.current;
+      if (!p) return;
+      npcAPI.nearby(p[0], p[1])
+        .then((r) => setSpawns(r.data))
+        .catch((e) => console.warn("[NPC] nearby failed:", e));
+    };
+
+    fetchNearby();
+    const interval = setInterval(fetchNearby, 30 * 60 * 1000); // 30 分鐘
+    return () => clearInterval(interval);
+  }, [userPos]);
+
+  // 玩家位置變動 → 重算距離 → 檢查遭遇
+  useEffect(() => {
+    if (!userPos || spawns.length === 0) return;
+    const [lat, lng] = userPos;
+
+    setSpawns((prev) =>
+      prev.map((s) => ({
+        ...s,
+        distanceKm: haversineKm(lat, lng, s.latitude, s.longitude),
+      }))
     );
-  }, [zoom]);
+
+    const hit = spawns.find(
+      (s) =>
+        !triggeredRef.current.has(s.id) &&
+        haversineKm(lat, lng, s.latitude, s.longitude) * 1000 < ENCOUNTER_M
+    );
+    if (hit) {
+      triggeredRef.current.add(hit.id);
+      setEncounter(hit);
+    }
+  }, [userPos, spawns.length]);
+
+  // DEV-only：按 T 立刻觸發最近一隻龍的遭遇
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "t") return;
+      if (spawns.length === 0) return;
+      const nearest = [...spawns].sort((a, b) => a.distanceKm - b.distanceKm)[0];
+      triggeredRef.current.add(nearest.id);
+      setEncounter(nearest);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [spawns]);
+
+  const handleEncountered = async (spawnId: string) => {
+    try {
+      await npcAPI.encounter(spawnId);
+    } catch (e) {
+      console.warn("[NPC] encounter report failed:", e);
+    }
+    // 從本地移除該 spawn（後端已重生到 10km 外）
+    setSpawns((prev) => prev.filter((s) => s.id !== spawnId));
+  };
+
+  if (gpsError && !import.meta.env.DEV) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-950">
+        <div className="text-center px-6">
+          <p className="text-4xl mb-4">📍</p>
+          <p className="text-white/60">請開啟定位以探索精靈世界</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!userPos) {
     return (
@@ -78,26 +216,50 @@ export default function SpiritWorldMap() {
     );
   }
 
-  console.log("[Map] 準備渲染 MapContainer，中心點:", userPos, "zoom:", zoom);
-
   return (
-    <MapContainerAny
-      center={userPos}
-      zoom={zoom}
-      maxZoom={19}
-      className="w-full h-full"
-      zoomControl={false}
-      attributionControl={false}
-      style={{ width: "100%", height: "100%", zIndex: 0 }}
-    >
-      <TileLayerAny
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-        maxNativeZoom={16}
+    <>
+      <MapContainerAny
+        center={userPos}
+        zoom={zoom}
         maxZoom={19}
-      />
-      <MarkerAny position={userPos} icon={userIcon}>
-        <Popup>你在這裡</Popup>
-      </MarkerAny>
-    </MapContainerAny>
+        className="w-full h-full"
+        zoomControl={false}
+        attributionControl={false}
+        style={{ width: "100%", height: "100%", zIndex: 0 }}
+      >
+        <TileLayerAny
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          maxNativeZoom={16}
+          maxZoom={19}
+        />
+        <MarkerAny position={userPos} icon={userIcon}>
+          <PopupAny>你在這裡</PopupAny>
+        </MarkerAny>
+
+        {spawns.map((s) => (
+          <MarkerAny
+            key={s.id}
+            position={[s.latitude, s.longitude]}
+            icon={npcIcon(s.meta?.image || "", s.meta?.element || "FIRE")}
+          >
+            <PopupAny>
+              <div className="text-center">
+                <strong>{s.meta?.name}</strong>
+                <br />
+                {s.distanceKm.toFixed(2)} km
+              </div>
+            </PopupAny>
+          </MarkerAny>
+        ))}
+      </MapContainerAny>
+
+      {encounter && (
+        <NpcEncounterDialog
+          spawn={encounter as any}
+          onClose={() => setEncounter(null)}
+          onEncountered={handleEncountered}
+        />
+      )}
+    </>
   );
 }

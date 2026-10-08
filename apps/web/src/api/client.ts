@@ -156,3 +156,19 @@ export const adminAccountsAPI = {
  action: (id:string,data:{action:"BAN"|"RESTORE"|"REVOKE_SESSIONS";reason:string}) => api.post(`/admin/accounts/${encodeURIComponent(id)}/actions`,data),
  history: (id:string) => api.get(`/admin/accounts/${encodeURIComponent(id)}/history`),
 };
+export const npcAPI = {
+  /** 取 9 隻 NPC 靜態資料（圖鑑用） */
+  list: () => api.get("/npcs"),
+
+  /** 拉玩家附近的龍（自動補 spawn） */
+  nearby: (lat: number, lng: number) =>
+    api.get("/npcs/nearby", { params: { lat, lng } }),
+
+  /** 上報遭遇（該龍重生到 10km 外） */
+  encounter: (spawnId: string) =>
+    api.post(`/npcs/spawns/${spawnId}/encounter`),
+
+  /** 對 NPC 對話 */
+  dialogue: (npcKey: string, message: string) =>
+    api.post(`/npcs/${npcKey}/dialogue`, { message }),
+};
