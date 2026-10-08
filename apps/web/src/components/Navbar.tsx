@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../api/client";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "../contexts/LanguageContext";
+import { isAuthorizedAdminUser } from "../utils/adminAccess";
 
 interface NavbarProps {
   user: any;
@@ -35,7 +36,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
   const publicCopy = PUBLIC_NAV_COPY[currentLanguage] ?? PUBLIC_NAV_COPY["zh-TW"];
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const adminLabel = user?.role === "ADMIN" ? (user.email?.toLowerCase() === "ceo@cccbuyear.com" ? "CEO · 管理員" : "管理員") : null;
+  const adminLabel = isAuthorizedAdminUser(user) ? "CEO · 管理員" : null;
   const closeMobile = () => setMobileOpen(false);
 
   const handleLogout = async () => {
@@ -56,6 +57,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
       <Link to="/assistant" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🤖 {t("Assistant")}</Link>
       <Link to="/academy" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">📚 {t("Learning")}</Link>
       <Link to="/social" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">🌍 {t("Social")}</Link>
+      <Link to="/pricing" onClick={closeMobile} className="text-amber-300 hover:text-amber-200 transition text-sm font-bold">💎 升級</Link>
       <Link to="/account" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Account")}</Link>
       <Link to="/settings/language" onClick={closeMobile} className="text-white/70 hover:text-white transition text-sm">{t("Language")}</Link>
     </>

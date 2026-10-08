@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { puzzleService } from "../services/puzzle.js";
 import prisma from "../config/prisma.js";
 import { routeParam } from "../utils/request.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 export class PuzzleController {
   // 獲取可用的益智關卡
@@ -101,7 +102,7 @@ export class PuzzleController {
     try {
       // 檢查是否為管理員
       const user = req.user;
-      if (!user || user.role !== "ADMIN") {
+      if (!isAuthorizedAdmin(user)) {
         res.status(403).json({ error: "權限不足" });
         return;
       }

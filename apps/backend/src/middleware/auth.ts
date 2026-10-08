@@ -2,6 +2,7 @@
 import { verifyToken, TokenPayload } from "../utils/jwt.js";
 import { hasSession } from "../services/sessions.js";
 import prisma from "../config/prisma.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 // Extend Express Request type
 declare global {
@@ -70,7 +71,8 @@ export function adminMiddleware(req: Request, res: Response, next: NextFunction)
     res.status(401).json({ error: "未登入" });
     return;
   }
-  if (req.user.role !== "ADMIN") {
+  // 後臺（管理員權限）僅允許指定信箱帳號使用，role 欄位本身不足以授權。
+  if (!isAuthorizedAdmin(req.user)) {
     res.status(403).json({ error: "權限不足" });
     return;
   }

@@ -15,7 +15,7 @@ vi.mock("./api/client", () => ({
 afterEach(cleanup);
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(authAPI.me).mockResolvedValue({ data: { role: "ADMIN" } } as any);
+  vi.mocked(authAPI.me).mockResolvedValue({ data: { role: "ADMIN", email: "ceo@cccbuyear.com" } } as any);
   vi.mocked(adminAccountsAPI.list).mockResolvedValue({
     data: {
       users: [

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { languageService } from "../services/language.js";
 import { routeParam } from "../utils/request.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 export class LanguageController {
   // 獲取用戶語言偏好設定
@@ -213,7 +214,7 @@ export class LanguageController {
     try {
       // 檢查是否為管理員
       const user = req.user;
-      if (!user || user.role !== "ADMIN") {
+      if (!isAuthorizedAdmin(user)) {
         res.status(403).json({ error: "權限不足" });
         return;
       }
@@ -230,7 +231,7 @@ export class LanguageController {
     try {
       // 檢查是否為管理員
       const user = req.user;
-      if (!user || user.role !== "ADMIN") {
+      if (!isAuthorizedAdmin(user)) {
         res.status(403).json({ error: "權限不足" });
         return;
       }

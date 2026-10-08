@@ -1,6 +1,7 @@
 import axios from "axios";
 import prisma from "../config/prisma.js";
 import { config } from "../config/index.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 const SOCIAL_CONTENT_PREFIX = "__NIGHTASAUR_SOCIAL_V1__:";
 
@@ -79,7 +80,7 @@ export class SocialService {
   async publishPost(postId: string, actorId: string) {
     if (!actorId) throw Object.assign(new Error("未登入"), { statusCode: 401 });
     const actor = await prisma.user.findUnique({ where: { id: actorId } });
-    if (!actor?.isActive || actor.role !== "ADMIN") {
+    if (!actor?.isActive || !isAuthorizedAdmin(actor)) {
       throw Object.assign(new Error("平台社群帳號僅限管理員發布"), { statusCode: 403 });
     }
     const post = await prisma.socialPost.findFirst({ where: { id: postId, userId: actorId } });

@@ -8,7 +8,8 @@ const fixtures = vi.hoisted(() => ({stage:'HATCHLING', level:2, message:'A real 
 vi.mock('./api/client', () => ({
   spiritsAPI: {getById: vi.fn(async () => ({data:{id:'fixture',name:'Fixture',stage:fixtures.stage,level:fixtures.level,element:'WATER',species:null,customization:{}}}))},
   generationAPI: {get:vi.fn(async () => ({data:{status:'PENDING'}}))},
-  dialogueAPI: {chat:vi.fn(async () => ({data:{message:fixtures.message,spiritName:'Fixture'}}))}, languageAPI: {}
+  dialogueAPI: {chat:vi.fn(async () => ({data:{message:fixtures.message,spiritName:'Fixture'}}))}, languageAPI: {},
+  authAPI: {me: vi.fn(async () => ({data:{role:'USER',email:'fixture@example.invalid'}}))},
 }));
 vi.mock('./components/SpiritSprite', () => ({default:()=> <span>sprite</span>}));
 vi.mock('./components/VoiceChat', () => ({VoiceChat:()=>null,useVoiceOutput:()=>({speak:vi.fn(),isSpeaking:false})}));

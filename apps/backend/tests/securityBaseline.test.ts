@@ -29,7 +29,7 @@ function mockDb(target: any, key: string, implementation: any) {
 }
 beforeEach(() => { mockDb(prisma.session, "count", async () => 1); });
 afterEach(() => { restores.splice(0).reverse().forEach(restore => restore()); mock.restoreAll(); process.env.SOCIAL_PUBLISH_ENABLED = "false"; });
-const user = { id: "owner", email: "fixture@example.invalid", role: "ADMIN", isActive: true };
+const user = { id: "owner", email: "ceo@cccbuyear.com", role: "ADMIN", isActive: true };
 const session = { id: "session" };
 const token = () => signToken({ userId: user.id, email: user.email, role: "ADMIN", sessionId: session.id });
 const post = { id: "post", userId: "owner", status: "DRAFT", content: '__NIGHTASAUR_SOCIAL_V1__:{"content":"unit","platform":"FACEBOOK"}' };

@@ -58,7 +58,7 @@ test("admin HTTP controls preserve accounts, revoke sessions, protect admins and
   try {
     const admin = await db.user.create({
       data: {
-        email: "admin@example.invalid",
+        email: "ceo@cccbuyear.com",
         username: "admin",
         role: "ADMIN",
         passwordHash: "unused",

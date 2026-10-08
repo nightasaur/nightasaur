@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { arLocationService } from "../services/arLocation.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 export class ARLocationController {
   // 更新玩家位置
@@ -186,7 +187,7 @@ export class ARLocationController {
     try {
       // 檢查是否為管理員
       const user = req.user;
-      if (!user || user.role !== "ADMIN") {
+      if (!isAuthorizedAdmin(user)) {
         res.status(403).json({ error: "權限不足" });
         return;
       }

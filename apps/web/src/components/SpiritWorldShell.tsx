@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import SpiritWorldMap from "./SpiritWorldMap";
+import { authAPI } from "../api/client";
+import { isAuthorizedAdminUser } from "../utils/adminAccess";
 
 interface SpiritWorldShellProps {
   children: ReactNode;
@@ -27,9 +29,19 @@ export default function SpiritWorldShell({
   const [menuOpen, setMenuOpen] = useState(false);
   const [internalCameraOn, setInternalCameraOn] = useState(false);
   const [cameraError, setCameraError] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // 漢堡選單裡的管理員連結只給後臺授權帳號看；一般使用者完全看不到這些入口。
+  useEffect(() => {
+    let active = true;
+    authAPI.me()
+      .then(({ data }) => { if (active) setIsAdmin(isAuthorizedAdminUser(data)); })
+      .catch(() => { if (active) setIsAdmin(false); });
+    return () => { active = false; };
+  }, []);
 
   const useExternalCamera = typeof externalCameraToggle === "function";
   const cameraOn = useExternalCamera ? !!externalCameraOn : internalCameraOn;
@@ -220,11 +232,14 @@ export default function SpiritWorldShell({
               <Link to="/dashboard" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">📊 總覽</Link>
               <Link to="/account" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">👤 帳號</Link>
               <Link to="/my/invoices" onClick={closeMenu} className="px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition">🧾 我的發票</Link>
-              <div className="mt-4 pt-4 border-t border-amber-500/20">
-                <div className="px-4 py-1 text-xs text-amber-400/70 mb-1">管理員</div>
-                <Link to="/admin/accounts" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">🛡️ 帳號管理</Link>
-                <Link to="/admin/payments" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">💳 付款審核</Link>
-              </div>
+              <Link to="/pricing" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">💎 升級方案</Link>
+              {isAdmin && (
+                <div className="mt-4 pt-4 border-t border-amber-500/20">
+                  <div className="px-4 py-1 text-xs text-amber-400/70 mb-1">CEO · 管理員</div>
+                  <Link to="/admin/accounts" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">🛡️ 帳號管理</Link>
+                  <Link to="/admin/payments" onClick={closeMenu} className="px-4 py-3 rounded-xl text-amber-300 hover:bg-amber-500/10 transition">💳 付款審核</Link>
+                </div>
+              )}
             </nav>
           </aside>
         </>

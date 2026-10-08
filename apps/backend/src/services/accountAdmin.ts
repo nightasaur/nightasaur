@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { z } from "zod";
+import { isAuthorizedAdmin } from "../config/admin.js";
 const actionSchema = z
   .object({
     action: z.enum(["BAN", "RESTORE", "REVOKE_SESSIONS"]),
@@ -51,7 +52,7 @@ export async function changeAccount(
   const { action, reason } = actionSchema.parse(input);
   return prisma.$transaction(async (tx) => {
     const actor = await tx.user.findUnique({ where: { id: actorId }, select });
-    if (!actor?.isActive || actor.role !== "ADMIN")
+    if (!actor?.isActive || !isAuthorizedAdmin(actor))
       fail("需要有效管理員權限", 403);
     const target = await tx.user.findUnique({
       where: { id: targetId },

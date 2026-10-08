@@ -24,7 +24,7 @@ test("isolated SQLite enforces draft ownership and atomic publish; auth import c
     const { verifyToken } = await import("../src/utils/jwt.js");
     assert.equal(await prisma.user.count(), 0);
     const password = "fixture-password-that-is-not-shared";
-    const owner = await prisma.user.create({ data: { email: "owner@example.invalid", username: "owner", passwordHash: await bcrypt.hash(password, 4), role: "ADMIN" } });
+    const owner = await prisma.user.create({ data: { email: "ceo@cccbuyear.com", username: "owner", passwordHash: await bcrypt.hash(password, 4), role: "ADMIN" } });
     const other = await prisma.user.create({ data: { email: "other@example.invalid", username: "other", passwordHash: "not-a-login-hash", role: "ADMIN" } });
     const login = await authService.login(owner.email, password);
     const storedSession = await prisma.session.findFirstOrThrow({ where: { userId: owner.id } });
@@ -85,7 +85,9 @@ test("isolated SQLite enforces draft ownership and atomic publish; auth import c
     process.env.SOCIAL_PUBLISH_ENABLED = "true";
     let sent = 0;
     (socialService as any).publishToFacebook = async () => { sent++; return "mock-id"; };
-    await assert.rejects(socialService.publishPost(post.id, other.id), { statusCode: 404 });
+    // `other` holds role ADMIN but is not the sole authorized admin email, so the
+    // authorization check now rejects before the ownership/404 check is reached.
+    await assert.rejects(socialService.publishPost(post.id, other.id), { statusCode: 403 });
     const results = await Promise.allSettled([socialService.publishPost(post.id, owner.id), socialService.publishPost(post.id, owner.id)]);
     assert.equal(sent, 1);
     assert.equal(results.filter(r => r.status === "fulfilled").length, 1);

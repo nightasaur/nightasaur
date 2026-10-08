@@ -1,5 +1,6 @@
 import axios from "axios";
 import prisma from "../config/prisma.js";
+import { isAuthorizedAdmin } from "../config/admin.js";
 
 export interface WooCredentials {
   url: string;
@@ -26,7 +27,7 @@ export interface WooProductList {
 
 export async function resolveCredentials(
   userId: string,
-  userRole: string
+  _userRole: string
 ): Promise<WooCredentials | null> {
   try {
     const userWoo = await prisma.userWoocommerce.findUnique({
@@ -43,7 +44,10 @@ export async function resolveCredentials(
     console.warn("[Woo] 查詢用戶憑證失敗:", e);
   }
 
-  if (userRole === "ADMIN" || userRole === "CEO") {
+  // 後臺共用商店憑證 fallback：只信任即時資料庫查詢，不信任呼叫端傳入的 role 字串。
+  const user = await prisma.user.findUnique({ where: { id: userId },
+    select: { email: true, role: true, isActive: true } });
+  if (user?.isActive && isAuthorizedAdmin(user)) {
     const url = process.env.WOO_URL;
     const key = process.env.WOO_KEY;
     const secret = process.env.WOO_SECRET;

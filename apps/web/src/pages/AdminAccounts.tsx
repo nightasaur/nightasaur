@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminAccountsAPI, authAPI } from "../api/client";
+import { isAuthorizedAdminUser } from "../utils/adminAccess";
 
 type Account = {
   id: string;
@@ -62,7 +63,7 @@ export default function AdminAccounts() {
     authAPI
       .me()
       .then(({ data }) => {
-        if (active) setAllowed(data.role === "ADMIN");
+        if (active) setAllowed(isAuthorizedAdminUser(data));
       })
       .catch(() => {
         if (active) setAllowed(false);
