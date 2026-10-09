@@ -8,6 +8,9 @@ interface HomeCopy {
   enterSpirit: string;
   createSpirit: string;
   exploreIelts: string;
+  upgradeTitle: string;
+  upgradeDescription: string;
+  upgradeCta: string;
   pillarsTitle: string;
   pillars: Array<{ title: string; description: string }>;
   cycleTitle: string;
@@ -55,6 +58,10 @@ const COPY: Record<string, HomeCopy> = {
     enterSpirit: "進入我的 Spirit 世界 ✨",
     createSpirit: "建立我的 Spirit 🥚",
     exploreIelts: "探索英語訓練對話 🎓",
+    upgradeTitle: "💎 解鎖精靈對戰系統",
+    upgradeDescription:
+      "選擇適合您的訂閱方案，獲取每日戰鬥次數，探索更多稀有精靈與專屬冒險特權。",
+    upgradeCta: "查看訂閱方案 →",
     pillarsTitle: "Nightasaur 核心支柱",
     pillars: [
       { title: "Agent — 能力", description: "AI 驅動的學習與創作能力" },
@@ -82,6 +89,10 @@ const COPY: Record<string, HomeCopy> = {
     enterSpirit: "进入我的 Spirit 世界 ✨",
     createSpirit: "创建我的 Spirit 🥚",
     exploreIelts: "探索英语训练对话 🎓",
+    upgradeTitle: "💎 解锁精灵对战系统",
+    upgradeDescription:
+      "选择适合您的订阅方案，获取每日战斗次数，探索更多稀有精灵与专属冒险特权。",
+    upgradeCta: "查看订阅方案 →",
     pillarsTitle: "Nightasaur 核心支柱",
     pillars: [
       { title: "Agent — 能力", description: "AI 驱动的学习与创作能力" },
@@ -109,6 +120,10 @@ const COPY: Record<string, HomeCopy> = {
     enterSpirit: "Enter My Spirit World ✨",
     createSpirit: "Create My Spirit 🥚",
     exploreIelts: "Explore English Conversation Practice 🎓",
+    upgradeTitle: "💎 Unlock Spirit Battle System",
+    upgradeDescription:
+      "Choose your subscription plan to get daily battles and explore rare spirits with exclusive perks.",
+    upgradeCta: "View Subscription Plans →",
     pillarsTitle: "Nightasaur Core Pillars",
     pillars: [
       { title: "Agent — Capability", description: "AI-powered learning and creative capabilities" },
@@ -136,6 +151,10 @@ const COPY: Record<string, HomeCopy> = {
     enterSpirit: "Spirit の世界へ ✨",
     createSpirit: "Spirit を作る 🥚",
     exploreIelts: "英会話トレーニングを体験 🎓",
+    upgradeTitle: "💎 精霊バトルシステムを解放",
+    upgradeDescription:
+      "サブスクリプションプランを選択して、毎日のバトル回数を獲得し、希少な精霊と限定特典を体験しよう。",
+    upgradeCta: "プランを見る →",
     pillarsTitle: "Nightasaur の中核",
     pillars: [
       { title: "Agent — 能力", description: "AI による学習と創作の能力" },
@@ -163,6 +182,10 @@ const COPY: Record<string, HomeCopy> = {
     enterSpirit: "나의 Spirit 세계로 ✨",
     createSpirit: "나의 Spirit 만들기 🥚",
     exploreIelts: "영어 회화 연습 시작하기 🎓",
+    upgradeTitle: "💎 스피릿 배틀 시스템 잠금 해제",
+    upgradeDescription:
+      "구독 플랜을 선택하여 일일 배틀 기회를 얻고, 희귀 스피릿과 전용 특권을 탐험하세요.",
+    upgradeCta: "플랜 확인하기 →",
     pillarsTitle: "Nightasaur 핵심 축",
     pillars: [
       { title: "Agent — 역량", description: "AI 기반 학습 및 창작 역량" },
@@ -248,6 +271,24 @@ export default function Home() {
           </>
         )}
       </div>
+
+      {/* 💎 訂閱升級 CTA */}
+      <section className="max-w-4xl w-full mx-auto px-6 mb-16">
+        <div className="glass-card text-center p-8 md:p-12 border border-purple-500/30 rounded-2xl bg-gradient-to-b from-purple-900/20 to-slate-900/40 backdrop-blur-md">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+            {copy.upgradeTitle}
+          </h2>
+          <p className="text-slate-300 text-sm md:text-base mb-6 max-w-xl mx-auto">
+            {copy.upgradeDescription}
+          </p>
+          <Link
+            to="/pricing"
+            className="inline-block px-8 py-3 rounded-xl font-semibold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition-all duration-200"
+          >
+            {copy.upgradeCta}
+          </Link>
+        </div>
+      </section>
 
       <div className="mb-16 max-w-4xl w-full">
         <h2 className="text-2xl font-bold mb-8 gradient-text">{copy.pillarsTitle}</h2>

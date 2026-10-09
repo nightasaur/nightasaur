@@ -71,3 +71,5 @@ Modelfile
 
 # ComfyUI local clone (not a tracked submodule)
 /ComfyUI/
+
+.home-dump.txt

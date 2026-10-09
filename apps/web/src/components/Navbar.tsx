@@ -87,7 +87,13 @@ export default function Navbar({ user, setUser }: NavbarProps) {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-white/70 hover:text-white transition">{publicCopy.login}</Link>
+              <Link
+                to="/pricing"
+                className="text-amber-300 hover:text-amber-200 font-medium px-3 py-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 transition-colors text-sm whitespace-nowrap"
+              >
+                💎 升級
+              </Link>
+              <Link to="/login" className="text-white/70 hover:text-white transition text-sm">{publicCopy.login}</Link>
               <Link to="/register" className="btn-primary text-sm py-2 px-4 whitespace-nowrap">{publicCopy.register}</Link>
             </>
           )}
@@ -121,9 +127,18 @@ export default function Navbar({ user, setUser }: NavbarProps) {
                 </button>
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <Link to="/login" onClick={closeMobile} className="px-4 py-3 rounded-xl border border-white/10 text-center text-white/80">{publicCopy.login}</Link>
-                <Link to="/register" onClick={closeMobile} className="btn-primary px-4 py-3 text-center">{publicCopy.register}</Link>
+              <div className="flex flex-col gap-2 mt-2">
+                <Link
+                  to="/pricing"
+                  onClick={closeMobile}
+                  className="px-4 py-3 rounded-xl border border-amber-400/30 bg-amber-400/10 text-center text-amber-300 font-semibold text-sm"
+                >
+                  💎 升級
+                </Link>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link to="/login" onClick={closeMobile} className="px-4 py-3 rounded-xl border border-white/10 text-center text-white/80 text-sm">{publicCopy.login}</Link>
+                  <Link to="/register" onClick={closeMobile} className="btn-primary px-4 py-3 text-center text-sm">{publicCopy.register}</Link>
+                </div>
               </div>
             )}
 
