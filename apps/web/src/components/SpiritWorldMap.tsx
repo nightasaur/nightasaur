@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -15,6 +15,7 @@ const MapContainerAny = MapContainer as any;
 const TileLayerAny = TileLayer as any;
 const MarkerAny = Marker as any;
 const PopupAny = Popup as any;
+const useMapAny = useMap as any;
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -81,6 +82,16 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+// 讓地圖跟隨玩家位置
+function FollowUser({ pos }: { pos: [number, number] | null }) {
+  const map = useMapAny();
+  useEffect(() => {
+    if (!pos) return;
+    map.flyTo(pos, map.getZoom(), { duration: 1 });
+  }, [pos, map]);
+  return null;
+}
+
 interface Spawn {
   id: string;
   npcKey: string;
@@ -99,6 +110,7 @@ export default function SpiritWorldMap() {
   const triggeredRef = useRef<Set<string>>(new Set());
   const userPosRef = useRef<[number, number] | null>(null);
   const initialFetchDone = useRef(false);
+  const lastPosRef = useRef<[number, number] | null>(null);
 
   useEffect(() => {
     userPosRef.current = userPos;
@@ -114,7 +126,14 @@ export default function SpiritWorldMap() {
 
     const onSuccess = (pos: GeolocationPosition) => {
       setGpsError(false);
-      setUserPos([pos.coords.latitude, pos.coords.longitude]);
+      const next: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+      const last = lastPosRef.current;
+      if (last) {
+        const d = haversineKm(last[0], last[1], next[0], next[1]);
+        if (d < 0.01) return; // 移動 <10m 不更新，避免手機卡死
+      }
+      lastPosRef.current = next;
+      setUserPos(next);
     };
     const onError = () => {
       if (import.meta.env.DEV) {
@@ -232,6 +251,7 @@ export default function SpiritWorldMap() {
           maxNativeZoom={16}
           maxZoom={19}
         />
+        <FollowUser pos={userPos} />
         <MarkerAny position={userPos} icon={userIcon}>
           <PopupAny>你在這裡</PopupAny>
         </MarkerAny>
