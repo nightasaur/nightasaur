@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import SpiritWorldMap from "./SpiritWorldMap";
+import VoiceChat from "./VoiceChat";
 import { authAPI } from "../api/client";
 import { isAuthorizedAdminUser } from "../utils/adminAccess";
 
@@ -34,7 +35,6 @@ export default function SpiritWorldShell({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // 漢堡選單裡的管理員連結只給後臺授權帳號看；一般使用者完全看不到這些入口。
   useEffect(() => {
     let active = true;
     authAPI.me()
@@ -64,7 +64,6 @@ export default function SpiritWorldShell({
     };
   }, []);
 
-  // 通知外部：相機開啟/關閉時把 video 元素（或 null）傳出去
   useEffect(() => {
     onCameraReady?.(cameraOn ? videoRef.current : null);
   }, [cameraOn, onCameraReady]);
@@ -114,7 +113,6 @@ export default function SpiritWorldShell({
       {/* ① 背景層 */}
       {initialBackground !== "none" && (
         <div className="fixed inset-0 z-0">
-          {/* 地圖背景：相機開時徹底 unmount，省效能 */}
           {initialBackground === "map" && !cameraOn && (
             <div
               className="absolute inset-0"
@@ -124,12 +122,10 @@ export default function SpiritWorldShell({
             </div>
           )}
 
-          {/* 深色漸層背景（gradient 模式用） */}
           {initialBackground === "gradient" && (
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
           )}
 
-          {/* 相機 video：map / gradient 都要渲染，相機開時顯示 */}
           {!useExternalCamera && (
             <video
               ref={videoRef}
@@ -178,12 +174,14 @@ export default function SpiritWorldShell({
         {children}
       </main>
 
-      {/* ⑤ 底部對話框 */}
+      {/* ⑤ 底部對話框（常駐整合 🎤 語音聊天按鈕） */}
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
           <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
             <div className="flex items-end gap-2">
-              {beforeInput && <div className="shrink-0">{beforeInput}</div>}
+              <div className="shrink-0">
+                {beforeInput || (onSend ? <VoiceChat onSendText={onSend} lang="zh-TW" /> : null)}
+              </div>
               <div className="flex-1 min-w-0">
                 <textarea
                   ref={textareaRef}
@@ -195,7 +193,7 @@ export default function SpiritWorldShell({
                       handleSend();
                     }
                   }}
-                  placeholder="對精靈說點什麼…"
+                  placeholder="對精靈說點什麼…（支援左側 🎤 語音輸入，精靈將以英文語音回應）"
                   rows={1}
                   className="w-full bg-transparent text-white placeholder-white/40 outline-none resize-none leading-6"
                   style={{ maxHeight: "168px" }}
@@ -203,7 +201,7 @@ export default function SpiritWorldShell({
                 <div className="flex justify-end mt-1">
                   <button
                     onClick={handleSend}
-                    className="px-4 py-1.5 rounded-xl bg-teal-500/80 hover:bg-teal-500 text-white text-sm transition"
+                    className="px-4 py-1.5 rounded-xl bg-teal-500/80 hover:bg-teal-500 text-white text-sm font-bold transition"
                   >
                     傳送
                   </button>

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { spiritsAPI, dialogueAPI, generationAPI } from "../api/client";
 import SpiritSprite, { AnimState } from "../components/SpiritSprite";
-import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
+import { VoiceChat, useVoiceOutput, translateChineseToEnglish } from "../components/VoiceChat";
 import SpiritWorldShell from "../components/SpiritWorldShell";
 import { STAGES, REQ, progression, growthValue } from "../utils/spiritPresentation";
 import { spiritText } from "../utils/spiritCopy";
@@ -49,7 +49,7 @@ export default function SpiritDetail() {
   const [artError, setArtError] = useState("");
   const [evolving, setEvolving] = useState(false);
   const [evolveMsg, setEvolveMsg] = useState("");
-  const [msgs, setMsgs] = useState<{ role: string; content: string; emotion?: string; displayIcon?: string }[]>([]);
+  const [msgs, setMsgs] = useState<{ role: string; content: string; enContent?: string; emotion?: string; displayIcon?: string }[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [tab, setTab] = useState<"chat"|"customize">("chat");
@@ -137,12 +137,13 @@ export default function SpiritDetail() {
     try {
       const response = await dialogueAPI.chat(id!, msg);
       const data = response.data;
-      const reply = data.message;
+      const reply = data.message || data.reply || data.content || "";
       if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty dialogue response");
-      setMsgs(p => [...p, { role: "assistant", content: reply, emotion: data.emotion, displayIcon: data.displayIcon }]);
+      const enContent = await translateChineseToEnglish(reply);
+      setMsgs(p => [...p, { role: "assistant", content: reply, enContent, emotion: data.emotion, displayIcon: data.displayIcon }]);
       if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level, currentEmotion: data.emotion, displayIcon: data.displayIcon }));
       if (autoSpeak) {
-        speak(reply);
+        speak(enContent);
       }
     } catch {
       setMsgs(p => [...p, { role: "assistant", content: t("感应中断了🦕") }]);
@@ -246,10 +247,15 @@ export default function SpiritDetail() {
                     {m.role==="assistant" && m.displayIcon && (
                       <span className="mr-1.5" title={m.emotion || ""}>{m.displayIcon}</span>
                     )}
-                    {m.content}
+                    <div>{m.content}</div>
+                    {m.role==="assistant" && m.enContent && m.enContent !== m.content && (
+                      <div className="mt-1.5 pt-1.5 border-t border-white/15 text-amber-300 text-xs italic">
+                        🇬🇧 {m.enContent}
+                      </div>
+                    )}
                     {m.role==="assistant" && (
-                      <button onClick={() => speak(m.content)}
-                        className="ml-2 text-sm opacity-50 hover:opacity-100">🔊</button>
+                      <button onClick={() => speak(m.enContent || m.content)}
+                        className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-200 text-xs opacity-80 hover:opacity-100">🔊 EN 發音</button>
                     )}
                   </div>
                 </div>

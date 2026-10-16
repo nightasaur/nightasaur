@@ -7,11 +7,11 @@ export class AcademyController {
   async getCourses(_req: Request, res: Response, next: NextFunction) {
     try {
       const courses = [
-        { id: "literature-basics", title: "文學基礎課程", icon: "📚", difficulty: "初級", unlocked: true },
-        { id: "physics-foundation", title: "物理基礎課程", icon: "⚛️", difficulty: "初級", unlocked: true },
-        { id: "chemistry-intro", title: "化學入門課程", icon: "🧪", difficulty: "初級", unlocked: true },
-        { id: "medical-basics", title: "醫學基礎課程", icon: "🏥", difficulty: "初級", unlocked: true },
-        { id: "mathematics-fundamentals", title: "數學基礎課程", icon: "🧮", difficulty: "初級", unlocked: true },
+        { id: "literature-basics", title: "雙語文學與英語口語基礎", description: "透過精靈對話與故事閱讀培養英語語感", icon: "📚", difficulty: "初級", estimatedTime: "20分鐘", categories: ["LITERATURE", "ENGLISH"], reward: { xp: 80, coins: 40 }, unlocked: true },
+        { id: "physics-foundation", title: "十全元素與自然物理學", description: "解析雷、火、水、冰、光、暗等元素能量與相剋法則", icon: "⚛️", difficulty: "初級", estimatedTime: "25分鐘", categories: ["PHYSICS", "ELEMENT"], reward: { xp: 80, coins: 40 }, unlocked: true },
+        { id: "chemistry-intro", title: "精靈演化與鍊金化學", description: "了解精靈孵化、進化階段與記憶結晶提煉的奧秘", icon: "🧪", difficulty: "初級", estimatedTime: "25分鐘", categories: ["CHEMISTRY", "SPIRIT"], reward: { xp: 80, coins: 40 }, unlocked: true },
+        { id: "medical-basics", title: "生命治癒與伴隨羈絆學", description: "掌握精靈治癒頻率、情緒識別與親密度提升技巧", icon: "🏥", difficulty: "初級", estimatedTime: "20分鐘", categories: ["MEDICINE", "BOND"], reward: { xp: 80, coins: 40 }, unlocked: true },
+        { id: "mathematics-fundamentals", title: "戰鬥傷害倍率與邏輯數學", description: "計算爆擊期望值、屬性克制加成與邏輯推理", icon: "🧮", difficulty: "初級", estimatedTime: "30分鐘", categories: ["MATHEMATICS", "LOGIC"], reward: { xp: 100, coins: 50 }, unlocked: true },
       ];
       return res.json({ courses });
     } catch (err) {

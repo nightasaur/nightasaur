@@ -5,13 +5,14 @@ import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import { spiritsAPI, dialogueAPI } from "../api/client";
 import SpiritSprite from "../components/SpiritSprite";
 import SpiritWorldShell from "../components/SpiritWorldShell";
-import { useVoiceOutput } from "../components/VoiceChat";
+import VoiceChat, { useVoiceOutput, translateChineseToEnglish } from "../components/VoiceChat";
 import { spiritText } from "../utils/spiritCopy";
 import { useLanguage } from "../contexts/LanguageContext";
 
 interface ChatMessage {
   role: "user" | "spirit";
   text: string;
+  enText?: string;
 }
 
 const OBJECT_ZH: Record<string, string> = {
@@ -59,8 +60,9 @@ export default function Spirits() {
   const lastDetectRef = useRef<number>(0);
   const spokenObjectsRef = useRef<Set<string>>(new Set());
 
-  const { speak, stopSpeaking } = useVoiceOutput({
-    lang: currentLanguage === "en-US" ? "en-US" : "zh-TW",
+  // 強制以英文輸出精靈語音
+  const { speak, stopSpeaking, isSpeaking } = useVoiceOutput({
+    lang: "en-US",
   });
 
   // 載入精靈列表
@@ -102,7 +104,7 @@ export default function Spirits() {
 
   const currentSpirit = spirits.find(s => s.id === currentId);
 
-  // 發送訊息
+  // 發送訊息：自動將精靈回覆翻譯為英文並輸出英文音訊
   const handleSend = useCallback(async (text: string) => {
     if (!currentId || sending) return;
     stopSpeaking();
@@ -113,8 +115,9 @@ export default function Spirits() {
       const reply =
         res.data?.reply || res.data?.message || res.data?.content ||
         res.data?.response || "（精靈沉默不語）";
-      setMessages(prev => [...prev, { role: "spirit", text: reply }]);
-      speak(reply);
+      const enText = await translateChineseToEnglish(reply);
+      setMessages(prev => [...prev, { role: "spirit", text: reply, enText }]);
+      speak(enText);
     } catch (err: any) {
       console.error("[Dialogue]", err);
       const errMsg = err?.response?.data?.error || err?.message || "連線失敗";
@@ -127,8 +130,6 @@ export default function Spirits() {
   // 物件識別循環
   useEffect(() => {
     if (!videoEl || !model) return;
-
-    console.log("[Spirits] 開始識別循環");
 
     const detect = async () => {
       const now = Date.now();
@@ -148,7 +149,6 @@ export default function Spirits() {
           if (!spokenObjectsRef.current.has(top.class)) {
             spokenObjectsRef.current.add(top.class);
             const zh = OBJECT_ZH[top.class] || top.class;
-            console.log("[Spirits] 發現新物體:", top.class, zh);
             handleSend(`I see a ${top.class} (${zh}). Teach me this word.`);
           }
         }
@@ -164,9 +164,7 @@ export default function Spirits() {
     };
   }, [videoEl, model, sending, currentId, handleSend]);
 
-  // 相機 ready 回調
   const handleCameraReady = useCallback((video: HTMLVideoElement | null) => {
-    console.log("[Spirits] camera ready:", !!video);
     setVideoEl(video);
     if (!video) {
       setDetections([]);
@@ -187,11 +185,17 @@ export default function Spirits() {
       onSend={handleSend}
       background="map"
       onCameraReady={handleCameraReady}
+      beforeInput={<VoiceChat onSendText={handleSend} lang="zh-TW" />}
     >
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-black">{t("我的精灵小队")}</h1>
           <div className="flex gap-2 items-center">
+            {isSpeaking && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse">
+                🔊 EN 英語發音中…
+              </span>
+            )}
             {modelLoading && (
               <span className="text-xs text-white/40 animate-pulse">AI 載入中…</span>
             )}
@@ -252,26 +256,33 @@ export default function Spirits() {
             <div className="space-y-3 pb-2">
               {messages.length === 0 && currentSpirit && (
                 <div className="text-center py-10 text-white/30 text-sm">
-                  對 {currentSpirit.name} 說點什麼吧…
+                  對 {currentSpirit.name} 說點什麼吧…（支援下方 🎤 語音聊天，精靈將自動以英文翻譯與英語發音回應）
                 </div>
               )}
 
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[80%] px-4 py-3 rounded-2xl whitespace-pre-wrap break-words ${
-                      m.role === "user" ? "bg-teal-500/30 text-white" : "bg-white/10 text-white/90"
+                    className={`max-w-[82%] px-4 py-3 rounded-2xl whitespace-pre-wrap break-words backdrop-blur-md ${
+                      m.role === "user" ? "bg-teal-500/30 text-white" : "bg-slate-900/80 border border-white/15 text-white/95"
                     }`}
                   >
-                    {m.text}
+                    <div>{m.text}</div>
+                    {m.role === "spirit" && m.enText && m.enText !== m.text && (
+                      <div className="mt-2 pt-2 border-t border-white/15 text-amber-300 text-xs italic flex items-center justify-between gap-2">
+                        <span>🇬🇧 {m.enText}</span>
+                      </div>
+                    )}
                     {m.role === "spirit" && (
-                      <button
-                        onClick={() => speak(m.text)}
-                        className="ml-2 text-white/40 hover:text-white/80 text-xs"
-                        title="重播語音"
-                      >
-                        🔊
-                      </button>
+                      <div className="mt-1.5 flex justify-end">
+                        <button
+                          onClick={() => speak(m.enText || m.text)}
+                          className="px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/40 text-amber-200 border border-amber-400/30 text-xs font-bold transition"
+                          title="播放英文語音 (Play English Audio)"
+                        >
+                          🔊 英文發音 (EN)
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -280,7 +291,7 @@ export default function Spirits() {
               {sending && (
                 <div className="flex justify-start">
                   <div className="px-4 py-3 rounded-2xl bg-white/5 text-white/50 text-sm animate-pulse">
-                    {currentSpirit?.name || "精靈"} 正在思考…
+                    {currentSpirit?.name || "精靈"} 正在思考並準備英語回應…
                   </div>
                 </div>
               )}
