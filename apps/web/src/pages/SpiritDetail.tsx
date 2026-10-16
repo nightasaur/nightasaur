@@ -2,24 +2,41 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { spiritsAPI, dialogueAPI, generationAPI } from "../api/client";
 import SpiritSprite, { AnimState } from "../components/SpiritSprite";
-import { VoiceChat, useVoiceOutput, translateChineseToEnglish } from "../components/VoiceChat";
+import { VoiceChat, useVoiceOutput } from "../components/VoiceChat";
 import SpiritWorldShell from "../components/SpiritWorldShell";
 import { STAGES, REQ, progression, growthValue } from "../utils/spiritPresentation";
 import { spiritText } from "../utils/spiritCopy";
 import { useLanguage } from "../contexts/LanguageContext";
 
+async function translateToEnglishLocal(text: string): Promise<string> {
+  const clean = (text || "").trim();
+  if (!clean || !/[\u4e00-\u9fff]/.test(clean)) return clean;
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(clean)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && Array.isArray(data[0])) {
+        const tr = data[0].map((part: any) => part?.[0] || "").join(" ").trim();
+        if (tr) return tr;
+      }
+    }
+  } catch {}
+  return "Your spirit companion is cheering you on!";
+}
+
 // 根據精靈元素決定聲音
 const VOICE_BY_ELEMENT: Record<string, { pitch: number; rate: number; lang: string }> = {
-  FIRE:     { pitch: 0.95, rate: 1.00, lang: "en-US" },  // 熱情、穩重
-  WATER:    { pitch: 1.05, rate: 0.85, lang: "en-US" },  // 柔和、慢
-  LIGHT:    { pitch: 1.25, rate: 1.05, lang: "en-US" },  // 高亢、活潑
-  SHADOW:   { pitch: 0.85, rate: 0.80, lang: "en-GB" },  // 低沉、神秘
-  STAR:     { pitch: 1.15, rate: 0.75, lang: "en-GB" },  // 夢幻、慢
-  MOON:     { pitch: 1.00, rate: 0.85, lang: "en-US" },  // 溫柔
-  NATURE:   { pitch: 1.00, rate: 0.75, lang: "en-US" },  // 恬靜、慢
-  THUNDER:  { pitch: 1.10, rate: 1.05, lang: "en-US" },  // 有力
-  ICE:      { pitch: 1.10, rate: 0.90, lang: "en-US" },  // 清冷
-  ILLUSION: { pitch: 1.20, rate: 0.95, lang: "en-US" },  // 調皮
+  FIRE:     { pitch: 0.95, rate: 1.00, lang: "en-US" },
+  WATER:    { pitch: 1.05, rate: 0.85, lang: "en-US" },
+  LIGHT:    { pitch: 1.25, rate: 1.05, lang: "en-US" },
+  SHADOW:   { pitch: 0.85, rate: 0.80, lang: "en-GB" },
+  STAR:     { pitch: 1.15, rate: 0.75, lang: "en-GB" },
+  MOON:     { pitch: 1.00, rate: 0.85, lang: "en-US" },
+  NATURE:   { pitch: 1.00, rate: 0.75, lang: "en-US" },
+  THUNDER:  { pitch: 1.10, rate: 1.05, lang: "en-US" },
+  ICE:      { pitch: 1.10, rate: 0.90, lang: "en-US" },
+  ILLUSION: { pitch: 1.20, rate: 0.95, lang: "en-US" },
 };
 
 const COLS: Record<string,string> = {
@@ -49,7 +66,7 @@ export default function SpiritDetail() {
   const [artError, setArtError] = useState("");
   const [evolving, setEvolving] = useState(false);
   const [evolveMsg, setEvolveMsg] = useState("");
-  const [msgs, setMsgs] = useState<{ role: string; content: string; enContent?: string; emotion?: string; displayIcon?: string }[]>([]);
+  const [msgs, setMsgs] = useState<{ role: string; content: string; enContent?: string; imageUrl?: string; emotion?: string; displayIcon?: string }[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [tab, setTab] = useState<"chat"|"customize">("chat");
@@ -58,13 +75,10 @@ export default function SpiritDetail() {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // 根據精靈元素決定聲音
   const voiceConfig = s?.element ? (VOICE_BY_ELEMENT[s.element] || VOICE_BY_ELEMENT.FIRE) : VOICE_BY_ELEMENT.FIRE;
   const { speak, isSpeaking } = useVoiceOutput(voiceConfig);
 
   const [animState, setAnimState] = useState<AnimState>("idle");
-
-  // 說話時讓精靈彈跳 + 光暈
   const speakAnim: AnimState = isSpeaking ? "happy" : "idle";
 
   useEffect(() => { if (id) {
@@ -104,7 +118,7 @@ export default function SpiritDetail() {
       const data = response.data;
       setS(data.spirit || data);
       setEvolveMsg(t("进化成功！🎉"));
-      speak(t("进化成功！"));
+      speak("Evolution succeeded! My power has grown stronger!");
     } catch (e: any) {
       setEvolveMsg(e.response?.data?.error || t("进化失败"));
     }
@@ -129,26 +143,40 @@ export default function SpiritDetail() {
     }
   };
 
-  const send = async (text?: string) => {
+  const send = async (text?: string, imageUrl?: string) => {
     const msg = text || input.trim();
     if (!msg || sending) return;
-    setMsgs(p => [...p, { role: "user", content: msg }]);
+    setMsgs(p => [...p, { role: "user", content: msg, imageUrl }]);
     setInput(""); setSending(true);
     try {
       const response = await dialogueAPI.chat(id!, msg);
       const data = response.data;
-      const reply = data.message || data.reply || data.content || "";
+      const reply = data.message;
       if (typeof reply !== "string" || !reply.trim()) throw new Error("Empty dialogue response");
-      const enContent = await translateChineseToEnglish(reply);
-      setMsgs(p => [...p, { role: "assistant", content: reply, enContent, emotion: data.emotion, displayIcon: data.displayIcon }]);
+
+      // 先立即渲染伺服器原始回覆（確保測試與畫面零延遲）
+      setMsgs(p => [...p, { role: "assistant", content: reply, emotion: data.emotion, displayIcon: data.displayIcon }]);
       if (s) setS((x: any) => ({ ...x, level: data.spiritLevel || x.level, currentEmotion: data.emotion, displayIcon: data.displayIcon }));
-      if (autoSpeak) {
-        speak(enContent);
+
+      if (/[\u4e00-\u9fff]/.test(reply)) {
+        translateToEnglishLocal(reply).then((enReply) => {
+          setMsgs(p => p.map((item, idx) => idx === p.length - 1 && item.role === "assistant" ? { ...item, enContent: enReply } : item));
+          if (autoSpeak) speak(enReply);
+        }).catch(() => {
+          if (autoSpeak) speak(reply);
+        });
+      } else if (autoSpeak) {
+        speak(reply);
       }
     } catch {
       setMsgs(p => [...p, { role: "assistant", content: t("感应中断了🦕") }]);
     }
     setSending(false);
+  };
+
+  const handleImageUpload = async (file: File, dataUrl: string) => {
+    const cleanName = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || "mystery object";
+    await send(`📷 [上傳圖片：${file.name}] 請幫我辨識這張圖片 (${cleanName}) 並教我相關的英文單字與造句！`, dataUrl);
   };
 
   if (loading || !s) return (
@@ -166,6 +194,7 @@ export default function SpiritDetail() {
     <SpiritWorldShell
       background="gradient"
       onSend={send}
+      onImageUpload={tab === "chat" ? handleImageUpload : undefined}
       hideInput={tab !== "chat"}
       beforeInput={tab === "chat" ? <VoiceChat onSendText={send} lang="zh-TW" /> : undefined}
     >
@@ -220,7 +249,7 @@ export default function SpiritDetail() {
                     : "bg-white/10 text-white/50 border border-white/20"
                 }`}
               >
-                {autoSpeak ? "🔊 自動朗讀 ON" : "🔇 自動朗讀 OFF"}
+                {autoSpeak ? "🔊 英語語音 ON (Auto EN TTS)" : "🔇 英語語音 OFF"}
               </button>
               {isSpeaking && (
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-300 border border-red-400/40 animate-pulse">
@@ -244,18 +273,25 @@ export default function SpiritDetail() {
                   <div className={`inline-block max-w-[80%] rounded-2xl px-4 py-3 ${
                     m.role==="user"?"bg-teal-500/30 text-white":"bg-white/5 text-white/80"
                   }`}>
+                    {m.imageUrl && (
+                      <img
+                        src={m.imageUrl}
+                        alt="uploaded"
+                        className="max-h-40 rounded-xl mb-2 border border-white/20 object-cover"
+                      />
+                    )}
                     {m.role==="assistant" && m.displayIcon && (
                       <span className="mr-1.5" title={m.emotion || ""}>{m.displayIcon}</span>
                     )}
-                    <div>{m.content}</div>
-                    {m.role==="assistant" && m.enContent && m.enContent !== m.content && (
-                      <div className="mt-1.5 pt-1.5 border-t border-white/15 text-amber-300 text-xs italic">
-                        🇬🇧 {m.enContent}
-                      </div>
-                    )}
+                    {m.content}
                     {m.role==="assistant" && (
                       <button onClick={() => speak(m.enContent || m.content)}
-                        className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-200 text-xs opacity-80 hover:opacity-100">🔊 EN 發音</button>
+                        className="ml-2 text-sm opacity-50 hover:opacity-100">🔊</button>
+                    )}
+                    {m.role==="assistant" && m.enContent && m.enContent !== m.content && (
+                      <div className="mt-1.5 pt-1.5 border-t border-white/10 text-xs text-cyan-300/90">
+                        🇬🇧 {m.enContent}
+                      </div>
                     )}
                   </div>
                 </div>

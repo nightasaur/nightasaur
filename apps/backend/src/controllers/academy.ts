@@ -7,11 +7,61 @@ export class AcademyController {
   async getCourses(_req: Request, res: Response, next: NextFunction) {
     try {
       const courses = [
-        { id: "literature-basics", title: "雙語文學與英語口語基礎", description: "透過精靈對話與故事閱讀培養英語語感", icon: "📚", difficulty: "初級", estimatedTime: "20分鐘", categories: ["LITERATURE", "ENGLISH"], reward: { xp: 80, coins: 40 }, unlocked: true },
-        { id: "physics-foundation", title: "十全元素與自然物理學", description: "解析雷、火、水、冰、光、暗等元素能量與相剋法則", icon: "⚛️", difficulty: "初級", estimatedTime: "25分鐘", categories: ["PHYSICS", "ELEMENT"], reward: { xp: 80, coins: 40 }, unlocked: true },
-        { id: "chemistry-intro", title: "精靈演化與鍊金化學", description: "了解精靈孵化、進化階段與記憶結晶提煉的奧秘", icon: "🧪", difficulty: "初級", estimatedTime: "25分鐘", categories: ["CHEMISTRY", "SPIRIT"], reward: { xp: 80, coins: 40 }, unlocked: true },
-        { id: "medical-basics", title: "生命治癒與伴隨羈絆學", description: "掌握精靈治癒頻率、情緒識別與親密度提升技巧", icon: "🏥", difficulty: "初級", estimatedTime: "20分鐘", categories: ["MEDICINE", "BOND"], reward: { xp: 80, coins: 40 }, unlocked: true },
-        { id: "mathematics-fundamentals", title: "戰鬥傷害倍率與邏輯數學", description: "計算爆擊期望值、屬性克制加成與邏輯推理", icon: "🧮", difficulty: "初級", estimatedTime: "30分鐘", categories: ["MATHEMATICS", "LOGIC"], reward: { xp: 100, coins: 50 }, unlocked: true },
+        {
+          id: "literature-basics",
+          title: "文學基礎與雙語口說",
+          icon: "📚",
+          difficulty: "初級",
+          description: "與伴隨精靈進行中英雙語閱讀與口語發音演練，提升語感與親密度。",
+          categories: ["文學", "英語口說"],
+          estimatedTime: "10 分鐘",
+          reward: { xp: 50, coins: 25 },
+          unlocked: true,
+        },
+        {
+          id: "physics-foundation",
+          title: "自然物理與科學探索",
+          icon: "⚛️",
+          difficulty: "初級",
+          description: "透過生活實例理解力學與能量，精靈將以英語發音輔助科學詞彙記憶。",
+          categories: ["物理", "科學英語"],
+          estimatedTime: "12 分鐘",
+          reward: { xp: 60, coins: 30 },
+          unlocked: true,
+        },
+        {
+          id: "chemistry-intro",
+          title: "元素化學與精靈屬性",
+          icon: "🧪",
+          difficulty: "初級",
+          description: "認識水、火、雷、冰等自然元素反應，同步解鎖精靈英語語音詞庫。",
+          categories: ["化學", "元素共鳴"],
+          estimatedTime: "10 分鐘",
+          reward: { xp: 55, coins: 25 },
+          unlocked: true,
+        },
+        {
+          id: "medical-basics",
+          title: "健康醫學與生命守護",
+          icon: "🏥",
+          difficulty: "中級",
+          description: "學習人體生理與日常保健知識，提升水系與光系精靈的治癒共鳴。",
+          categories: ["醫學", "生命科學"],
+          estimatedTime: "15 分鐘",
+          reward: { xp: 80, coins: 40 },
+          unlocked: true,
+        },
+        {
+          id: "mathematics-fundamentals",
+          title: "邏輯數學與對戰策略",
+          icon: "🧮",
+          difficulty: "初級",
+          description: "訓練邏輯推演與心算速度，強化精靈在對戰中的反應力與專注力。",
+          categories: ["數學", "邏輯思維"],
+          estimatedTime: "10 分鐘",
+          reward: { xp: 50, coins: 25 },
+          unlocked: true,
+        },
       ];
       return res.json({ courses });
     } catch (err) {
@@ -40,11 +90,11 @@ export class AcademyController {
       if (!userId) return res.status(401).json({ error: "請先登入" });
 
       const courseMap: Record<string, { title: string; icon: string; cat: AcademicCategory }> = {
-        "literature-basics": { title: "文學基礎課程", icon: "📚", cat: "LITERATURE" },
-        "physics-foundation": { title: "物理基礎課程", icon: "⚛️", cat: "PHYSICS" },
-        "chemistry-intro": { title: "化學入門課程", icon: "🧪", cat: "CHEMISTRY" },
-        "medical-basics": { title: "醫學基礎課程", icon: "🏥", cat: "MEDICINE" },
-        "mathematics-fundamentals": { title: "數學基礎課程", icon: "🧮", cat: "MATHEMATICS" },
+        "literature-basics": { title: "文學基礎與雙語口說", icon: "📚", cat: "LITERATURE" },
+        "physics-foundation": { title: "自然物理與科學探索", icon: "⚛️", cat: "PHYSICS" },
+        "chemistry-intro": { title: "元素化學與精靈屬性", icon: "🧪", cat: "CHEMISTRY" },
+        "medical-basics": { title: "健康醫學與生命守護", icon: "🏥", cat: "MEDICINE" },
+        "mathematics-fundamentals": { title: "邏輯數學與對戰策略", icon: "🧮", cat: "MATHEMATICS" },
       };
 
       const course = courseMap[courseId];
