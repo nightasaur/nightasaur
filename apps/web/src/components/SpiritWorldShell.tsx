@@ -8,6 +8,7 @@ import { isAuthorizedAdminUser } from "../utils/adminAccess";
 interface SpiritWorldShellProps {
   children: ReactNode;
   onSend?: (text: string) => void;
+  onImageUpload?: (file: File, dataUrl: string) => void;
   hideInput?: boolean;
   beforeInput?: ReactNode;
   background?: "gradient" | "map" | "none";
@@ -19,6 +20,7 @@ interface SpiritWorldShellProps {
 export default function SpiritWorldShell({
   children,
   onSend,
+  onImageUpload,
   hideInput = false,
   beforeInput,
   background: initialBackground = "gradient",
@@ -32,6 +34,7 @@ export default function SpiritWorldShell({
   const [cameraError, setCameraError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -105,6 +108,44 @@ export default function SpiritWorldShell({
     setInput("");
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      if (onImageUpload) {
+        onImageUpload(file, dataUrl);
+      } else if (onSend) {
+        onSend(`[上傳圖片: ${file.name}] 請幫我辨識這張圖片並用英文介紹！`);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = typeof reader.result === "string" ? reader.result : "";
+            if (onImageUpload) {
+              onImageUpload(file, dataUrl);
+            }
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    }
+  };
+
   const closeMenu = () => setMenuOpen(false);
   const showCameraButton = initialBackground !== "none" || useExternalCamera;
 
@@ -170,30 +211,56 @@ export default function SpiritWorldShell({
       </button>
 
       {/* ④ 主內容 */}
-      <main className={`relative z-10 pt-20 ${hideInput ? "pb-6" : "pb-40"}`}>
+      <main className={`relative z-10 pt-20 ${hideInput ? "pb-6" : "pb-44"}`}>
         {children}
       </main>
 
-      {/* ⑤ 底部對話框（常駐整合 🎤 語音聊天按鈕） */}
+      {/* ⑤ 底部對話框（整合 🎤 即時語音輸入 + 🖼️ 圖片上傳辨識） */}
       {!hideInput && (
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4">
-          <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
+          <div className="max-w-3xl mx-auto bg-slate-950/80 backdrop-blur-xl border border-white/20 rounded-3xl p-3 shadow-2xl">
             <div className="flex items-end gap-2">
-              <div className="shrink-0">
-                {beforeInput || (onSend ? <VoiceChat onSendText={onSend} lang="zh-TW" /> : null)}
+              <div className="shrink-0 flex items-center gap-1.5">
+                <VoiceChat
+                  onSendText={(txt) => {
+                    setInput("");
+                    onSend?.(txt);
+                  }}
+                  onInterimChange={(liveTxt) => {
+                    if (liveTxt) setInput(liveTxt);
+                  }}
+                  lang="zh-TW"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-10 px-3 rounded-full bg-purple-500/30 hover:bg-purple-500/50 text-purple-100 border border-purple-400/40 flex items-center justify-center gap-1.5 text-sm font-bold transition-all shadow-md"
+                  title="上傳圖片進行 AI 視覺辨識與精靈雙語對話"
+                >
+                  <span>🖼️</span>
+                  <span className="hidden sm:inline">圖片辨識</span>
+                </button>
               </div>
               <div className="flex-1 min-w-0">
                 <textarea
                   ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onPaste={handlePaste}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleSend();
                     }
                   }}
-                  placeholder="對精靈說點什麼…（支援左側 🎤 語音輸入，精靈將以英文語音回應）"
+                  placeholder="對精靈說點什麼…（支援 🎤 語音聽寫、🖼️ 圖片上傳辨識，精靈將以英語發聲回應）"
                   rows={1}
                   className="w-full bg-transparent text-white placeholder-white/40 outline-none resize-none leading-6"
                   style={{ maxHeight: "168px" }}

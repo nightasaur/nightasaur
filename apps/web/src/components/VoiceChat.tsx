@@ -17,7 +17,6 @@ export async function translateChineseToEnglish(text: string): Promise<string> {
   if (!clean) return "";
   if (PRESET_EN_MAP[clean]) return PRESET_EN_MAP[clean];
 
-  // 若已經不含中文字元，直接回傳英文原文
   if (!/[\u4e00-\u9fff]/.test(clean)) {
     return clean;
   }
@@ -40,52 +39,118 @@ export async function translateChineseToEnglish(text: string): Promise<string> {
 }
 
 // ============================================
-// VoiceChat - 語音輸入按鍵組件（Web Speech API）
+// VoiceChat - 語音輸入按鍵組件（支援即時落字 interimResults 與防丟字保護）
 // ============================================
 export default function VoiceChat({
   onSendText,
   onSpeechResult,
+  onInterimChange,
   lang = "zh-TW",
 }: {
   onSendText: (text: string) => void;
   onSpeechResult?: (text: string) => void;
+  onInterimChange?: (text: string) => void;
   lang?: string;
 }) {
   const [isListening, setIsListening] = useState(false);
   const [currentLang, setCurrentLang] = useState(lang);
+  const [livePreview, setLivePreview] = useState("");
   const recognitionRef = useRef<any>(null);
+  const transcriptBufferRef = useRef<string>("");
+  const submittedRef = useRef<boolean>(false);
 
   useEffect(() => {
     setCurrentLang(lang);
   }, [lang]);
 
+  const finalizeAndSend = useCallback((textToSend: string) => {
+    const finalClean = textToSend.trim();
+    if (!finalClean || submittedRef.current) return;
+    submittedRef.current = true;
+    setLivePreview("");
+    onInterimChange?.("");
+    onSendText(finalClean);
+    onSpeechResult?.(finalClean);
+  }, [onSendText, onSpeechResult, onInterimChange]);
+
   const startListening = useCallback(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("您的瀏覽器不支援語音輸入，請使用 Chrome 或 Edge 瀏覽器。");
+      alert("您的瀏覽器不支援麥克風語音輸入，請使用 Chrome 或 Edge 瀏覽器。");
       return;
     }
+
+    try {
+      recognitionRef.current?.abort();
+    } catch {}
+
     const rec = new SpeechRecognition();
     rec.lang = currentLang;
-    rec.interimResults = false;
+    rec.continuous = false;
+    rec.interimResults = true; // 開啟即時聽寫，邊講邊顯示
     rec.maxAlternatives = 1;
-    rec.onresult = (e: any) => {
-      const text = e.results[0][0].transcript;
-      setIsListening(false);
-      onSendText(text);
-      onSpeechResult?.(text);
+
+    transcriptBufferRef.current = "";
+    submittedRef.current = false;
+
+    rec.onstart = () => {
+      setIsListening(true);
+      setLivePreview("請開始說話…");
     };
-    rec.onerror = () => setIsListening(false);
-    rec.onend = () => setIsListening(false);
-    rec.start();
-    setIsListening(true);
-    recognitionRef.current = rec;
-  }, [onSendText, onSpeechResult, currentLang]);
+
+    rec.onresult = (e: any) => {
+      let fullText = "";
+      let isFinal = false;
+      for (let i = 0; i < e.results.length; i++) {
+        fullText += e.results[i][0].transcript;
+        if (e.results[i].isFinal) isFinal = true;
+      }
+      transcriptBufferRef.current = fullText;
+      setLivePreview(fullText);
+      onInterimChange?.(fullText);
+
+      if (isFinal && fullText.trim()) {
+        setIsListening(false);
+        finalizeAndSend(fullText);
+      }
+    };
+
+    rec.onerror = (err: any) => {
+      console.warn("[VoiceChat] speech recognition warning:", err?.error);
+      setIsListening(false);
+      setLivePreview("");
+      if (transcriptBufferRef.current.trim()) {
+        finalizeAndSend(transcriptBufferRef.current);
+      }
+    };
+
+    rec.onend = () => {
+      setIsListening(false);
+      setLivePreview("");
+      // 若使用者說話後手動點擊停止或自動結束，確保已辨識的緩衝文字 100% 送出不丟失
+      if (transcriptBufferRef.current.trim() && !submittedRef.current) {
+        finalizeAndSend(transcriptBufferRef.current);
+      }
+    };
+
+    try {
+      rec.start();
+      recognitionRef.current = rec;
+    } catch (e) {
+      console.error("[VoiceChat] start error:", e);
+      setIsListening(false);
+    }
+  }, [currentLang, finalizeAndSend, onInterimChange]);
 
   const stopListening = () => {
-    recognitionRef.current?.stop();
+    try {
+      recognitionRef.current?.stop();
+    } catch {}
     setIsListening(false);
+    if (transcriptBufferRef.current.trim() && !submittedRef.current) {
+      finalizeAndSend(transcriptBufferRef.current);
+    }
   };
 
   const toggleLang = () => {
@@ -94,7 +159,7 @@ export default function VoiceChat({
   };
 
   return (
-    <div className="flex gap-1.5 items-center">
+    <div className="flex gap-1.5 items-center relative">
       <button
         type="button"
         onClick={isListening ? stopListening : startListening}
@@ -103,10 +168,10 @@ export default function VoiceChat({
             ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/50"
             : "bg-teal-500/30 hover:bg-teal-500/50 text-teal-100 border border-teal-400/40 shadow-md shadow-teal-500/10"
         }`}
-        title={isListening ? "停止語音輸入" : "點擊與精靈語音聊天"}
+        title={isListening ? "點擊完成並送出語音" : "點擊開始語音輸入"}
       >
         <span className="text-base">{isListening ? "🔴" : "🎤"}</span>
-        <span className="hidden sm:inline">{isListening ? "聆聽中" : "語音"}</span>
+        <span className="hidden sm:inline">{isListening ? "完成送出" : "語音"}</span>
       </button>
       <button
         type="button"
@@ -117,6 +182,11 @@ export default function VoiceChat({
       >
         {currentLang === "zh-TW" ? "中" : "EN"}
       </button>
+      {isListening && livePreview && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 border border-teal-400/50 text-teal-200 text-sm font-bold shadow-xl">
+          🎙️ 聽寫中：{livePreview}
+        </div>
+      )}
     </div>
   );
 }
@@ -153,7 +223,6 @@ export function useVoiceOutput(config?: VoiceConfig) {
     return () => cleanup();
   }, [cleanup]);
 
-  // 使用瀏覽器高自然度英文 TTS 朗讀
   const speakWithBrowserEnglish = useCallback((englishText: string, lang = "en-US") => {
     if (!("speechSynthesis" in window)) {
       setIsSpeaking(false);
@@ -186,17 +255,14 @@ export function useVoiceOutput(config?: VoiceConfig) {
     setIsSpeaking(true);
 
     try {
-      // 1. 將所有精靈輸出的中文內容翻譯為英文
       const englishText = await translateChineseToEnglish(rawText);
       const targetLang = config?.lang?.startsWith("en") ? config.lang : "en-US";
 
-      // 2. 優先使用高自然度英文語音輸出
       if ("speechSynthesis" in window && window.speechSynthesis.getVoices().some(v => v.lang.startsWith("en"))) {
         speakWithBrowserEnglish(englishText, targetLang);
         return;
       }
 
-      // 3. 備援：呼叫後端或本機 3070 Piper 英文語音合成
       const token = localStorage.getItem("nightasaur_token");
       const base = import.meta.env.VITE_API_URL || "/api";
 

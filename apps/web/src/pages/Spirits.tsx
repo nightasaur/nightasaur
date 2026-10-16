@@ -13,32 +13,34 @@ interface ChatMessage {
   role: "user" | "spirit";
   text: string;
   enText?: string;
+  imageUrl?: string;
+  detectedTags?: string[];
 }
 
 const OBJECT_ZH: Record<string, string> = {
-  person: "人", bicycle: "腳踏車", car: "車子", motorcycle: "機車",
-  airplane: "飛機", bus: "公車", train: "火車", truck: "卡車",
-  boat: "船", "traffic light": "紅綠燈", "fire hydrant": "消防栓",
-  "stop sign": "停止標誌", "parking meter": "停車計時器", bench: "長椅",
-  bird: "鳥", cat: "貓", dog: "狗", horse: "馬", sheep: "羊",
-  cow: "牛", elephant: "大象", bear: "熊", zebra: "斑馬",
-  giraffe: "長頸鹿", backpack: "背包", umbrella: "雨傘",
-  handbag: "手提包", tie: "領帶", suitcase: "行李箱",
-  frisbee: "飛盤", skis: "滑雪板", snowboard: "單板滑雪",
-  "sports ball": "球", kite: "風箏", "baseball bat": "棒球棒",
-  "baseball glove": "棒球手套", skateboard: "滑板", surfboard: "衝浪板",
-  "tennis racket": "網球拍", bottle: "瓶子", "wine glass": "酒杯",
-  cup: "杯子", fork: "叉子", knife: "刀子", spoon: "湯匙",
-  bowl: "碗", banana: "香蕉", apple: "蘋果", sandwich: "三明治",
-  orange: "橘子", broccoli: "花椰菜", carrot: "紅蘿蔔",
-  "hot dog": "熱狗", pizza: "披薩", donut: "甜甜圈", cake: "蛋糕",
-  chair: "椅子", couch: "沙發", "potted plant": "盆栽", bed: "床",
-  "dining table": "餐桌", toilet: "馬桶", tv: "電視",
-  laptop: "筆電", mouse: "滑鼠", remote: "遙控器", keyboard: "鍵盤",
-  "cell phone": "手機", microwave: "微波爐", oven: "烤箱",
-  toaster: "烤麵包機", sink: "水槽", refrigerator: "冰箱",
-  book: "書", clock: "時鐘", vase: "花瓶", scissors: "剪刀",
-  "teddy bear": "泰迪熊", "hair drier": "吹風機", toothbrush: "牙刷",
+  person: "人物 (Person)", bicycle: "腳踏車 (Bicycle)", car: "汽車 (Car)", motorcycle: "機車 (Motorcycle)",
+  airplane: "飛機 (Airplane)", bus: "公車 (Bus)", train: "火車 (Train)", truck: "卡車 (Truck)",
+  boat: "船隻 (Boat)", "traffic light": "紅綠燈 (Traffic Light)", "fire hydrant": "消防栓 (Fire Hydrant)",
+  "stop sign": "停止標誌 (Stop Sign)", "parking meter": "停車計時器 (Parking Meter)", bench: "長椅 (Bench)",
+  bird: "飛鳥 (Bird)", cat: "貓咪 (Cat)", dog: "狗狗 (Dog)", horse: "駿馬 (Horse)", sheep: "綿羊 (Sheep)",
+  cow: "乳牛 (Cow)", elephant: "大象 (Elephant)", bear: "熊 (Bear)", zebra: "斑馬 (Zebra)",
+  giraffe: "長頸鹿 (Giraffe)", backpack: "背包 (Backpack)", umbrella: "雨傘 (Umbrella)",
+  handbag: "手提包 (Handbag)", tie: "領帶 (Tie)", suitcase: "行李箱 (Suitcase)",
+  frisbee: "飛盤 (Frisbee)", skis: "滑雪板 (Skis)", snowboard: "單板滑雪 (Snowboard)",
+  "sports ball": "運動球 (Sports Ball)", kite: "風箏 (Kite)", "baseball bat": "球棒 (Baseball Bat)",
+  "baseball glove": "棒球手套 (Glove)", skateboard: "滑板 (Skateboard)", surfboard: "衝浪板 (Surfboard)",
+  "tennis racket": "網球拍 (Tennis Racket)", bottle: "水瓶 (Bottle)", "wine glass": "酒杯 (Wine Glass)",
+  cup: "杯子 (Cup)", fork: "叉子 (Fork)", knife: "刀子 (Knife)", spoon: "湯匙 (Spoon)",
+  bowl: "碗 (Bowl)", banana: "香蕉 (Banana)", apple: "蘋果 (Apple)", sandwich: "三明治 (Sandwich)",
+  orange: "柳橙 (Orange)", broccoli: "花椰菜 (Broccoli)", carrot: "紅蘿蔔 (Carrot)",
+  "hot dog": "熱狗 (Hot Dog)", pizza: "披薩 (Pizza)", donut: "甜甜圈 (Donut)", cake: "蛋糕 (Cake)",
+  chair: "椅子 (Chair)", couch: "沙發 (Couch)", "potted plant": "盆栽植物 (Potted Plant)", bed: "床鋪 (Bed)",
+  "dining table": "餐桌 (Dining Table)", toilet: "衛浴 (Toilet)", tv: "螢幕/電視 (TV/Monitor)",
+  laptop: "筆記型電腦 (Laptop)", mouse: "滑鼠 (Mouse)", remote: "遙控器 (Remote)", keyboard: "鍵盤 (Keyboard)",
+  "cell phone": "智慧型手機 (Cell Phone)", microwave: "微波爐 (Microwave)", oven: "烤箱 (Oven)",
+  toaster: "烤麵包機 (Toaster)", sink: "水槽 (Sink)", refrigerator: "冰箱 (Refrigerator)",
+  book: "書籍 (Book)", clock: "時鐘 (Clock)", vase: "花瓶 (Vase)", scissors: "剪刀 (Scissors)",
+  "teddy bear": "泰迪熊 (Teddy Bear)", "hair drier": "吹風機 (Hair Drier)", toothbrush: "牙刷 (Toothbrush)",
 };
 
 export default function Spirits() {
@@ -51,7 +53,7 @@ export default function Spirits() {
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // AI 識別
+  // AI 視覺辨識
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
   const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
   const [detections, setDetections] = useState<any[]>([]);
@@ -75,16 +77,14 @@ export default function Spirits() {
       .catch(console.error);
   }, []);
 
-  // 載入 TensorFlow 模型
+  // 載入 TensorFlow COCO-SSD 模型
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        console.log("[Spirits] 開始載入 TensorFlow 模型…");
         await tf.ready();
         const m = await cocoSsd.load({ base: "lite_mobilenet_v2" });
         if (!cancelled) {
-          console.log("[Spirits] 模型載入成功");
           setModel(m);
           setModelLoading(false);
         }
@@ -97,14 +97,13 @@ export default function Spirits() {
     return () => { cancelled = true; };
   }, []);
 
-  // 對話自動滾到底
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
 
   const currentSpirit = spirits.find(s => s.id === currentId);
 
-  // 發送訊息：自動將精靈回覆翻譯為英文並輸出英文音訊
+  // 發送文字訊息
   const handleSend = useCallback(async (text: string) => {
     if (!currentId || sending) return;
     stopSpeaking();
@@ -127,7 +126,106 @@ export default function Spirits() {
     }
   }, [currentId, sending, speak, stopSpeaking]);
 
-  // 物件識別循環
+  // 圖片上傳與 AI 視覺辨識功能
+  const handleImageUpload = useCallback(async (file: File, dataUrl: string) => {
+    if (!currentId) return;
+    stopSpeaking();
+
+    // 1. 載入圖片元素並執行 AI 物件與視覺特徵辨識
+    const analyzeUploadedImage = (): Promise<{ tags: string[]; summaryPrompt: string }> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = async () => {
+          const tags: string[] = [];
+          try {
+            let activeModel = model;
+            if (!activeModel) {
+              await tf.ready();
+              activeModel = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+              setModel(activeModel);
+            }
+            if (activeModel) {
+              const preds = await activeModel.detect(img);
+              for (const p of preds.slice(0, 4)) {
+                const label = OBJECT_ZH[p.class] || p.class;
+                tags.push(`🔍 ${label} · ${Math.round(p.score * 100)}%`);
+              }
+            }
+          } catch (e) {
+            console.warn("[ImageDetect] fallback analysis:", e);
+          }
+
+          // 若未偵測到特定 COCO 類別，分析影像色彩與構圖特徵
+          if (tags.length === 0) {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = 64;
+              canvas.height = 64;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, 64, 64);
+                const data = ctx.getImageData(0, 0, 64, 64).data;
+                let r = 0, g = 0, b = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                  r += data[i]; g += data[i + 1]; b += data[i + 2];
+                }
+                const count = data.length / 4;
+                r = Math.round(r / count); g = Math.round(g / count); b = Math.round(b / count);
+                const tone = r > b + 25 ? "暖色調 (Warm Tone)" : b > r + 25 ? "冷色調 (Cool Tone)" : "自然色調 (Balanced Tone)";
+                tags.push(`🎨 ${tone}`);
+                tags.push(`📐 ${img.naturalWidth}×${img.naturalHeight}px`);
+              }
+            } catch {}
+          }
+
+          const cleanFileName = file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ");
+          const detectedDesc = tags.join("、") || cleanFileName;
+          const prompt = `我上傳了一張圖片（檔名：${cleanFileName}，AI 視覺辨識結果：${detectedDesc}）。請告訴我你看到了什麼，並教我相關的英文單字與一句實用例句！`;
+          resolve({ tags, summaryPrompt: prompt });
+        };
+        img.onerror = () => {
+          resolve({
+            tags: [`📄 ${file.name}`],
+            summaryPrompt: `我分享了一張圖片「${file.name}」，請與我互動並教我相關的英文表達！`
+          });
+        };
+        img.src = dataUrl;
+      });
+    };
+
+    const { tags, summaryPrompt } = await analyzeUploadedImage();
+
+    setMessages(prev => [
+      ...prev,
+      {
+        role: "user",
+        text: `🖼️ 已上傳圖片：${file.name}`,
+        imageUrl: dataUrl,
+        detectedTags: tags,
+      }
+    ]);
+
+    setSending(true);
+    try {
+      const res = await dialogueAPI.chat(currentId, summaryPrompt);
+      const reply =
+        res.data?.reply || res.data?.message || res.data?.content ||
+        res.data?.response || `我看到了你分享的圖片（${tags.join(", ")}）！這張圖片很有趣，我們一起用英文形容它吧！`;
+      const enText = await translateChineseToEnglish(reply);
+      setMessages(prev => [...prev, { role: "spirit", text: reply, enText }]);
+      speak(enText);
+    } catch {
+      const fallbackReply = `我看到了你上傳的圖片（辨識特徵：${tags.join("、")}）！這真是一張很棒的照片！`;
+      const enText = await translateChineseToEnglish(fallbackReply);
+      setMessages(prev => [...prev, { role: "spirit", text: fallbackReply, enText }]);
+      speak(enText);
+    } finally {
+      setSending(false);
+    }
+  }, [currentId, model, speak, stopSpeaking]);
+
+  // 相機即時物件識別循環
   useEffect(() => {
     if (!videoEl || !model) return;
 
@@ -183,6 +281,7 @@ export default function Spirits() {
   return (
     <SpiritWorldShell
       onSend={handleSend}
+      onImageUpload={handleImageUpload}
       background="map"
       onCameraReady={handleCameraReady}
       beforeInput={<VoiceChat onSendText={handleSend} lang="zh-TW" />}
@@ -197,7 +296,7 @@ export default function Spirits() {
               </span>
             )}
             {modelLoading && (
-              <span className="text-xs text-white/40 animate-pulse">AI 載入中…</span>
+              <span className="text-xs text-white/40 animate-pulse">AI 視覺載入中…</span>
             )}
             <Link to="/spirits/new" className="btn-primary text-sm px-4 py-2">
               {t("+ 孵化精灵")}
@@ -205,7 +304,7 @@ export default function Spirits() {
           </div>
         </div>
 
-        {/* AI 識別結果標籤 */}
+        {/* AI 相機識別結果標籤 */}
         {videoEl && detections.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
             {detections.slice(0, 5).map((d, i) => (
@@ -255,8 +354,8 @@ export default function Spirits() {
 
             <div className="space-y-3 pb-2">
               {messages.length === 0 && currentSpirit && (
-                <div className="text-center py-10 text-white/30 text-sm">
-                  對 {currentSpirit.name} 說點什麼吧…（支援下方 🎤 語音聊天，精靈將自動以英文翻譯與英語發音回應）
+                <div className="text-center py-10 text-white/40 text-sm">
+                  對 {currentSpirit.name} 說點什麼吧…（支援下方 🎤 語音聽寫、🖼️ 圖片上傳辨識，精靈將自動以英文翻譯與英語發音回應）
                 </div>
               )}
 
@@ -264,9 +363,30 @@ export default function Spirits() {
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[82%] px-4 py-3 rounded-2xl whitespace-pre-wrap break-words backdrop-blur-md ${
-                      m.role === "user" ? "bg-teal-500/30 text-white" : "bg-slate-900/80 border border-white/15 text-white/95"
+                      m.role === "user" ? "bg-teal-500/30 text-white" : "bg-slate-900/85 border border-white/15 text-white/95"
                     }`}
                   >
+                    {m.imageUrl && (
+                      <div className="mb-2">
+                        <img
+                          src={m.imageUrl}
+                          alt="Uploaded"
+                          className="max-h-56 rounded-xl object-contain border border-white/20"
+                        />
+                        {m.detectedTags && m.detectedTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {m.detectedTags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-0.5 rounded-full bg-purple-500/30 border border-purple-400/50 text-purple-100 text-xs font-bold"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div>{m.text}</div>
                     {m.role === "spirit" && m.enText && m.enText !== m.text && (
                       <div className="mt-2 pt-2 border-t border-white/15 text-amber-300 text-xs italic flex items-center justify-between gap-2">
@@ -291,7 +411,7 @@ export default function Spirits() {
               {sending && (
                 <div className="flex justify-start">
                   <div className="px-4 py-3 rounded-2xl bg-white/5 text-white/50 text-sm animate-pulse">
-                    {currentSpirit?.name || "精靈"} 正在思考並準備英語回應…
+                    {currentSpirit?.name || "精靈"} 正在辨識並準備雙語語音回應…
                   </div>
                 </div>
               )}
