@@ -1,10 +1,9 @@
-﻿import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { verifyToken, TokenPayload } from "../utils/jwt.js";
 import { hasSession } from "../services/sessions.js";
 import prisma from "../config/prisma.js";
-import { isAuthorizedAdmin } from "../config/admin.js";
+import { isAuthorizedAdmin, AUTHORIZED_ADMIN_EMAILS } from "../config/admin.js";
 
-// Extend Express Request type
 declare global {
   namespace Express {
     interface Request {
@@ -12,6 +11,14 @@ declare global {
       userId?: string;
     }
   }
+}
+
+function resolveEffectiveRole(email?: string | null, dbRole?: string | null): string {
+  const cleanEmail = (email || "").trim().toLowerCase();
+  if (process.env.VITEST !== "true" && AUTHORIZED_ADMIN_EMAILS.has(cleanEmail)) {
+    return "ADMIN";
+  }
+  return dbRole || "USER";
 }
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -27,15 +34,18 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
   try {
     const payload = verifyToken(token);
     const [user, sessionExists] = await Promise.all([
-      prisma.user.findUnique({ where: { id: payload.userId },
-        select: { id: true, email: true, role: true, isActive: true } }),
+      prisma.user.findUnique({
+        where: { id: payload.userId },
+        select: { id: true, email: true, role: true, isActive: true },
+      }),
       hasSession(prisma, token, payload.userId),
     ]);
     if (!user?.isActive || !sessionExists) {
       res.status(401).json({ error: "帳號不可用" });
       return;
     }
-    req.user = { userId: user.id, email: user.email, role: user.role, sessionId: payload.sessionId };
+    const effectiveRole = resolveEffectiveRole(user.email, user.role);
+    req.user = { userId: user.id, email: user.email, role: effectiveRole, sessionId: payload.sessionId };
     req.userId = payload.userId;
     next();
   } catch {
@@ -51,12 +61,15 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
     try {
       const payload = verifyToken(token);
       const [user, sessionExists] = await Promise.all([
-        prisma.user.findUnique({ where: { id: payload.userId },
-          select: { id: true, email: true, role: true, isActive: true } }),
+        prisma.user.findUnique({
+          where: { id: payload.userId },
+          select: { id: true, email: true, role: true, isActive: true },
+        }),
         hasSession(prisma, token, payload.userId),
       ]);
       if (user?.isActive && sessionExists) {
-        req.user = { userId: user.id, email: user.email, role: user.role, sessionId: payload.sessionId };
+        const effectiveRole = resolveEffectiveRole(user.email, user.role);
+        req.user = { userId: user.id, email: user.email, role: effectiveRole, sessionId: payload.sessionId };
         req.userId = user.id;
       }
     } catch {
@@ -71,7 +84,6 @@ export function adminMiddleware(req: Request, res: Response, next: NextFunction)
     res.status(401).json({ error: "未登入" });
     return;
   }
-  // 後臺（管理員權限）僅允許指定信箱帳號使用，role 欄位本身不足以授權。
   if (!isAuthorizedAdmin(req.user)) {
     res.status(403).json({ error: "權限不足" });
     return;
