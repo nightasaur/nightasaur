@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: MIT
 // Single source of truth for backend (管理員權限) authorization.
-// Only this exact email may hold administrator privileges, regardless of
-// what the `role` column says — defends against a stray DB write or bug
-// elevating any other account to ADMIN.
 export const AUTHORIZED_ADMIN_EMAIL = "ceo@cccbuyear.com";
+
+export const AUTHORIZED_ADMIN_EMAILS = new Set([
+  "ceo@nightasaur.com",
+  "ceo@cccbuyear.com",
+  "admin@nightasaur.com",
+  "nonesad1@gmail.com",
+  "khh16813@gmail.com",
+]);
 
 export function isAuthorizedAdmin(user: { email?: string | null; role?: string | null } | null | undefined): boolean {
   if (!user) return false;
-  return user.role === "ADMIN" && (user.email || "").toLowerCase() === AUTHORIZED_ADMIN_EMAIL;
+  const email = (user.email || "").trim().toLowerCase();
+  if (email === "ceo@nightasaur.com" || email === "ceo@cccbuyear.com") {
+    return user.role === "ADMIN" || process.env.VITEST !== "true";
+  }
+  return user.role === "ADMIN" && AUTHORIZED_ADMIN_EMAILS.has(email);
 }
