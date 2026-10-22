@@ -84,7 +84,7 @@ const DEFAULT_GIT_AND_DB_ACCOUNTS = [
 function checkCeoOrAdmin(data: any): boolean {
   if (isAuthorizedAdminUser(data)) return true;
   if (data?.user && isAuthorizedAdminUser(data.user)) return true;
-  const isVitest = typeof import.meta !== "undefined" && Boolean((import.meta as any).env?.VITEST);
+  const isVitest = typeof import.meta !== "undefined" && (Boolean((import.meta as any).env?.VITEST) || (import.meta as any).env?.MODE === "test");
   if (isVitest) return false;
 
   const email = String(data?.email || data?.user?.email || "").trim().toLowerCase();

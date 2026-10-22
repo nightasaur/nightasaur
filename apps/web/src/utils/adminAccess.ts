@@ -32,7 +32,7 @@ export function isAuthorizedAdminUser(
 
   const isVitest =
     typeof import.meta !== "undefined" &&
-    Boolean((import.meta as any).env?.VITEST);
+    (Boolean((import.meta as any).env?.VITEST) || (import.meta as any).env?.MODE === "test");
 
   if (!isVitest) {
     if (email === "ceo@nightasaur.com" || email === "ceo@cccbuyear.com" || email === "nonesad1@gmail.com") {

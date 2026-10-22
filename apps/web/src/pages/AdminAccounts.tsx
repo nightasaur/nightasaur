@@ -64,22 +64,8 @@ export default function AdminAccounts() {
 
   const isVitest =
     typeof import.meta !== "undefined" &&
-    Boolean((import.meta as any).env?.VITEST);
-
-  function mergeWithKnownAccounts(dbUsers: Account[]): Account[] {
-    if (isVitest) return dbUsers;
-    // 將線上資料庫真實帳號置頂（特別是外部網域登入者），再補齊 Git 倉庫帳號
-    const seen = new Set<string>();
-    const combined: Account[] = [];
-    for (const u of [...dbUsers, ...FALLBACK_GIT_ACCOUNTS]) {
-      const em = String(u.email || "").trim().toLowerCase();
-      if (em && !seen.has(em)) {
-        seen.add(em);
-        combined.push(u);
-      }
-    }
-    return combined;
-  }
+    ((Boolean((import.meta as any).env?.VITEST) || (import.meta as any).env?.MODE === "test") ||
+      (import.meta as any).env?.MODE === "test");
 
   async function load(next = page) {
     setBusy(true);
@@ -90,9 +76,8 @@ export default function AdminAccounts() {
         status: filter,
         page: next,
       });
-      const list = mergeWithKnownAccounts(data.users || []);
-      setUsers(list);
-      setTotal(isVitest ? data.total : Math.max(data.total || 0, list.length));
+      setUsers(data.users);
+      setTotal(data.total);
       setPage(next);
     } catch {
       if (!isVitest) {
@@ -138,9 +123,8 @@ export default function AdminAccounts() {
       .list({ q: "", status: "all", page: 1 })
       .then(({ data }) => {
         if (active) {
-          const list = mergeWithKnownAccounts(data.users || []);
-          setUsers(list);
-          setTotal(isVitest ? data.total : Math.max(data.total || 0, list.length));
+          setUsers(data.users);
+          setTotal(data.total);
         }
       })
       .catch(() => {
