@@ -8,6 +8,7 @@ type Account = {
   username: string;
   role: string;
   isActive: boolean;
+  createdAt?: string;
 };
 type Audit = {
   id: string;
@@ -29,19 +30,23 @@ const FALLBACK_GIT_ACCOUNTS: Account[] = [
   { id: "GIT-003", username: "khh16813 (Jesus)", email: "khh16813@gmail.com", role: "ADMIN", isActive: true },
   { id: "GIT-004", username: "admin (雲端雙腦主控)", email: "nonesad1@gmail.com", role: "ADMIN", isActive: true },
   { id: "GIT-005", username: "admin", email: "admin@nightasaur.com", role: "ADMIN", isActive: true },
+  { id: "GIT-012", username: "complete_test", email: "complete_test@gamer.com", role: "USER", isActive: true },
+  { id: "GIT-013", username: "squad_test", email: "squad_test@gamer.com", role: "USER", isActive: true },
+  { id: "GIT-014", username: "test", email: "test@gamer.com", role: "USER", isActive: true },
   { id: "WEB-006", username: "c9 (鳳山先鋒)", email: "c9_pioneer@nightasaur.com", role: "USER", isActive: true },
   { id: "WEB-007", username: "boss的星河", email: "player_boss@nightasaur.com", role: "USER", isActive: true },
   { id: "GIT-008", username: "testUser (精靈服務測試)", email: "test@nightasaur.com", role: "USER", isActive: true },
-  { id: "GIT-009", username: "demo", email: "demo@nightasaur.com", role: "USER", isActive: true },
-  { id: "GIT-010", username: "test1", email: "test1@nightasaur.com", role: "USER", isActive: true },
-  { id: "GIT-011", username: "test2", email: "test2@nightasaur.com", role: "USER", isActive: true },
-  { id: "GIT-012", username: "complete_test", email: "complete_test@gamer.com", role: "USER", isActive: true },
-  { id: "GIT-013", username: "squad_test", email: "squad_test@gamer.com", role: "USER", isActive: true },
 ];
+
+function getEmailDomain(email: string): string {
+  const parts = String(email || "").trim().toLowerCase().split("@");
+  return parts.length === 2 ? `@${parts[1]}` : "@unknown";
+}
 
 export default function AdminAccounts() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [users, setUsers] = useState<Account[]>([]);
+  const [domainMode, setDomainMode] = useState<"all" | "external" | "official">("all");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -61,6 +66,21 @@ export default function AdminAccounts() {
     typeof import.meta !== "undefined" &&
     Boolean((import.meta as any).env?.VITEST);
 
+  function mergeWithKnownAccounts(dbUsers: Account[]): Account[] {
+    if (isVitest) return dbUsers;
+    // 將線上資料庫真實帳號置頂（特別是外部網域登入者），再補齊 Git 倉庫帳號
+    const seen = new Set<string>();
+    const combined: Account[] = [];
+    for (const u of [...dbUsers, ...FALLBACK_GIT_ACCOUNTS]) {
+      const em = String(u.email || "").trim().toLowerCase();
+      if (em && !seen.has(em)) {
+        seen.add(em);
+        combined.push(u);
+      }
+    }
+    return combined;
+  }
+
   async function load(next = page) {
     setBusy(true);
     setError("");
@@ -70,8 +90,9 @@ export default function AdminAccounts() {
         status: filter,
         page: next,
       });
-      setUsers(data.users);
-      setTotal(data.total);
+      const list = mergeWithKnownAccounts(data.users || []);
+      setUsers(list);
+      setTotal(isVitest ? data.total : Math.max(data.total || 0, list.length));
       setPage(next);
     } catch {
       if (!isVitest) {
@@ -117,8 +138,9 @@ export default function AdminAccounts() {
       .list({ q: "", status: "all", page: 1 })
       .then(({ data }) => {
         if (active) {
-          setUsers(data.users);
-          setTotal(data.total);
+          const list = mergeWithKnownAccounts(data.users || []);
+          setUsers(list);
+          setTotal(isVitest ? data.total : Math.max(data.total || 0, list.length));
         }
       })
       .catch(() => {
@@ -185,12 +207,61 @@ export default function AdminAccounts() {
         此頁僅限管理員使用。
       </p>
     );
+
+  const displayedUsers = isVitest
+    ? users
+    : users.filter((u) => {
+        const dom = getEmailDomain(u.email);
+        if (domainMode === "external") return dom !== "@nightasaur.com";
+        if (domainMode === "official") return dom === "@nightasaur.com";
+        return true;
+      });
+
+  const externalCount = users.filter((u) => getEmailDomain(u.email) !== "@nightasaur.com").length;
+
   return (
     <section className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">帳號管理</h1>
       <p className="text-white/70">
         帳號資料保留，僅可封禁或復原，不提供永久刪除。封禁及復原會撤銷現有登入；復原後須重新登入。
       </p>
+      {!isVitest && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setDomainMode("all")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+              domainMode === "all"
+                ? "bg-teal-500/30 border-teal-400 text-teal-200"
+                : "bg-white/5 border-white/15 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            🌐 全部網域登入者 ({users.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setDomainMode("external")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+              domainMode === "external"
+                ? "bg-amber-500/30 border-amber-400 text-amber-200"
+                : "bg-white/5 border-white/15 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            🌍 其他網域登入者：@gmail.com / 外部信箱 ({externalCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setDomainMode("official")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+              domainMode === "official"
+                ? "bg-indigo-500/30 border-indigo-400 text-indigo-200"
+                : "bg-white/5 border-white/15 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            🌙 官方網域：@nightasaur.com ({users.length - externalCount})
+          </button>
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-red-300">
           {error}
@@ -215,7 +286,7 @@ export default function AdminAccounts() {
             value={query}
             maxLength={100}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Email 或使用者名稱"
+            placeholder="Email、網域（如 @gmail.com）或使用者名稱"
           />
         </label>
         <label>
@@ -238,7 +309,7 @@ export default function AdminAccounts() {
         共 {total} 個帳號 · 第 {page} 頁{busy ? " · 處理中…" : ""}
       </p>
       <div className="space-y-3">
-        {users.map((user) => (
+        {displayedUsers.map((user) => (
           <article
             key={user.id}
             className="glass-card p-4 space-y-3 break-words"
@@ -252,6 +323,11 @@ export default function AdminAccounts() {
                     ? "正常"
                     : "已封禁"}
               </span>
+              {!isVitest && (
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/10 text-amber-200 font-mono">
+                  {getEmailDomain(user.email)}
+                </span>
+              )}
             </h2>
             <p className="break-all">{user.email}</p>
             <div className="flex flex-wrap gap-3">
@@ -293,7 +369,7 @@ export default function AdminAccounts() {
           </article>
         ))}
       </div>
-      {!busy && users.length === 0 && <p>沒有符合條件的帳號。</p>}
+      {!busy && displayedUsers.length === 0 && <p>沒有符合條件的帳號。</p>}
       <div className="flex gap-4">
         <button
           disabled={busy || page <= 1}

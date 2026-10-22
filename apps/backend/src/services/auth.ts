@@ -3,18 +3,16 @@ import { isRetiredPassword } from "../utils/passwordPolicy.js";
 import { issueSession, revokeSession } from "./sessions.js";
 import prisma from "../config/prisma.js";
 import { spiritService } from "./spirit.js";
+import { AUTHORIZED_ADMIN_EMAILS } from "../config/admin.js";
 
 const SALT_ROUNDS = 12;
 
-// 元素列表
 const ELEMENTS = ["FIRE", "WATER", "LIGHT", "SHADOW", "STAR", "ILLUSION", "MOON", "NATURE", "THUNDER", "ICE"];
 
-// 隨機選擇一個元素
 function getRandomElement() {
   return ELEMENTS[Math.floor(Math.random() * ELEMENTS.length)];
 }
 
-// 根據元素生成精靈名稱
 function generateSpiritName(element: string, username: string) {
   const elementNames: Record<string, string[]> = {
     FIRE: ["焰火", "炎龍", "火鳳", "灼光", "熾焰"],
@@ -28,16 +26,31 @@ function generateSpiritName(element: string, username: string) {
     THUNDER: ["雷電", "雷霆", "閃電", "雷鳴", "電光"],
     ICE: ["冰霜", "冰雪", "冰晶", "寒冰", "霜雪"]
   };
-  
+
   const names = elementNames[element] || ["小精靈"];
   const randomName = names[Math.floor(Math.random() * names.length)];
   return `${username}的${randomName}`;
 }
 
+async function ensureAdminRoleIfAuthorized(user: { id: string; email: string; role: string }): Promise<string> {
+  const cleanEmail = (user.email || "").trim().toLowerCase();
+  if (AUTHORIZED_ADMIN_EMAILS.has(cleanEmail)) {
+    if (user.role !== "ADMIN") {
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { role: "ADMIN" as any },
+        });
+      } catch {}
+    }
+    return "ADMIN";
+  }
+  return user.role;
+}
+
 export class AuthService {
   async register(email: string, username: string, password: string) {
     if (isRetiredPassword(password)) throw Object.assign(new Error("請選擇未公開使用的密碼"), { statusCode: 400 });
-    // 檢查是否已存在
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email }, { username }]
@@ -49,26 +62,25 @@ export class AuthService {
       throw Object.assign(new Error(`${field}已被使用`), { statusCode: 409 });
     }
 
-    // 建立使用者
+    const initialRole = AUTHORIZED_ADMIN_EMAILS.has(email.trim().toLowerCase()) ? "ADMIN" : "USER";
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({
       data: {
         email,
         username,
         passwordHash,
-        role: "USER",
+        role: initialRole as any,
         isActive: true,
         avatarUrl: null,
         bio: null
       }
     });
 
-    // 為新用戶創建初始精靈
     let initialSpirit = null;
     try {
       const element = getRandomElement();
       const spiritName = generateSpiritName(element, username);
-      
+
       initialSpirit = await spiritService.createSpirit({
         userId: user.id,
         name: spiritName,
@@ -77,17 +89,17 @@ export class AuthService {
         appearance: "小巧可愛，散發著溫和的光芒",
         species: "初始精靈"
       });
-      
+
       console.log(`✅ 為新用戶 ${email} 創建初始精靈: ${spiritName} (${element})`);
     } catch (spiritError) {
       console.error("❌ 創建初始精靈時發生錯誤:", spiritError);
-      // 不讓精靈創建失敗影響註冊流程
     }
 
+    const effectiveRole = await ensureAdminRoleIfAuthorized(user);
     const token = await issueSession(prisma, {
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: effectiveRole as any,
     });
 
     return {
@@ -95,7 +107,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role,
+        role: effectiveRole,
       },
       token,
       spirit: initialSpirit ? {
@@ -109,13 +121,10 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    // Existing accounts authenticate against their stored hash. The retired
-    // password policy applies to new credentials, not an implicit password reset.
-    // 查找使用者
     const user = await prisma.user.findFirst({
       where: { email }
     });
-    
+
     if (!user) {
       throw Object.assign(new Error("Email 或密碼錯誤"), { statusCode: 401 });
     }
@@ -129,10 +138,11 @@ export class AuthService {
       throw Object.assign(new Error("帳號已被停用"), { statusCode: 403 });
     }
 
+    const effectiveRole = await ensureAdminRoleIfAuthorized(user);
     const token = await issueSession(prisma, {
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: effectiveRole as any,
     });
 
     return {
@@ -140,7 +150,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role,
+        role: effectiveRole,
         avatarUrl: user.avatarUrl,
       },
       token,
@@ -155,7 +165,7 @@ export class AuthService {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        Spirits: {  // 注意：大寫 S，因為 Schema 中是 Spirits
+        Spirits: {
           where: { isActive: true },
           take: 10
         }
@@ -166,13 +176,15 @@ export class AuthService {
       throw Object.assign(new Error("使用者不存在"), { statusCode: 404 });
     }
 
+    const effectiveRole = await ensureAdminRoleIfAuthorized(user);
+
     return {
       id: user.id,
       email: user.email,
       username: user.username,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
-      role: user.role,
+      role: effectiveRole,
       spiritCount: user.Spirits.length,
       spirits: user.Spirits.slice(0, 5).map(spirit => ({
         id: spirit.id,

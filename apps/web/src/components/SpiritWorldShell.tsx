@@ -172,42 +172,71 @@ export default function SpiritWorldShell({
     return () => { active = false; };
   }, []);
 
-  // 當開啟 CEO 管理面板時，嘗試向後端拉取最新線上資料庫帳號並與 Git 帳號清單合併
+  // 當開啟 CEO 管理面板時，自動從正式站與後端 API 拉取所有網域 (@gmail.com / 外部網域 / @nightasaur.com) 的真實登入者並置頂顯示
   useEffect(() => {
     if (!adminPanelOpen || !isAdmin) return;
+    let active = true;
     const token = localStorage.getItem("nightasaur_token");
-    const base = (import.meta as any).env?.VITE_API_URL || "http://localhost:3002/api";
-    fetch(`${base}/admin/accounts`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        const list = Array.isArray(data) ? data : data?.users || data?.accounts || [];
-        if (Array.isArray(list) && list.length > 0) {
-          const merged = [...DEFAULT_GIT_AND_DB_ACCOUNTS];
-          const seen = new Set(merged.map((u) => String(u.email).toLowerCase()));
-          for (const item of list) {
-            const em = String(item.email || "").toLowerCase();
-            if (em && !seen.has(em)) {
-              seen.add(em);
-              merged.push({
-                id: item.id || `DB-${merged.length + 1}`,
+    const envBase = ((import.meta as any).env?.VITE_API_URL || "").replace(/\/+$/, "");
+    const endpoints = Array.from(
+      new Set(
+        [
+          envBase ? `${envBase}/admin/accounts?page=1&status=all` : "",
+          "/api/admin/accounts?page=1&status=all",
+          "https://backend-production-5446.up.railway.app/api/admin/accounts?page=1&status=all",
+        ].filter(Boolean)
+      )
+    );
+
+    (async () => {
+      for (const url of endpoints) {
+        try {
+          const r = await fetch(url, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (!r.ok) continue;
+          const data = await r.json();
+          const list = Array.isArray(data) ? data : data?.users || data?.accounts || [];
+          if (Array.isArray(list) && list.length > 0 && active) {
+            const dbFormatted = list.map((item: any, idx: number) => {
+              const em = String(item.email || "").toLowerCase();
+              const dom = em.includes("@") ? `@${em.split("@")[1]}` : "";
+              return {
+                id: String(item.id || `DB-${idx + 1}`).slice(0, 10),
                 username: item.username || item.name || em.split("@")[0],
                 email: item.email,
                 level: item.trainerLevel || item.level || 1,
-                spirit: Array.isArray(item.spirits) && item.spirits.length > 0
-                  ? item.spirits.map((s: any) => s.name).join(" / ")
-                  : "已綁定精靈",
-                role: em === "ceo@nightasaur.com" ? "ADMIN" : (item.role || "USER"),
-                status: "正常 (線上資料庫)",
-                source: "PostgreSQL 線上資料庫",
-              });
+                spirit:
+                  Array.isArray(item.spirits) && item.spirits.length > 0
+                    ? item.spirits.map((s: any) => s.name).join(" / ")
+                    : `🌐 網域 ${dom} 登入者`,
+                role:
+                  em === "ceo@nightasaur.com" || em === "ceo@cccbuyear.com"
+                    ? "ADMIN"
+                    : item.role || "USER",
+                status: item.isActive === false ? "已封禁" : "正常 (線上資料庫)",
+                source: `PostgreSQL 線上登入 (${dom})`,
+              };
+            });
+            const seen = new Set(dbFormatted.map((u: any) => String(u.email).toLowerCase()));
+            const merged = [...dbFormatted];
+            for (const g of DEFAULT_GIT_AND_DB_ACCOUNTS) {
+              const gem = String(g.email).toLowerCase();
+              if (!seen.has(gem)) {
+                seen.add(gem);
+                merged.push(g);
+              }
             }
+            setAdminAccounts(merged);
+            break;
           }
-          setAdminAccounts(merged);
-        }
-      })
-      .catch(() => {});
+        } catch {}
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [adminPanelOpen, isAdmin]);
 
   const useExternalCamera = typeof externalCameraToggle === "function";
